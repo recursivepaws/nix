@@ -86,7 +86,6 @@
     unzip
     kitty
     zsh
-    oh-my-zsh
     git
     gh
     fzf
@@ -106,6 +105,8 @@
     nodejs_22
     lazygit
     delta
+    xwayland-satellite
+    spotify
   ];
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -127,6 +128,8 @@
     enable = true;
     settings = { PermitRootLogin = "no"; };
   };
+  services.blueman.enable = true;
+  services.pipewire.enable = true;
 
   # nix = {
   #   package = pkgs.nixVersions.stable;

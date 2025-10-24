@@ -40,14 +40,21 @@
   };
 
   # Add stuff for your user as you see fit:
-  home.packages = with pkgs; [ fuzzel steam ];
+  home.packages = with pkgs; [ fuzzel steam oh-my-zsh chezmoi ];
 
   # Enable home-manager and git
   programs.home-manager.enable = true;
   programs.git.enable = true;
   programs.neovim.enable = true;
-
+  programs.obs-studio.enable = true;
+  # programs.zsh.enable = true;
+  programs.starship.enable = true;
+  # programs.zoxide.enable = true;
+  # programs._1password.enable = true;
+  #programs._1password-gui.enable = true;
+  #programs.obs-studio.enableVirtualCamera = true;
   # Nicely reload system units when changing configs
+
   systemd.user.startServices = "sd-switch";
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
