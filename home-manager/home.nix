@@ -40,7 +40,7 @@
   };
 
   # Add stuff for your user as you see fit:
-  home.packages = with pkgs; [ fuzzel steam oh-my-zsh chezmoi vlc ];
+  home.packages = with pkgs; [ fuzzel steam chezmoi vlc ];
 
   # Enable home-manager and git
   programs.home-manager.enable = true;

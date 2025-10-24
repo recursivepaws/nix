@@ -119,6 +119,8 @@
     spotify
     v4l-utils
     oh-my-zsh
+    eza
+    zoxide
   ];
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
