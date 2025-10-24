@@ -50,8 +50,6 @@
   # programs.zsh.enable = true;
   programs.starship.enable = true;
   # programs.zoxide.enable = true;
-  # programs._1password.enable = true;
-  #programs._1password-gui.enable = true;
   #programs.obs-studio.enableVirtualCamera = true;
   # Nicely reload system units when changing configs
 
