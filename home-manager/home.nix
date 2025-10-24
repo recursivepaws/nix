@@ -40,15 +40,15 @@
   };
 
   # Add stuff for your user as you see fit:
-  home.packages = with pkgs; [ fuzzel steam oh-my-zsh chezmoi ];
+  home.packages = with pkgs; [ fuzzel steam oh-my-zsh chezmoi vlc ];
 
   # Enable home-manager and git
   programs.home-manager.enable = true;
   programs.git.enable = true;
-  programs.neovim.enable = true;
-  programs.obs-studio.enable = true;
+  # programs.neovim.enable = true;
+  # programs.obs-studio.enable = true;
   # programs.zsh.enable = true;
-  programs.starship.enable = true;
+  # programs.starship.enable = true;
   # programs.zoxide.enable = true;
   #programs.obs-studio.enableVirtualCamera = true;
   # Nicely reload system units when changing configs

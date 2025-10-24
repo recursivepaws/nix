@@ -85,7 +85,6 @@
     wget
     unzip
     kitty
-    zsh
     git
     gh
     fzf
@@ -116,10 +115,21 @@
   # programs.mtr.enable = true;
   programs.firefox.enable = true;
   programs.niri.enable = true;
+  programs.neovim.enable = true;
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
   };
+  programs.zsh = {
+    enable = true;
+    enableLsColors = true;
+  };
+  programs.obs-studio = {
+    enable = true;
+    enableVirtualCamera = true;
+  };
+  programs.starship = { enable = true; };
+  programs.zoom-us.enable = true;
   programs._1password.enable = true;
   programs._1password-gui.enable = true;
 
