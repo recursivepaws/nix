@@ -31,6 +31,17 @@
       options root=UUID=49e09db5-a4ba-4790-b6e3-79fc890625dd rw
     '';
   };
+
+  boot.extraModulePackages = with config.boot.kernelPackages;
+    [ v4l2loopback.out ];
+  boot.kernelModules = [ "v4l2loopback" ];
+  boot.extraModprobeConfig = ''
+    options v4l2loopback exclusive_caps=0 card_label="Virtual Camera"
+  '';
+  # boot.kernelPatches = [{
+  #   name = "webcam-fix";
+  #   patch = ./webcam-fix.patch;
+  # }];
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -68,7 +79,7 @@
   users.users.vera = {
     isNormalUser = true;
     description = "Vera Gonzalez";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
     ##packages = with pkgs; [ chezmoi cargo pnpm kitty fuzzel ];
     openssh.authorizedKeys.keys = [
       # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
@@ -106,6 +117,8 @@
     delta
     xwayland-satellite
     spotify
+    v4l-utils
+    oh-my-zsh
   ];
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
