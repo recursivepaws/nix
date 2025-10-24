@@ -81,12 +81,31 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
-    #niri
+    unzip
+    kitty
     zsh
+    oh-my-zsh
     git
+    gh
     fzf
+    ripgrep
+    fd
+    clang
+    mold
+    cargo
+    go
+    uv
+    python314
+    lua5_1
+    luarocks
+    stylua
+    pnpm
+    tree-sitter
+    nodejs_22
+    lazygit
+    delta
   ];
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
