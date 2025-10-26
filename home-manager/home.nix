@@ -1,17 +1,35 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
-{ inputs, pkgs, ... }: {
+{ inputs, pkgs, config, ... }: {
   # You can import other home-manager modules here
   imports = [
     # If you want to use home-manager modules from other flakes (such as nix-colors):
-    # inputs.nix-colors.homeManagerModule
     inputs.zen-browser.homeModules.beta
-    # inputs.ignis.homeManagerModules
-    # You can also split up your configuration and import pieces of it here:
+    # inputs.nix-colors.homeManagerModule
+    # inputs.stylix.homeModules.stylix
+    # # inputs.ignis.homeManagerModules
+    # # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
     ./gtk.nix
+    ./portal.nix
+    ./kitty.nix
+    # (import ./colors.nix {
+    #   basix = inputs.basix;
+    #   inherit pkgs;
+    #   inherit config;
+    # })
   ];
 
+  # stylix.enable = true;
+  # stylix.base16Scheme =
+  #   "${pkgs.base16-schemes}/share/themes/gruvbox-dark-hard.yaml";
+  # stylix.image = pkgs.fetchurl {
+  #   url =
+  #     "https://www.pixelstalk.net/wp-content/uploads/2016/05/Epic-Anime-Awesome-Wallpapers.jpg";
+  #   hash = "sha256-enQo3wqhgf0FEPHj2coOCvo7DuZv+x5rL/WIo4qPI50=";
+  # };
+  # stylix.polarity = "dark";
+  # stylix.targets.kitty.enable = true;
   /* nixpkgs = {
        # You can add overlays here
        overlays = [

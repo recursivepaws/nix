@@ -99,7 +99,6 @@
     libwebcam
     wget
     unzip
-    kitty
     gh
     fzf
     ripgrep

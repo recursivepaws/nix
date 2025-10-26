@@ -9,6 +9,16 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    /* basix = {
+         url = "github:NotAShelf/Basix";
+         inputs.nixpkgs.follows = "nixpkgs";
+       };
+    */
+    # stylix = {
+    #   url = "github:nix-community/stylix";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # nix-colors.url = "github:misterio77/nix-colors";
     # ignis = {
     #   url = "github:ignis-sh/ignis";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -41,14 +51,12 @@
             ({ config, pkgs, ... }: { nixpkgs.overlays = [ overlay-nixpkgs ]; })
             ./nixos/configuration.nix
             home-manager.nixosModules.home-manager
+            # inputs.stylix.homeModules.stylix
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.vera = import ./home-manager/home.nix;
-              home-manager.extraSpecialArgs = {
-                inherit inputs;
-                inherit system;
-              };
+              home-manager.extraSpecialArgs = { inherit inputs; };
             }
           ];
         };
