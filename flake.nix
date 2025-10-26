@@ -9,20 +9,6 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    /* basix = {
-         url = "github:NotAShelf/Basix";
-         inputs.nixpkgs.follows = "nixpkgs";
-       };
-    */
-    # stylix = {
-    #   url = "github:nix-community/stylix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    # nix-colors.url = "github:misterio77/nix-colors";
-    # ignis = {
-    #   url = "github:ignis-sh/ignis";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
     home-manager = {
       # Follow corresponding `release` branch from Home Manager
       url = "github:nix-community/home-manager/release-25.05";
@@ -39,10 +25,6 @@
           config.allowUnfreePredicate = _: true;
         };
       };
-      # pkgs = import nixpkgs {
-      #   inherit system;
-      #   config.allowUnfree = true;
-      # };
     in {
       nixosConfigurations = {
         NyaNix = nixpkgs.lib.nixosSystem {

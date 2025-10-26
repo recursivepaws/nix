@@ -34,9 +34,5 @@
         ];
       in (builtins.concatStringsSep "," mappings) + " Symbols Nerd Font Mono";
     };
-    # font_size 12.25
-    # font_family Caskaydia Cove
-    # window_margin_width 15
-    # remember_window_size no
   };
 }
