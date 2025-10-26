@@ -1,14 +1,15 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
-{ inputs, lib, config, pkgs, system, ... }: {
+{ inputs, pkgs, ... }: {
   # You can import other home-manager modules here
   imports = [
     # If you want to use home-manager modules from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModule
     inputs.zen-browser.homeModules.beta
-
+    # inputs.ignis.homeManagerModules
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
+    # ./gtk.nix
   ];
 
   /* nixpkgs = {
@@ -41,16 +42,10 @@
     stateVersion = "25.05";
   };
 
-  gtk = {
-    enable = true;
-    iconTheme = {
-      name = "Adwaita";
-      package = pkgs.adwaita-icon-theme;
-    };
-  };
-
   # Add stuff for your user as you see fit:
   home.packages = with pkgs; [
+    # inputs.ignis.packages.${pkgs.stdenv.hostPlatform.system}.ignis
+    wl-clipboard
     fuzzel
     steam
     chezmoi
@@ -59,10 +54,23 @@
     discord
   ];
 
-  programs = { };
-  # Enable home-manager and git
+  /* programs.ignis = {
+       enable = true;
+       addToPythonEnv = true;
+       services = {
+         bluetooth.enable = true;
+         recorder.enable = true;
+         audio.enable = true;
+         network.enable = true;
+       };
+       sass = {
+         enable = true;
+         useDartSass = true;
+       };
+     };
+  */
+
   programs.zen-browser.enable = true;
-  programs.home-manager.enable = true;
   # programs.git.enable = true;
   # # programs.neovim.enable = true;
   # # programs.obs-studio.enable = true;
@@ -78,7 +86,9 @@
   #   defaultCommand = "fd --hidden --strip-cwd-prefix --exclude .git";
   # };
   #
-  systemd.user.startServices = "sd-switch";
+  # systemd.user.startServices = "sd-switch";
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
+
+  programs.home-manager.enable = true;
 }
