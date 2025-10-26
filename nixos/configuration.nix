@@ -76,6 +76,8 @@
   # };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+
+  users.defaultUserShell = pkgs.zsh;
   users.users.vera = {
     isNormalUser = true;
     description = "Vera Gonzalez";
@@ -93,10 +95,10 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    libwebcam
     wget
     unzip
     kitty
-    git
     gh
     fzf
     ripgrep
@@ -113,14 +115,13 @@
     pnpm
     tree-sitter
     nodejs_22
-    lazygit
     delta
     xwayland-satellite
     spotify
     v4l-utils
-    oh-my-zsh
     eza
     zoxide
+    guvcview
   ];
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -128,25 +129,49 @@
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
-  programs.firefox.enable = true;
-  programs.niri.enable = true;
-  programs.neovim.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
+  programs = {
+    #mtr.enable = true;
+    git = { enable = true; };
+    lazygit.enable = true;
+    firefox = { enable = true; };
+    niri = { enable = true; };
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
+    gnupg.agent = {
+      enable = true;
+      enableSSHSupport = true;
+    };
+    zsh = {
+      enable = true;
+      ohMyZsh = {
+        enable = true;
+        plugins = [ "git" "fzf" "history" ];
+      };
+    };
+    obs-studio = {
+      enable = true;
+      enableVirtualCamera = true;
+    };
+    fzf = {
+      fuzzyCompletion = true;
+
+      # enable = true;
+      # enableZshIntegration = true;
+      # defaultCommand = "fd --hidden --strip-cwd-prefix --exclude .git";
+    };
+    starship = { enable = true; };
+    _1password.enable = true;
+    _1password-gui.enable = true;
+    dconf.enable = true;
   };
-  programs.zsh = {
-    enable = true;
-    enableLsColors = true;
-  };
-  programs.obs-studio = {
-    enable = true;
-    enableVirtualCamera = true;
-  };
-  programs.starship = { enable = true; };
-  programs.zoom-us.enable = true;
-  programs._1password.enable = true;
-  programs._1password-gui.enable = true;
+
+  # Make sure these are also enabled
+  services.dbus.enable = true;
+
+  # If using a DE without polkit, you may need:
+  security.polkit.enable = true;
 
   # List services that you want to enable:
 
@@ -157,6 +182,10 @@
   };
   services.blueman.enable = true;
   services.pipewire.enable = true;
+
+  # xdg.autostart.enable = true;
+
+  # services.uvcvideo.dynctrl.enable = true;
 
   # nix = {
   #   package = pkgs.nixVersions.stable;
