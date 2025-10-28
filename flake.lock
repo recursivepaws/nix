@@ -67,6 +67,22 @@
         "type": "github"
       }
     },
+    "dms-official-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1761499744,
+        "narHash": "sha256-piEPE5GOMKyM+y4qpfMyRlIk4GQjVxqzF5BtxOJ9UZ8=",
+        "owner": "AvengeMedia",
+        "repo": "dms-plugins",
+        "rev": "43ec46372c728ed416b37f66886c2a0e5aff026c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dms-plugins",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -260,6 +276,7 @@
         "dankMaterialShell": "dankMaterialShell",
         "dgop": "dgop",
         "dms-cli": "dms-cli",
+        "dms-official-plugins": "dms-official-plugins",
         "home-manager": "home-manager",
         "niri": "niri",
         "nixpkgs": "nixpkgs",

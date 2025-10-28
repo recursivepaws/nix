@@ -6,7 +6,12 @@
   ];
 
   programs = {
-    dankMaterialShell = { enable = true; };
+    dankMaterialShell = {
+      enable = true;
+      plugins = with inputs; {
+        DankPomodoroTimer.src = "${dms-official-plugins}/DankPomodoroTimer";
+      };
+    };
 
     niri = {
       settings = {

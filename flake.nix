@@ -21,6 +21,10 @@
       url = "github:AvengeMedia/danklinux";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dms-official-plugins = {
+      url = "github:AvengeMedia/dms-plugins";
+      flake = false;
+    };
     dankMaterialShell = {
       url = "github:AvengeMedia/DankMaterialShell";
       inputs.nixpkgs.follows = "nixpkgs";
