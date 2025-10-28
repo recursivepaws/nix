@@ -1,13 +1,6 @@
-{ lib, pkgs, ... }: {
-  programs.kitty = lib.mkForce {
+{ pkgs, ... }: {
+  programs.kitty = {
     enable = true;
-    extraConfig = let
-      dracula = pkgs.fetchurl {
-        url =
-          "https://raw.githubusercontent.com/Base24/base24-kitty-te/refs/heads/master/output/schemes/base24-dracula24.colorscheme";
-        hash = "sha256-XvcsE5ZTTTBHOre7VLnH1jbK6u+oVnc+CdX4HgRXv+o=";
-      };
-    in "include ${dracula}";
     settings = {
       font_size = 12.25;
       font_family = "Caskaydia Cove";
@@ -33,5 +26,12 @@
         ];
       in (builtins.concatStringsSep "," mappings) + " Symbols Nerd Font Mono";
     };
+    extraConfig = let
+      dracula = pkgs.fetchurl {
+        url =
+          "https://raw.githubusercontent.com/Base24/base24-kitty-te/refs/heads/master/output/schemes/base24-dracula24.colorscheme";
+        hash = "sha256-XvcsE5ZTTTBHOre7VLnH1jbK6u+oVnc+CdX4HgRXv+o=";
+      };
+    in "include ${dracula}";
   };
 }
