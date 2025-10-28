@@ -21,6 +21,7 @@
     chezmoi
     vlc
     telegram-desktop
+    signal-desktop
     discord
     eww
   ];
