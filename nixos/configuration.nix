@@ -97,7 +97,6 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    blueman
     networkmanager
     # libwebcam
     wget
@@ -194,6 +193,7 @@
     settings = { PermitRootLogin = "no"; };
   };
   services.pipewire.enable = true;
+  services.blueman.enable = true;
 
   # xdg.autostart.enable = true;
 
