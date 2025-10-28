@@ -122,6 +122,7 @@
     spotify
     v4l-utils
     eza
+    bat
     zoxide
     guvcview
   ];
