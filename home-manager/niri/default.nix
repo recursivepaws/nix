@@ -15,7 +15,7 @@
 
     niri = {
       settings = {
-        spawn-at-startup = [{ command = [ "dms run -d" ]; }];
+        spawn-at-startup = [{ command = [ "dms" "run" "-d" ]; }];
         binds = with config.lib.niri.actions;
           let sh = spawn "sh" "-c";
           in {
