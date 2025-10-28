@@ -4,17 +4,17 @@
     theme = {
       name = "Gruvbox-Material-Dark";
       package =
-        inputs.nixpkgs-unstable.outputs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.pkgs.gruvbox-material-gtk-theme;
+        inputs.nixpkgs.outputs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.pkgs.gruvbox-material-gtk-theme;
     };
     cursorTheme = {
       name = "Capitaine Cursors (Gruvbox)";
       package =
-        inputs.nixpkgs-unstable.outputs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.capitaine-cursors-themed;
+        inputs.nixpkgs.outputs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.capitaine-cursors-themed;
     };
     iconTheme = {
       name = "Gruvbox-Plus-Dark";
       package =
-        inputs.nixpkgs-unstable.outputs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.gruvbox-plus-icons;
+        inputs.nixpkgs.outputs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.gruvbox-plus-icons;
     };
   };
 

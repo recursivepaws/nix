@@ -13,7 +13,6 @@
       font_family = "Caskaydia Cove";
       window_margin_width = 15;
       remember_window_size = "no";
-      #include = ;
       symbol_map = let
         mappings = [
           "U+e000-U+e00a"

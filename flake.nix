@@ -3,27 +3,27 @@
   description = "flake for NyaNix";
 
   inputs = {
-    nixpkgs = { url = "github:NixOS/nixpkgs/nixos-25.05"; };
-    nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
+    nixpkgs = { url = "github:nixos/nixpkgs/nixos-unstable"; };
+    nixpkgs-stable = { url = "github:NixOS/nixpkgs/nixos-25.05"; };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
     niri = {
       url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dgop = {
       url = "github:AvengeMedia/dgop";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dms-cli = {
       url = "github:AvengeMedia/danklinux";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dankMaterialShell = {
       url = "github:AvengeMedia/DankMaterialShell";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
       inputs.dgop.follows = "dgop";
       inputs.dms-cli.follows = "dms-cli";
     };
@@ -31,10 +31,10 @@
       # Follow corresponding `release` branch from Home Manager
       # url = "github:nix-community/home-manager/release-25.05";
       url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }@inputs:
+  outputs = { nixpkgs, nixpkgs-stable, home-manager, ... }@inputs:
     let system = "x86_64-linux";
     in {
       overlays = import ./overlays { inherit inputs; };
@@ -51,7 +51,7 @@
               home-manager.users.vera = import ./home-manager/home.nix;
               home-manager.extraSpecialArgs = {
                 inherit inputs;
-                pkgs-unstable = import nixpkgs-unstable {
+                pkgs-stable = import nixpkgs-stable {
                   inherit system;
                   config.allowUnfree = true;
                 };
