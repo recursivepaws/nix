@@ -34,11 +34,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = { nixpkgs, nixpkgs-stable, home-manager, ... }@inputs:
+  outputs = { nixpkgs, nixpkgs-stable, home-manager, niri, ... }@inputs:
     let system = "x86_64-linux";
     in {
-      overlays = import ./overlays { inherit inputs; };
+      # overlays = ;
       nixosConfigurations = {
+        modules = [ import ./overlays { inherit niri; } ];
         NyaNix = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
