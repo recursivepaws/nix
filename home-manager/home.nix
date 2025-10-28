@@ -15,6 +15,7 @@
 
   # Add stuff for your user as you see fit:
   home.packages = with pkgs; [
+    playerctl
     wl-clipboard
     fuzzel
     steam

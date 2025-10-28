@@ -43,6 +43,14 @@
             "Mod+Page_Up".action = focus-workspace-up;
             "Mod+Ctrl+Page_Down".action = move-column-to-workspace-down;
             "Mod+Ctrl+Page_Up".action = move-column-to-workspace-up;
+
+            # Media controls
+            "XF86AudioPlay".action = sh "playerctl play-pause";
+            "XF86AudioNext".action = sh "playerctl next";
+            "XF86AudioPrev".action = sh "playerctl previous";
+            "XF86AudioRaiseVolume".action = sh "dms ipc call audio increment 3";
+            "XF86AudioLowerVolume".action = sh "dms ipc call audio decrement 3";
+            "XF86AudioMute".action = sh "dms ipc call audio mute";
           };
       };
     };
