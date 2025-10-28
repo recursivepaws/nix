@@ -95,8 +95,9 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    blueman
     networkmanager
-    libwebcam
+    # libwebcam
     wget
     unzip
     gh
@@ -121,6 +122,7 @@
     spotify
     v4l-utils
     eza
+    bat
     zoxide
     guvcview
   ];
@@ -135,7 +137,10 @@
     git = { enable = true; };
     lazygit.enable = true;
     firefox = { enable = true; };
-    niri = { enable = true; };
+    niri = {
+      enable = true;
+      package = pkgs.niri-stable;
+    };
     neovim = {
       enable = true;
       defaultEditor = true;
@@ -181,7 +186,6 @@
     enable = true;
     settings = { PermitRootLogin = "no"; };
   };
-  services.blueman.enable = true;
   services.pipewire.enable = true;
 
   # xdg.autostart.enable = true;
