@@ -1,6 +1,11 @@
 { inputs, pkgs, config, ... }: {
-  imports =
-    [ inputs.zen-browser.homeModules.beta ./gtk.nix ./portal.nix ./kitty.nix ];
+  imports = [
+    inputs.zen-browser.homeModules.beta
+    ./niri
+    # ./gtk.nix
+    # ./portal.nix
+    ./kitty.nix
+  ];
 
   home = {
     username = "vera";
@@ -10,6 +15,7 @@
 
   # Add stuff for your user as you see fit:
   home.packages = with pkgs; [
+    # inputs.quickshell.packages.${system}.default
     wl-clipboard
     fuzzel
     steam
@@ -25,7 +31,9 @@
     rev = "3d74fb407236a059e8b5399dff2b6eefb4587ed1";
     ref = "main";
   };
+
   programs.zen-browser.enable = true;
+
   systemd.user.startServices = "sd-switch";
 
   programs.home-manager.enable = true;
