@@ -137,7 +137,10 @@
     git = { enable = true; };
     lazygit.enable = true;
     firefox = { enable = true; };
-    niri = { enable = true; };
+    niri = {
+      enable = true;
+      package = pkgs.niri-stable;
+    };
     neovim = {
       enable = true;
       defaultEditor = true;

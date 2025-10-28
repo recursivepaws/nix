@@ -39,10 +39,11 @@
     in {
       # overlays = ;
       nixosConfigurations = {
-        modules = [ import ./overlays { inherit niri; } ];
+        # modules = [ ];
         NyaNix = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
+            (import ./overlays { inherit niri; })
             ./nixos/configuration.nix
             home-manager.nixosModules.home-manager
             # inputs.stylix.homeModules.stylix
