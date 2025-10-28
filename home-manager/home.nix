@@ -15,7 +15,6 @@
 
   # Add stuff for your user as you see fit:
   home.packages = with pkgs; [
-    # inputs.quickshell.packages.${system}.default
     wl-clipboard
     fuzzel
     steam

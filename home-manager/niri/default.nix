@@ -1,9 +1,14 @@
-{ inputs, ... }: {
+{ inputs, pkgs-unstable, ... }: {
   imports = [
     inputs.niri.homeModules.niri
     inputs.dankMaterialShell.homeModules.dankMaterialShell.default
     inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
   ];
 
-  programs = { dankMaterialShell.enable = true; };
+  programs = {
+    dankMaterialShell = {
+      enable = true;
+      quickshell.package = pkgs-unstable.quickshell;
+    };
+  };
 }
