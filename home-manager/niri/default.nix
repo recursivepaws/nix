@@ -16,6 +16,14 @@
     niri = {
       settings = {
         spawn-at-startup = [{ command = [ "dms" "run" "-d" ]; }];
+        window-rules = [{
+          matches = [
+            { app-id = "^signal$"; }
+            { app-id = "^org.telegram.desktop$"; }
+            { app-id = "^1Password$"; }
+          ];
+          block-out-from = "screencast";
+        }];
         binds = with config.lib.niri.actions;
           let sh = spawn "sh" "-c";
           in {
