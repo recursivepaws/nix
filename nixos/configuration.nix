@@ -99,6 +99,8 @@
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     networkmanager
     # libwebcam
+    sccache
+    wayland
     wget
     unzip
     gh
@@ -127,6 +129,15 @@
     zoxide
     guvcview
   ];
+
+  environment.etc = {
+    "1password/custom_allowed_browsers" = {
+      text = ''
+        zen
+      '';
+      mode = "0755";
+    };
+  };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
@@ -175,7 +186,10 @@
     };
     starship = { enable = true; };
     _1password.enable = true;
-    _1password-gui.enable = true;
+    _1password-gui = {
+      enable = true;
+      polkitPolicyOwners = [ "vera" ];
+    };
     dconf.enable = true;
   };
 
