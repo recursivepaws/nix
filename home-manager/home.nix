@@ -2,7 +2,6 @@
   imports = [
     inputs.zen-browser.homeModules.beta
     ./niri
-    ./thunar.nix
     ./gtk.nix
     # ./portal.nix
     ./kitty.nix
