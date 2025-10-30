@@ -3,6 +3,7 @@
     inputs.niri.homeModules.niri
     inputs.dankMaterialShell.homeModules.dankMaterialShell.default
     inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
+    ./portal.nix
   ];
 
   programs = {
@@ -15,6 +16,10 @@
 
     niri = {
       settings = {
+        environment = {
+          QT_QPA_PLATFORMTHEME = "gtk3";
+          QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+        };
         spawn-at-startup = [
           { command = [ "dms" "run" "-d" ]; }
           { command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }
@@ -31,13 +36,13 @@
           let sh = spawn "sh" "-c";
           in {
             "Mod+Q".action = spawn "kitty";
-            # "Mod+E".action.spawn = "thunar";
             "Mod+X".action = sh "dms ipc call spotlight toggle";
             "Mod+Shift+X".action = quit;
             "Mod+F".action = maximize-column;
             "Mod+Shift+F".action = fullscreen-window;
             "Mod+C".action = close-window;
             "Mod+E".action = spawn "thunar";
+            "Mod+Ctrl+S".action.screenshot = [ ];
 
             "Mod+H".action = focus-column-left;
             "Mod+J".action = focus-window-down;

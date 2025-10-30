@@ -7,15 +7,19 @@
     plugins = with pkgs.xfce; [ thunar-volman thunar-archive-plugin ];
   };
 
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-    config.common = {
-      default = "gtk";
-      "org.freedesktop.impl.portal.FileChooser" = "gtk";
-    };
-  };
-
+  # xdg.portal = {
+  #   enable = true;
+  #   extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  #   config.common = {
+  #     default = "gtk";
+  #     "org.freedesktop.impl.portal.FileChooser" = "gtk";
+  #   };
+  # };
+  #
   xdg.mime.defaultApplications = { "inode/directory" = "thunar.desktop"; };
-  environment.sessionVariables = { QT_QPA_PLATFORMTHEME = "gnome"; };
+  /* environment.sessionVariables = {
+       QT_QPA_PLATFORMTHEME = "gtk3";
+       QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+     };
+  */
 }
