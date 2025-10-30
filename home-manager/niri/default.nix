@@ -15,7 +15,10 @@
 
     niri = {
       settings = {
-        spawn-at-startup = [{ command = [ "dms" "run" "-d" ]; }];
+        spawn-at-startup = [
+          { command = [ "dms" "run" "-d" ]; }
+          { command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }
+        ];
         window-rules = [{
           matches = [
             { app-id = "^signal$"; }
@@ -34,6 +37,7 @@
             "Mod+F".action = maximize-column;
             "Mod+Shift+F".action = fullscreen-window;
             "Mod+C".action = close-window;
+            "Mod+E".action = spawn "thunar";
 
             "Mod+H".action = focus-column-left;
             "Mod+J".action = focus-window-down;

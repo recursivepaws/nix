@@ -141,10 +141,16 @@
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  services.gvfs.enable = true; # Mount, trash, and other functionalities
+  services.tumbler.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
   programs = {
+    thunar = {
+      enable = true;
+      plugins = with pkgs.xfce; [ thunar-volman thunar-archive-plugin ];
+    };
     #mtr.enable = true;
     git = { enable = true; };
     lazygit.enable = true;
