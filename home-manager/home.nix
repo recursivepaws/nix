@@ -15,6 +15,7 @@
 
   # Add stuff for your user as you see fit:
   home.packages = with pkgs; [
+    eog
     playerctl
     wl-clipboard
     fuzzel
@@ -32,6 +33,12 @@
   #   rev = "3d74fb407236a059e8b5399dff2b6eefb4587ed1";
   #   ref = "main";
   # };
+
+  home.file."${config.xdg.configHome}/starship.toml".source = pkgs.fetchurl {
+    url =
+      "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/refs/heads/main/extra/carbonfox/starship.toml";
+    hash = "sha256-NneOWmWRhL5sgP/qFSSeVhf41W+waiadwz+KXL7s04s=";
+  };
 
   programs.zen-browser.enable = true;
 

@@ -27,11 +27,11 @@
       in (builtins.concatStringsSep "," mappings) + " Symbols Nerd Font Mono";
     };
     extraConfig = let
-      dracula = pkgs.fetchurl {
+      carbonfox = pkgs.fetchurl {
         url =
-          "https://raw.githubusercontent.com/Base24/base24-kitty-te/refs/heads/master/output/schemes/base24-dracula24.colorscheme";
-        hash = "sha256-XvcsE5ZTTTBHOre7VLnH1jbK6u+oVnc+CdX4HgRXv+o=";
+          "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/refs/heads/main/extra/carbonfox/kitty.conf";
+        hash = "sha256-VYHlVMwMO/YN64ZH+GDJQ60DmimokmRMCXbYJh1qH6Y=";
       };
-    in "include ${dracula}";
+    in "include ${carbonfox}";
   };
 }

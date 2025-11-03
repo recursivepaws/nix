@@ -181,7 +181,7 @@
       # enableZshIntegration = true;
       # defaultCommand = "fd --hidden --strip-cwd-prefix --exclude .git";
     };
-    starship = { enable = true; };
+    starship.enable = true;
     _1password.enable = true;
     _1password-gui = {
       enable = true;
