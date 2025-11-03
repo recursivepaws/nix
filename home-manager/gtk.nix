@@ -1,19 +1,31 @@
 { inputs, pkgs, config, ... }: {
+  home.packages = with pkgs; [ gnome-shell sassc ];
   gtk = {
     enable = true;
     theme = {
-      name = "Dracula";
-      package = pkgs.dracula-theme;
+      name = "Nightfox-Dark-Carbonfox";
+      package = pkgs.stdenvNoCC.mkDerivation {
+        inherit (pkgs.nightfox-gtk-theme) pname version src;
+
+        propagatedUserEnvPkgs = [ pkgs.gtk-engine-murrine ];
+        nativeBuildInputs = [ pkgs.sassc ];
+        buildInputs = [ pkgs.gnome-themes-extra ];
+
+        dontBuild = true;
+
+        postPatch = ''
+          patchShebangs themes/install.sh
+        '';
+
+        installPhase = ''
+          runHook preInstall
+          mkdir -p $out/share/themes
+          cd themes
+          ./install.sh -n Nightfox --tweaks carbonfox macos -d "$out/share/themes"
+          runHook postInstall
+        '';
+      };
     };
-    cursorTheme = {
-      name = "Dracula-cursors";
-      package = pkgs.dracula-theme;
-      size = 16;
-    };
-    # iconTheme = {
-    #   name = "Dracula-icons";
-    #   package = pkgs.dracula-theme;
-    # };
     iconTheme = {
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
@@ -21,7 +33,6 @@
     gtk3.extraConfig = { gtk-application-prefer-dark-theme = 1; };
     gtk4.extraConfig = { gtk-application-prefer-dark-theme = 1; };
   };
-
   home.pointerCursor = {
     gtk.enable = true;
     x11.enable = true;
