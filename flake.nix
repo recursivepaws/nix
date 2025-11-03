@@ -13,6 +13,10 @@
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dgop = {
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -50,8 +54,6 @@
           modules = [
             (import ./overlays { inherit niri; })
             ./nixos/configuration.nix
-            home-manager.nixosModules.home-manager
-            # inputs.stylix.homeModules.stylix
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;

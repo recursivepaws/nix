@@ -6,6 +6,9 @@
   imports = [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
     ./file-manager.nix
+    ./stylix.nix
+    inputs.home-manager.nixosModules.home-manager
+    inputs.stylix.nixosModules.stylix
     inputs.dankMaterialShell.nixosModules.greeter
   ];
 
