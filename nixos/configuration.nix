@@ -12,7 +12,10 @@
     inputs.dankMaterialShell.nixosModules.greeter
   ];
 
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [ rocmPackages.clr.icd ];
+  };
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

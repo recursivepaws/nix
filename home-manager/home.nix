@@ -16,6 +16,7 @@
   # Add stuff for your user as you see fit:
   home.packages = with pkgs; [
     eog
+    davinci-resolve-studio
     playerctl
     wl-clipboard
     fuzzel
