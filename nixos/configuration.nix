@@ -1,14 +1,13 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ lib, inputs, config, pkgs, ... }: {
-  imports = [ # Include the results of the hardware scan.
+{ inputs, config, pkgs, ... }: {
+  imports = [
     ./hardware-configuration.nix
     ./file-manager.nix
     ./stylix.nix
+    ./age.nix
+    ./network.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.stylix.nixosModules.stylix
+    inputs.agenix.nixosModules.default
     inputs.dankMaterialShell.nixosModules.greeter
   ];
 
@@ -57,9 +56,6 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable networking
-  networking.networkmanager.enable = true;
-
   # Set your time zone.
   time.timeZone = "America/New_York";
 
@@ -92,9 +88,9 @@
     description = "Vera Gonzalez";
     extraGroups = [ "networkmanager" "wheel" "video" ];
     ##packages = with pkgs; [ chezmoi cargo pnpm kitty fuzzel ];
-    openssh.authorizedKeys.keys = [
-      # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
-    ];
+    # openssh.authorizedKeys.keys = [
+    #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
+    # ];
   };
 
   # Allow unfree packages
@@ -107,6 +103,7 @@
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     networkmanager
     # libwebcam
+    ragenix
     sccache
     wayland
     wget
@@ -136,6 +133,10 @@
     bat
     zoxide
     guvcview
+    #
+    glib
+    xprop
+    clang-tools
   ];
 
   environment.etc = {
@@ -224,7 +225,8 @@
   # };
 
   nix.package = pkgs.nix;
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features =
+    [ "nix-command" "flakes" "recursive-nix" ];
   nix.channel.enable = false;
 
   # Open ports in the firewall.

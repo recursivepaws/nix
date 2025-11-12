@@ -3,7 +3,7 @@
     portal = {
       enable = true;
       config.niri = {
-        default = [ "gnome" "gtk" ];
+        default = [ "gnome" "gtk" "wlr" ];
         "org.freedesktop.impl.portal.Access" = "gtk";
         "org.freedesktop.impl.portal.FileChooser" = "gtk";
         "org.freedesktop.impl.portal.ScreenCast" = "gnome";

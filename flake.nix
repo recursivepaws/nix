@@ -3,8 +3,9 @@
   description = "flake for NyaNix";
 
   inputs = {
-    nixpkgs = { url = "github:nixos/nixpkgs/nixos-unstable"; };
-    nixpkgs-stable = { url = "github:NixOS/nixpkgs/nixos-25.05"; };
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
+    agenix.url = "github:yaxitech/ragenix";
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs-stable";
