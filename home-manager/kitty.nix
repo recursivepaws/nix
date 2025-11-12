@@ -2,6 +2,7 @@
   programs.kitty = {
     enable = true;
     settings = {
+      linux_display_server = "x11";
       font_size = 12.25;
       font_family = "Caskaydia Cove";
       window_margin_width = 15;
