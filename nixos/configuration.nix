@@ -134,6 +134,7 @@
     zoxide
     guvcview
     #
+    tree
     glib
     xprop
     clang-tools

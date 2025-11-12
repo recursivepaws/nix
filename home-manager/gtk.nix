@@ -30,8 +30,14 @@
       name = "Papirus-Dark";
       package = pkgs.papirus-icon-theme;
     };
-    gtk3.extraConfig = { gtk-application-prefer-dark-theme = 1; };
     gtk4.extraConfig = { gtk-application-prefer-dark-theme = 1; };
+    gtk3 = {
+      bookmarks = [
+        "file://${config.xdg.userDirs.documents}"
+        "file:///mnt/data Data (NFS)"
+      ];
+      extraConfig = { gtk-application-prefer-dark-theme = 1; };
+    };
   };
   home.pointerCursor = {
     gtk.enable = true;

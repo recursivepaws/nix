@@ -3,6 +3,7 @@
     ssh = let opAgent = "~/.1password/agent.sock";
     in {
       enable = true;
+      # enableDefaultConfig = false;
       extraConfig = ''
         Host *
           IdentityAgent ${opAgent}
@@ -10,7 +11,7 @@
     };
     git = {
       enable = true;
-      extraConfig = {
+      settings = {
         gpg = { format = "ssh"; };
         "gpg \"ssh\"" = {
           program = "${lib.getExe' pkgs._1password-gui "op-ssh-sign"}";

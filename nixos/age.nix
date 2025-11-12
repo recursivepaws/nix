@@ -1,9 +1,12 @@
 { ... }: {
   age.secrets = {
-    network = {
-      file = ../secrets/network.age;
+    startup = {
+      file = ../secrets/startup.age;
       owner = "root";
       group = "root";
     };
+    # network = {
+    #   file = ../secrets/network.age;
+    # };
   };
 }
