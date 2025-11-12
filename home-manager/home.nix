@@ -27,6 +27,8 @@
     signal-desktop
     discord
     eww
+    baobab
+    seahorse
   ];
 
   # home.file."${config.xdg.configHome}/eww".source = builtins.fetchGit {
