@@ -34,7 +34,8 @@
     gtk3 = {
       bookmarks = [
         "file://${config.xdg.userDirs.documents}"
-        "file:///mnt/data Data (NFS)"
+        "smb://vera@MeowStation.local/ MeowStation"
+        "sftp://vera@BarkStation.local/ BarkStation"
       ];
       extraConfig = { gtk-application-prefer-dark-theme = 1; };
     };

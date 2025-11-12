@@ -47,39 +47,4 @@
 
   environment.systemPackages = with pkgs; [ nfs-utils ];
   boot = { supportedFilesystems = [ "nfs" "nfs4" "ext4" ]; };
-  systemd.services."mnt-data.automount".reloadIfChanged = false;
-
-  fileSystems."/mnt/data" = {
-    device = "MeowStation.local:/volume1/data";
-    fsType = "nfs";
-    options = [
-      # Version
-      "nfsvers=4"
-
-      # Prevent lockups
-      "bg"
-      "noatime"
-      "retry=0"
-      "soft"
-      "timeo=100"
-
-      # Better performance.
-      "nconnect=16"
-
-      # Dont autostart
-      "_netdev"
-      "noauto"
-      "x-systemd.automount"
-      "x-systemd.idle-timeout=10min"
-      "x-systemd.mount-timeout=10"
-
-      # Require network to start
-      "x-systemd.requires=network-online.target"
-
-      # Show in the file manager
-      "x-gvfs-icon=folder-remote"
-      "x-gvfs-show"
-      "x-gvfs-symbolic-icon=folder-remote-symbolic"
-    ];
-  };
 }
