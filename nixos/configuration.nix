@@ -151,7 +151,6 @@
 
   programs = {
     nix-ld = { enable = true; };
-    git.enable = true;
     lazygit.enable = true;
     dankMaterialShell.greeter = {
       enable = true;

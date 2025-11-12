@@ -3,6 +3,7 @@
     inputs.zen-browser.homeModules.beta
     ./niri
     ./gtk.nix
+    ./signing.nix
     # ./portal.nix
     ./kitty.nix
   ];
