@@ -135,6 +135,7 @@
     guvcview
     #
     tree
+    htop
     xprop
     clang-tools
   ];
@@ -151,6 +152,7 @@
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   programs = {
+    chromium = { enable = true; };
     nix-ld = { enable = true; };
     lazygit.enable = true;
     dankMaterialShell.greeter = {

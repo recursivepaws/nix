@@ -29,6 +29,9 @@
     eww
     baobab
     seahorse
+    immich-go
+    google-chrome
+    zoom-us
   ];
 
   home.file."${config.xdg.configHome}/starship.toml".source = pkgs.fetchurl {
