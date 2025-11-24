@@ -4,7 +4,7 @@
     ./niri
     ./gtk.nix
     ./signing.nix
-    ./kitty.nix
+    ./terminal.nix
   ];
 
   home = {
@@ -20,7 +20,7 @@
     playerctl
     wl-clipboard
     fuzzel
-    steam
+    spotifyd
     chezmoi
     vlc
     telegram-desktop
