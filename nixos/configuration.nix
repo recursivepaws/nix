@@ -7,14 +7,11 @@
     ./network.nix
     ./niri.nix
     ./dms.nix
+    ./gpu.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.agenix.nixosModules.default
   ];
 
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [ rocmPackages.clr.icd ];
-  };
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -213,7 +210,9 @@
     settings = { PermitRootLogin = "no"; };
   };
   services.pipewire.enable = true;
-  services.blueman.enable = true;
+
+  services.trezord.enable = true;
+  # services.blueman.enable = true;
 
   # xdg.autostart.enable = true;
 

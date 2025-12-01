@@ -13,7 +13,11 @@
     stateVersion = "25.05";
   };
 
-  # Add stuff for your user as you see fit:
+  programs = {
+    zen-browser.enable = true;
+    home-manager.enable = true;
+  };
+
   home.packages = with pkgs; [
     eog
     davinci-resolve-studio
@@ -26,12 +30,12 @@
     telegram-desktop
     signal-desktop
     discord
-    eww
     baobab
     seahorse
     immich-go
     google-chrome
     zoom-us
+    trezor-suite
   ];
 
   home.file."${config.xdg.configHome}/starship.toml".source = pkgs.fetchurl {
@@ -40,9 +44,5 @@
     hash = "sha256-NneOWmWRhL5sgP/qFSSeVhf41W+waiadwz+KXL7s04s=";
   };
 
-  programs.zen-browser.enable = true;
-
   systemd.user.startServices = "sd-switch";
-
-  programs.home-manager.enable = true;
 }
