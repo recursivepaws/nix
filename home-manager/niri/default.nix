@@ -21,13 +21,14 @@
           let sh = spawn "sh" "-c";
           in {
             "Mod+Q".action = spawn "kitty";
+            "Mod+P".action = sh "dms ipc call powermenu toggle";
             "Mod+X".action = sh "dms ipc call spotlight toggle";
             "Mod+Shift+X".action = quit;
             "Mod+F".action = maximize-column;
             "Mod+Shift+F".action = fullscreen-window;
             "Mod+C".action = close-window;
             "Mod+E".action = spawn "thunar";
-            "Mod+Ctrl+S".action.screenshot = [ ];
+            "Mod+Ctrl+S".action = sh "dms ipc call niri screenshot";
 
             "Mod+H".action = focus-column-left;
             "Mod+J".action = focus-window-down;
