@@ -10,7 +10,7 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
-    niri = {
+    niri-flake = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -22,10 +22,10 @@
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    dms-cli = {
-      url = "github:AvengeMedia/danklinux";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # dms-cli = {
+    #   url = "github:AvengeMedia/danklinux";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     dms-official-plugins = {
       url = "github:AvengeMedia/dms-plugins";
       flake = false;
@@ -34,7 +34,7 @@
       url = "github:AvengeMedia/DankMaterialShell";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.dgop.follows = "dgop";
-      inputs.dms-cli.follows = "dms-cli";
+      # inputs.dms-cli.follows = "dms-cli";
     };
     home-manager = {
       # Follow corresponding `release` branch from Home Manager
@@ -43,7 +43,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, niri, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-stable, home-manager, ... }@inputs:
     let system = "x86_64-linux";
     in {
       # overlays = ;
@@ -53,7 +53,6 @@
           inherit system;
           specialArgs = { inherit self inputs; };
           modules = [
-            (import ./overlays { inherit niri; })
             ./nixos/configuration.nix
             {
               home-manager.useGlobalPkgs = true;

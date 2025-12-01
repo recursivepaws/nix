@@ -1,5 +1,8 @@
 # This file defines overlays
 { inputs, ... }: {
-  # imports = [ ./niri.nix ];
   nixpkgs.overlays = [ inputs.niri-flake.overlays.niri ];
+  # programs.niri = {
+  #   enable = true;
+  #   package = pkgs.niri;
+  # };
 }

@@ -1,19 +1,6 @@
-{ inputs, config, ... }: {
-  imports = [
-    inputs.niri.homeModules.niri
-    inputs.dankMaterialShell.homeModules.dankMaterialShell.default
-    inputs.dankMaterialShell.homeModules.dankMaterialShell.niri
-    ./portal.nix
-  ];
-
+{ config, ... }: {
+  imports = [ ./portal.nix ];
   programs = {
-    dankMaterialShell = {
-      enable = true;
-      plugins = with inputs; {
-        DankPomodoroTimer.src = "${dms-official-plugins}/DankPomodoroTimer";
-      };
-    };
-
     niri = {
       settings = {
         environment = {
@@ -71,5 +58,6 @@
           };
       };
     };
+
   };
 }

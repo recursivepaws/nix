@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ inputs, pkgs, ... }: {
+  imports = with inputs; [ stylix.nixosModules.stylix ];
   stylix = {
     polarity = "dark";
     targets.gtk.enable = false;

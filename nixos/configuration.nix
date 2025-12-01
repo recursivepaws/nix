@@ -2,13 +2,13 @@
   imports = [
     ./hardware-configuration.nix
     ./file-manager.nix
-    ./stylix.nix
+    # ./stylix.nix
     ./age.nix
     ./network.nix
+    ./niri.nix
+    ./dms.nix
     inputs.home-manager.nixosModules.home-manager
-    inputs.stylix.nixosModules.stylix
     inputs.agenix.nixosModules.default
-    inputs.dankMaterialShell.nixosModules.greeter
   ];
 
   hardware.graphics = {
@@ -133,6 +133,7 @@
     bat
     zoxide
     guvcview
+    ffmpeg
     #
     tree
     htop
@@ -150,20 +151,18 @@
   };
 
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  environment.pathsToLink =
+    [ "/share/applications" "/share/xdg-desktop-portal" ];
 
   programs = {
     chromium = { enable = true; };
     nix-ld = { enable = true; };
     lazygit.enable = true;
-    dankMaterialShell.greeter = {
-      enable = true;
-      compositor.name = "niri";
-      configHome = "/home/vera";
-    };
-    niri = {
-      enable = true;
-      package = pkgs.niri-stable;
-    };
+    # dankMaterialShell.greeter = {
+    #   enable = true;
+    #   compositor.name = "niri";
+    #   configHome = "/home/vera";
+    # };
     neovim = {
       enable = true;
       defaultEditor = true;
