@@ -158,11 +158,6 @@
     chromium = { enable = true; };
     nix-ld = { enable = true; };
     lazygit.enable = true;
-    # dankMaterialShell.greeter = {
-    #   enable = true;
-    #   compositor.name = "niri";
-    #   configHome = "/home/vera";
-    # };
     neovim = {
       enable = true;
       defaultEditor = true;

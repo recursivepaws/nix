@@ -7,10 +7,8 @@
           QT_QPA_PLATFORMTHEME = "gtk3";
           QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
         };
-        spawn-at-startup = [
-          { command = [ "dms" "run" "-d" ]; }
-          { command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }
-        ];
+        spawn-at-startup =
+          [{ command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }];
         window-rules = [{
           matches = [
             { app-id = "^signal$"; }
