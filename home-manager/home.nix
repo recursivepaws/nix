@@ -20,7 +20,10 @@
 
   home.packages = with pkgs; [
     eog
-    davinci-resolve-studio
+    handbrake
+    avidemux
+    manim
+    cameractrls
     playerctl
     wl-clipboard
     fuzzel

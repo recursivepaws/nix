@@ -1,10 +1,20 @@
 { pkgs, ... }: {
-  # Add amdgpu drivers and openCL for compatibility
-  boot.initrd.kernelModules = [ "amdgpu" ];
   hardware.graphics = {
     enable = true;
-    extraPackages = with pkgs; [ rocmPackages.clr.icd ];
+    enable32Bit = true;
   };
-  environment.systemPackages = with pkgs; [ clinfo ];
-  environment.variables = { ROC_ENABLE_PRE_VEGA = "1"; };
+
+  environment.systemPackages = with pkgs; [
+    mesa-demos
+    vulkan-tools
+    vulkan-headers
+    clinfo
+    libdrm
+    libvdpau
+    vdpauinfo
+    driversi686Linux.vdpauinfo
+    libva
+    libva-utils
+    wayland-utils
+  ];
 }

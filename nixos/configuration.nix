@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, ... }: {
+{ inputs, config, pkgs, pkgs-stable, ... }: {
   imports = [
     ./hardware-configuration.nix
     ./file-manager.nix
@@ -8,6 +8,8 @@
     ./niri.nix
     ./dms.nix
     ./gpu.nix
+    ./amd.nix
+    ./davinci.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.agenix.nixosModules.default
   ];
@@ -210,6 +212,7 @@
     settings = { PermitRootLogin = "no"; };
   };
   services.pipewire.enable = true;
+  services.avahi.enable = true;
 
   services.trezord.enable = true;
   # services.blueman.enable = true;

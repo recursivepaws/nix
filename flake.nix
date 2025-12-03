@@ -42,29 +42,32 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # BUG: https://github.com/NixOS/nixpkgs/issues/448456
+    # terrible terrible terrible terrible terrible
+    mesa-good.url =
+      "github:nixos/nixpkgs?ref=599ddd2b79331c1e6153e1659bdaab65d62c4c82";
   };
   outputs = { self, nixpkgs, nixpkgs-stable, home-manager, ... }@inputs:
-    let system = "x86_64-linux";
+    let
+      system = "x86_64-linux";
+      pkgs-stable = import nixpkgs-stable {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in {
       # overlays = ;
       nixosConfigurations = {
         # modules = [ ];
         NyaNix = nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit self inputs; };
+          specialArgs = { inherit self inputs pkgs-stable; };
           modules = [
             ./nixos/configuration.nix
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.vera = import ./home-manager/home.nix;
-              home-manager.extraSpecialArgs = {
-                inherit inputs;
-                pkgs-stable = import nixpkgs-stable {
-                  inherit system;
-                  config.allowUnfree = true;
-                };
-              };
+              home-manager.extraSpecialArgs = { inherit inputs pkgs-stable; };
             }
           ];
         };
