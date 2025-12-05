@@ -1,5 +1,5 @@
 # This file defines overlays
 { inputs, ... }: {
-  # imports = [ ./niri.nix ];
-  nixpkgs.overlays = [ inputs.niri-flake.overlays.niri ];
+  nixpkgs.overlays =
+    [ inputs.niri-flake.overlays.niri inputs.claude-code.overlays.default ];
 }

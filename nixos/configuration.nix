@@ -3,6 +3,7 @@
     ./hardware-configuration.nix
     ./file-manager.nix
     # ./stylix.nix
+    ./fonts.nix
     ./age.nix
     ./network.nix
     ./niri.nix
@@ -98,6 +99,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    claude-code
     nixfmt-rfc-style
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     networkmanager
@@ -154,6 +156,7 @@
     [ "/share/applications" "/share/xdg-desktop-portal" ];
 
   programs = {
+    localsend.enable = true;
     chromium = { enable = true; };
     nix-ld = { enable = true; };
     lazygit.enable = true;
