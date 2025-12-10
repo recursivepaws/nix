@@ -1,11 +1,5 @@
-{ inputs, pkgs, config, ... }: {
-  imports = [
-    inputs.zen-browser.homeModules.beta
-    ./niri
-    ./gtk.nix
-    ./signing.nix
-    ./terminal.nix
-  ];
+{ pkgs, config, ... }: {
+  imports = [ ./niri ./gtk.nix ./signing.nix ./terminal.nix ];
 
   home = {
     username = "vera";
@@ -13,10 +7,7 @@
     stateVersion = "25.05";
   };
 
-  programs = {
-    zen-browser.enable = true;
-    home-manager.enable = true;
-  };
+  programs = { home-manager.enable = true; };
 
   home.packages = with pkgs; [
     eog

@@ -9,6 +9,6 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMvZ+DxqeKWXhjj35i7Fu0FYzOptNi+ui5il+kWc9Ev+";
   computers = [ NyaNix ];
 in {
-  "network.age".publicKeys = vera;
+  "user.age".publicKeys = vera;
   "startup.age".publicKeys = computers;
 }

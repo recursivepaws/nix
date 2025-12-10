@@ -7,10 +7,6 @@
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
     agenix.url = "github:yaxitech/ragenix";
     claude-code.url = "github:sadjow/claude-code-nix";
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
-    };
     niri-flake = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";

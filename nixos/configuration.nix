@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, pkgs-stable, ... }: {
+{ inputs, config, pkgs, ... }: {
   imports = [
     ./hardware-configuration.nix
     ./file-manager.nix
@@ -11,6 +11,7 @@
     ./gpu.nix
     ./amd.nix
     ./davinci.nix
+    ./ipod.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.agenix.nixosModules.default
   ];
@@ -130,6 +131,7 @@
     xwayland-satellite
     spotify
     v4l-utils
+    lua-language-server
     eza
     bat
     zoxide
@@ -157,8 +159,8 @@
 
   programs = {
     localsend.enable = true;
-    chromium = { enable = true; };
-    nix-ld = { enable = true; };
+    chromium.enable = true;
+    nix-ld.enable = true;
     lazygit.enable = true;
     neovim = {
       enable = true;
