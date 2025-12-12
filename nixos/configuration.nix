@@ -12,6 +12,8 @@
     ./amd.nix
     ./davinci.nix
     ./ipod.nix
+    ./webcam.nix
+    # ./v4l2loopback.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.agenix.nixosModules.default
   ];
@@ -41,12 +43,6 @@
     '';
   };
 
-  boot.extraModulePackages = with config.boot.kernelPackages;
-    [ v4l2loopback.out ];
-  boot.kernelModules = [ "v4l2loopback" ];
-  boot.extraModprobeConfig = ''
-    options v4l2loopback exclusive_caps=0 card_label="Virtual Camera"
-  '';
   # boot.kernelPatches = [{
   #   name = "webcam-fix";
   #   patch = ./webcam-fix.patch;
@@ -117,6 +113,7 @@
     clang
     mold
     rustc
+    rustfmt
     cargo
     go
     uv
@@ -139,6 +136,10 @@
     ffmpeg
     #
     tree
+
+    gawk
+    bc
+
     htop
     xprop
     clang-tools
@@ -218,6 +219,16 @@
   };
   services.pipewire.enable = true;
   services.avahi.enable = true;
+
+  services.flatpak = { enable = true; };
+  systemd.services.flatpak-repo = {
+    wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.flatpak ];
+    script = ''
+      flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      flatpak install -y flathub hu.irl.cameractrls
+    '';
+  };
 
   services.trezord.enable = true;
   # services.blueman.enable = true;
