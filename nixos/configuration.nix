@@ -227,6 +227,7 @@
     script = ''
       flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
       flatpak install -y flathub hu.irl.cameractrls
+      flatpak install -y flathub com.core447.StreamController
     '';
   };
 
