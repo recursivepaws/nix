@@ -7,19 +7,31 @@
     plugins = with pkgs.xfce; [ thunar-volman thunar-archive-plugin ];
   };
 
-  # xdg.portal = {
-  #   enable = true;
-  #   extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-  #   config.common = {
-  #     default = "gtk";
-  #     "org.freedesktop.impl.portal.FileChooser" = "gtk";
-  #   };
-  # };
-  #
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-gnome
+    ];
+    config = {
+      niri = {
+        default = [ "gtk" ];
+        "org.freedesktop.impl.portal.FileChooser" = "gtk";
+        "org.freedesktop.impl.portal.ScreenCast" = "gnome";
+        "org.freedesktop.impl.portal.Secret" = "gnome";
+      };
+      common = {
+        default = "gtk";
+        "org.freedesktop.impl.portal.FileChooser" = "gtk";
+      };
+    };
+    wlr.enable = false;
+    xdgOpenUsePortal = true;
+  };
   xdg.mime.defaultApplications = { "inode/directory" = "thunar.desktop"; };
-  /* environment.sessionVariables = {
-       QT_QPA_PLATFORMTHEME = "gtk3";
-       QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
-     };
-  */
+
+  environment.sessionVariables = {
+    # Force Qt to use XDG portal for file dialogs
+    QT_QPA_PLATFORMTHEME = "gnome";
+  };
 }

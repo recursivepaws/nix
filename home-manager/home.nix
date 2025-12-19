@@ -20,7 +20,6 @@
     fuzzel
     spotifyd
     chezmoi
-    vlc
     telegram-desktop
     signal-desktop
     discord

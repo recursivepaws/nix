@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, ... }: {
+{ inputs, config, lib, pkgs, ... }: {
   imports = [
     ./hardware-configuration.nix
     ./file-manager.nix
@@ -12,6 +12,7 @@
     ./amd.nix
     ./davinci.nix
     ./ipod.nix
+    ./flatpak.nix
     ./webcam.nix
     # ./v4l2loopback.nix
     inputs.home-manager.nixosModules.home-manager
@@ -126,7 +127,6 @@
     nodejs_22
     delta
     xwayland-satellite
-    spotify
     v4l-utils
     lua-language-server
     eza
@@ -219,18 +219,6 @@
   };
   services.pipewire.enable = true;
   services.avahi.enable = true;
-
-  services.flatpak = { enable = true; };
-  systemd.services.flatpak-repo = {
-    wantedBy = [ "multi-user.target" ];
-    path = [ pkgs.flatpak ];
-    script = ''
-      flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-      flatpak install -y flathub hu.irl.cameractrls
-      flatpak install -y flathub com.core447.StreamController
-    '';
-  };
-
   services.trezord.enable = true;
   # services.blueman.enable = true;
 
