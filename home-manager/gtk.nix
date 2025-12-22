@@ -1,4 +1,4 @@
-{ inputs, pkgs, config, ... }: {
+{ pkgs, config, ... }: {
   home.packages = with pkgs; [ gnome-shell sassc ];
   gtk = {
     enable = true;
