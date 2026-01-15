@@ -14,7 +14,7 @@ IPOD_PRODUCT="$2"
 IPOD_MOUNT="/mnt/IPOD"
 SMB_HOST="192.168.1.167"
 SMB_USER="vera"
-SMB_SHARE="data/media/beets/"
+SMB_SHARE="data/media/"
 SMB_MOUNT="/mnt/MeowStationSMB"
 SECRET_FILE="/run/agenix/startup"
 MAX_WAIT=30 # seconds to wait for device
@@ -139,12 +139,20 @@ fi
 # 3. Sync from SMB server to iPod
 log "Starting rsync from server to iPod..."
 
-# Use --iconv to transliterate problematic Unicode characters to ASCII
 rsync -av \
   --size-only \
   --progress \
   --delete \
-  "$SMB_MOUNT/" \
+  "$SMB_MOUNT/beets/" \
   "$IPOD_MOUNT/Music"
 
-log "Sync completed successfully"
+log "Sync music completed successfully"
+
+rsync -av \
+  --size-only \
+  --progress \
+  --delete \
+  "$SMB_MOUNT/podcasts/" \
+  "$IPOD_MOUNT/Podcasts"
+
+log "Sync podcasts completed successfully"
