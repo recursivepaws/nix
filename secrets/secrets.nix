@@ -7,6 +7,7 @@ let
 
   NyaNix =
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMvZ+DxqeKWXhjj35i7Fu0FYzOptNi+ui5il+kWc9Ev+";
+  # ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMvZ+DxqeKWXhjj35i7Fu0FYzOptNi+ui5il+kWc9Ev+ root@nixos
   computers = [ NyaNix ];
 in {
   "user.age".publicKeys = vera;

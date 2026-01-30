@@ -12,6 +12,7 @@
     ./amd.nix
     ./davinci.nix
     ./ipod.nix
+    ./camera.nix
     ./flatpak.nix
     ./webcam.nix
     # ./v4l2loopback.nix
@@ -22,6 +23,8 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  boot.kernelModules = [ "nct6775" ];
 
   boot.initrd.luks.devices."luks-ed949a4c-1c52-4ac8-91cf-00a3d5c8b922".device =
     "/dev/disk/by-uuid/ed949a4c-1c52-4ac8-91cf-00a3d5c8b922";
@@ -99,6 +102,10 @@
   environment.systemPackages = with pkgs; [
     claude-code
     nixfmt-rfc-style
+    figma-linux
+    lm_sensors
+    blender
+    anki
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     networkmanager
     # libwebcam
@@ -113,8 +120,8 @@
     fd
     clang
     mold
-    rustc
-    rustfmt
+    # rustc
+    # rustfmt
     cargo
     go
     uv
@@ -133,7 +140,12 @@
     bat
     zoxide
     guvcview
-    ffmpeg
+    ffmpeg-full
+    SDL2
+    yasm
+    nasm
+    # sdl2-compat
+    # sdl3
     #
     tree
 
@@ -154,11 +166,18 @@
     };
   };
 
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
-  environment.pathsToLink =
-    [ "/share/applications" "/share/xdg-desktop-portal" ];
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    GTK_USE_PORTAL = "1";
+  };
+  environment.pathsToLink = [
+    "/share/applications"
+    "/share/xdg-desktop-portal"
+    "/share/gtksourceview-4"
+  ];
 
   programs = {
+    coolercontrol.enable = true;
     localsend.enable = true;
     chromium.enable = true;
     nix-ld.enable = true;

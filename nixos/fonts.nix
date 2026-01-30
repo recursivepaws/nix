@@ -4,7 +4,7 @@
   environment.systemPackages = with pkgs; [ lohit-fonts.devanagari ];
   # Download and install Jaini font
 
-  fonts.packages = [
+  fonts.packages = with pkgs; [
     (pkgs.runCommand "jaini-font" {
       src = pkgs.fetchurl {
         url =
@@ -15,7 +15,16 @@
       mkdir -p $out/share/fonts/truetype
       cp $src $out/share/fonts/truetype/Jaini-Regular.ttf
     '')
+    junicode
+    noto-fonts
+    noto-fonts-color-emoji
+    liberation_ttf
+    atkinson-hyperlegible
+    nerd-fonts.caskaydia-cove
+    mplus-outline-fonts.githubRelease
   ];
+
+  fonts.fontconfig.defaultFonts.emoji = [ "Noto Color Emoji" ];
 
   # Set Jaini as default for Devanagari
   fonts.fontconfig.localConf = ''
