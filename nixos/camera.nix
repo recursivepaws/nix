@@ -15,6 +15,7 @@ let
       systemd # udevadm
       gnugrep # grep
       bash # bash
+      zenity # progress
       immich-cli # immich
     ];
     text = builtins.readFile ../scripts/camera-sync.sh;

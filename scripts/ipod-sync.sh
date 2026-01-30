@@ -19,6 +19,10 @@ SMB_MOUNT="/mnt/MeowStationSMB"
 SECRET_FILE="/run/agenix/startup"
 MAX_WAIT=30 # seconds to wait for device
 
+show_zenity() {
+  sudo -u vera DISPLAY=:0 XAUTHORITY=/home/vera/.Xauthority zenity "$@"
+}
+
 # Logging
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /var/log/ipod-sync.log
@@ -49,32 +53,32 @@ trap cleanup EXIT
 # 0. Find and mount iPod
 log "Looking for iPod device..."
 
-# Find the device node for the iPod (it's /dev/sdc2 based on your Thunar message)
+# Find the device node for the iPod
 DEVICE=""
+
+exec 3> >(show_zenity --progress \
+  --title="Waiting for iPod" \
+  --text="Connecting..." \
+  --percentage=0 \
+  --auto-close)
+
 for i in $(seq 1 $MAX_WAIT); do
   # Look for block devices matching our USB vendor/product ID
   for syspath in /sys/bus/usb/devices/*; do
     if [ -f "$syspath/idVendor" ] && [ -f "$syspath/idProduct" ]; then
       vendor=$(cat "$syspath/idVendor" 2>/dev/null || echo "")
       product=$(cat "$syspath/idProduct" 2>/dev/null || echo "")
-
       if [ "$vendor" = "$IPOD_VENDOR" ] && [ "$product" = "$IPOD_PRODUCT" ]; then
-        # Found the USB device, now find its block device partition
-        # Look for partitions under this device
         for blockdev in /sys/block/sd*; do
           if [ -d "$blockdev" ]; then
-            # Check if this block device belongs to our USB device
             dev_path=$(readlink -f "$blockdev/device" 2>/dev/null || echo "")
             if [[ "$dev_path" == *"$vendor"* ]] || udevadm info --query=property --path="$blockdev" 2>/dev/null | grep -q "ID_VENDOR_ID=$IPOD_VENDOR"; then
-              # Found the disk, now look for the partition (usually partition 2)
               blockname=$(basename "$blockdev")
               if [ -b "/dev/${blockname}2" ]; then
                 DEVICE="/dev/${blockname}2"
-                log "Found iPod device: $DEVICE"
                 break 3
               elif [ -b "/dev/${blockname}1" ]; then
                 DEVICE="/dev/${blockname}1"
-                log "Found iPod device: $DEVICE"
                 break 3
               fi
             fi
@@ -84,11 +88,18 @@ for i in $(seq 1 $MAX_WAIT); do
     fi
   done
 
-  if [ -z "$DEVICE" ]; then
-    log "Waiting for iPod device... ($i/$MAX_WAIT)"
+  if [ -n "$DEVICE" ]; then
+    echo "100" >&3
+    echo "# iPod detected!" >&3
+    break
+  else
+    echo "# Waiting for iPod device... ($i/$MAX_WAIT)" >&3
+    echo "$((i * 100 / MAX_WAIT))" >&3
     sleep 1
   fi
 done
+
+exec 3>&- # Close the file descriptor
 
 if [ -z "$DEVICE" ]; then
   log "ERROR: iPod device not found after ${MAX_WAIT}s"
@@ -141,18 +152,22 @@ log "Starting rsync from server to iPod..."
 
 rsync -av \
   --size-only \
-  --progress \
+  --info=progress2 \
   --delete \
   "$SMB_MOUNT/beets/" \
-  "$IPOD_MOUNT/Music"
+  "$IPOD_MOUNT/Music" |
+  grep -oP '\d+(?=%)' |
+  show_zenity --progress --title="IPod Music Sync" --text="Copying music files..." --auto-close
 
 log "Sync music completed successfully"
 
 rsync -av \
   --size-only \
-  --progress \
+  --info=progress2 \
   --delete \
   "$SMB_MOUNT/podcasts/" \
-  "$IPOD_MOUNT/Podcasts"
+  "$IPOD_MOUNT/Podcasts" |
+  grep -oP '\d+(?=%)' |
+  show_zenity --progress --title="IPod Podcast Sync" --text="Copying files..." --auto-close
 
 log "Sync podcasts completed successfully"

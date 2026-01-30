@@ -122,7 +122,7 @@ immich login "http://$IMMICH_HOST/api" "$IMMICH_API_KEY"
 
 log "Successfully logged in to Immich"
 
-immich upload --recursive --delete-duplicates --delete "$CAMERA_MOUNT/DCIM/"
+immich upload --recursive --delete-duplicates --delete "$CAMERA_MOUNT/DCIM/" | zenity --progress --title="Immich Image Sync" --text="Copying image files..." --auto-close
 
 log "Successfully uploaded images to Immich"
 # 2. Mount SMB share if not already mounted
