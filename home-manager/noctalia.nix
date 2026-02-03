@@ -4,6 +4,13 @@
 
   programs.noctalia-shell.systemd.enable = true;
 
+  xdg.configFile."noctalia/colorschemes/Oxocarbon/Oxocarbon.json".source =
+    pkgs.fetchurl {
+      url =
+        "https://raw.githubusercontent.com/noctalia-dev/noctalia-colorschemes/79829c121516de5ffcb5ab62f6dc178c8534a34a/Oxocarbon/Oxocarbon.json";
+      hash = "sha256-/MyJJcQhxFSf8oku6DZmbqA2SZmoQru8e/IMo9vSZ7c=";
+    };
+
   # configure options
   programs.noctalia-shell = {
     enable = true;
@@ -44,7 +51,7 @@
           ];
         };
       };
-      colorSchemes.predefinedScheme = "Monochrome";
+      colorSchemes.predefinedScheme = "Oxocarbon";
       general = {
         avatarImage = ../assets/recursivepaws.png;
         radiusRatio = 0.2;
