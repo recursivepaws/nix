@@ -11,8 +11,8 @@
     settings = {
       # configure noctalia here
       bar = {
-        density = "compact";
-        position = "right";
+        # density = "compact";
+        position = "top";
         showCapsule = false;
         widgets = {
           left = [
@@ -45,10 +45,10 @@
         };
       };
       colorSchemes.predefinedScheme = "Monochrome";
-      # general = {
-      #   avatarImage = "/home/drfoobar/.face";
-      #   radiusRatio = 0.2;
-      # };
+      general = {
+        avatarImage = ../assets/recursivepaws.png;
+        radiusRatio = 0.2;
+      };
       location = {
         monthBeforeDay = false;
         name = "Washington, DC";
@@ -63,6 +63,22 @@
       }];
       states = {
         catwalk = {
+          enabled = true;
+          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+        };
+        pomodoro = {
+          enabled = true;
+          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+        };
+        todo = {
+          enabled = true;
+          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+        };
+        # unicode-picker = {
+        #   enabled = true;
+        #   sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+        # };
+        clipper = {
           enabled = true;
           sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
         };

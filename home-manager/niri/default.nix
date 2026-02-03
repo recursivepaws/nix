@@ -20,17 +20,20 @@
           block-out-from = "screencast";
         }];
         binds = with config.lib.niri.actions;
-          let sh = spawn "sh" "-c";
+        # let
+          let
+            sh = spawn "sh" "-c";
+            ns = x: sh ("noctalia-shell ipc call " + x);
           in {
             "Mod+Q".action = spawn "kitty";
-            "Mod+P".action = sh "dms ipc call powermenu toggle";
-            "Mod+X".action = sh "dms ipc call spotlight toggle";
+            "Mod+P".action = ns "sessionMenu toggle";
+            "Mod+X".action = ns "launcher toggle";
             "Mod+Shift+X".action = quit;
             "Mod+F".action = maximize-column;
             "Mod+Shift+F".action = fullscreen-window;
             "Mod+C".action = close-window;
             "Mod+E".action = spawn "thunar";
-            "Mod+Ctrl+S".action = sh "dms ipc call niri screenshot";
+            "Mod+Ctrl+S".action = ns "niri screenshot";
 
             "Mod+H".action = focus-column-left;
             "Mod+J".action = focus-window-down;
@@ -53,9 +56,9 @@
             "XF86AudioPlay".action = sh "playerctl play-pause";
             "XF86AudioNext".action = sh "playerctl next";
             "XF86AudioPrev".action = sh "playerctl previous";
-            "XF86AudioRaiseVolume".action = sh "dms ipc call audio increment 3";
-            "XF86AudioLowerVolume".action = sh "dms ipc call audio decrement 3";
-            "XF86AudioMute".action = sh "dms ipc call audio mute";
+            "XF86AudioRaiseVolume".action = ns "volume increase";
+            "XF86AudioLowerVolume".action = ns "volume decrease";
+            "XF86AudioMute".action = ns "volume muteOutput";
           };
       };
     };
