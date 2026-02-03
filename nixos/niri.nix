@@ -14,4 +14,8 @@
     enable = true;
     package = pkgs.niri-stable;
   };
+
+  services.displayManager.gdm.enable = true;
+  security.pam.services.gdm.enableGnomeKeyring = true;
+  services.gnome.gnome-keyring.enable = true;
 }

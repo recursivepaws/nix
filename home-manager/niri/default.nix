@@ -11,14 +11,26 @@
           { command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }
           { command = [ "bash" "-c" "1password --silent" ]; }
         ];
-        window-rules = [{
-          matches = [
-            { app-id = "^signal$"; }
-            { app-id = "^org.telegram.desktop$"; }
-            { app-id = "^1Password$"; }
-          ];
-          block-out-from = "screencast";
-        }];
+        window-rules = [
+          {
+            matches = [
+              { app-id = "^signal$"; }
+              { app-id = "^org.telegram.desktop$"; }
+              { app-id = "^1Password$"; }
+            ];
+            block-out-from = "screencast";
+          }
+          {
+            geometry-corner-radius = {
+              bottom-left = 15.0;
+              bottom-right = 15.0;
+              top-left = 15.0;
+              top-right = 15.0;
+            };
+            clip-to-geometry = true;
+          }
+        ];
+        debug.honor-xdg-activation-with-invalid-serial = [ ];
         binds = with config.lib.niri.actions;
         # let
           let

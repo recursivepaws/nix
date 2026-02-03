@@ -18,9 +18,9 @@
     settings = {
       # configure noctalia here
       bar = {
-        # density = "compact";
+        density = "spacious";
         position = "top";
-        showCapsule = false;
+        showCapsule = true;
         widgets = {
           left = [
             {
@@ -29,6 +29,7 @@
             }
             { id = "Network"; }
             { id = "Bluetooth"; }
+            { id = "WallpaperSelector"; }
           ];
           center = [{
             hideUnoccupied = false;
@@ -51,6 +52,7 @@
           ];
         };
       };
+      wallpaper = { directory = ../assets/fungi; };
       colorSchemes.predefinedScheme = "Oxocarbon";
       general = {
         avatarImage = ../assets/recursivepaws.png;
@@ -69,10 +71,10 @@
         url = "https://github.com/noctalia-dev/noctalia-plugins";
       }];
       states = {
-        catwalk = {
-          enabled = true;
-          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
-        };
+        # catwalk = {
+        #   enabled = true;
+        #   sourceUrcompactl = "https://github.com/noctalia-dev/noctalia-plugins";
+        # };
         pomodoro = {
           enabled = true;
           sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
@@ -81,10 +83,10 @@
           enabled = true;
           sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
         };
-        # unicode-picker = {
-        #   enabled = true;
-        #   sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
-        # };
+        unicode-picker = {
+          enabled = true;
+          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+        };
         clipper = {
           enabled = true;
           sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
