@@ -106,6 +106,7 @@
     lm_sensors
     blender
     anki
+    scrcpy
     #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     networkmanager
     # libwebcam
@@ -177,6 +178,7 @@
   ];
 
   programs = {
+    adb.enable = true;
     coolercontrol.enable = true;
     localsend.enable = true;
     chromium.enable = true;

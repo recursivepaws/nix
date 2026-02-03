@@ -21,6 +21,10 @@ SECRET_FILE="/run/agenix/startup"
 
 MAX_WAIT=30 # seconds to wait for device
 
+show_zenity() {
+  sudo -u vera DISPLAY=:0 XAUTHORITY=/home/vera/.Xauthority zenity "$@"
+}
+
 # Logging
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a /var/log/camera-sync.log
@@ -122,7 +126,7 @@ immich login "http://$IMMICH_HOST/api" "$IMMICH_API_KEY"
 
 log "Successfully logged in to Immich"
 
-immich upload --recursive --delete-duplicates --delete "$CAMERA_MOUNT/DCIM/" | zenity --progress --title="Immich Image Sync" --text="Copying image files..." --auto-close
+immich upload --recursive --delete-duplicates --delete "$CAMERA_MOUNT/DCIM/"
 
 log "Successfully uploaded images to Immich"
 # 2. Mount SMB share if not already mounted
