@@ -25,6 +25,10 @@
         };
       };
       aliases = {
+        publish = ''!git push --set-upstream origin "$(git current-branch)"'';
+        unpublish = ''!git push origin :"$(git current-branch)"'';
+        stashes = "stash list";
+
         a = "add";
         aa = "add -A";
         c = "commit";
@@ -47,12 +51,14 @@
         kf = "push -f";
         rb = "rebase";
         rbi = "rebase -i";
-        r = "remote";
-        ra = "remote add";
-        rr = "remote rm";
-        rv = "remote -v";
-        rs = "remote show";
+        # r = "remote";
+        # ra = "remote add";
+        # rr = "remote rm";
+        # rv = "remote -v";
+        # rs = "remote show";
         s = "status";
+        r = "restore";
+        rs = "restore --staged";
       };
     };
   };
