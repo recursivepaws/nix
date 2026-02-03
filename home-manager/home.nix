@@ -1,5 +1,5 @@
 { pkgs, config, ... }: {
-  imports = [ ./niri ./gtk.nix ./signing.nix ./terminal.nix ];
+  imports = [ ./niri ./gtk.nix ./signing.nix ./terminal.nix ./noctalia.nix ];
 
   home = {
     username = "vera";

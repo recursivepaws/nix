@@ -7,7 +7,8 @@
     ./age.nix
     ./network.nix
     ./niri.nix
-    ./dms.nix
+    # ./dms.nix
+    ./noctalia.nix
     ./gpu.nix
     ./amd.nix
     ./davinci.nix
