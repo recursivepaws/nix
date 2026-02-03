@@ -25,6 +25,10 @@
         };
       };
       aliases = {
+        default-branch = "config init.defaultBranch";
+        current-branch = "rev-parse --abbrev-ref HEAD";
+        upstream-branch = ''
+          !git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)"'';
         publish = ''!git push --set-upstream origin "$(git current-branch)"'';
         unpublish = ''!git push origin :"$(git current-branch)"'';
         stashes = "stash list";
@@ -43,8 +47,16 @@
         f = "fetch";
         fo = "fetch origin";
         fu = "fetch upstream";
-        lol = "log --graph --decorate --pretty=oneline --abbrev-commit";
-        lola = "log --graph --decorate --pretty=oneline --abbrev-commit --all";
+
+        ll = "log-list";
+        lll = "log-list-long";
+        lg = "log-graph";
+
+        log-graph = "log --graph --all --oneline --decorate";
+        log-list =
+          "log --graph --topo-order --date=short --abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN]%Creset %Cblue%G?%Creset'";
+        log-list-long =
+          "log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN <%aE>]%Creset %Cblue%G?%Creset'";
         j = "pull";
         jr = "pull -r";
         k = "push";
