@@ -38,9 +38,17 @@
           }];
           right = [
             {
-              alwaysShowPercentage = false;
-              id = "Battery";
-              warningThreshold = 30;
+              id = "Tray";
+              hidePassive = true;
+              drawerEnabled = false;
+            }
+            {
+              id = "microphone";
+              displayMode = "alwaysShow";
+            }
+            {
+              id = "Volume";
+              displayMode = "alwaysShow";
             }
             {
               formatHorizontal = "HH:mm";
@@ -48,6 +56,22 @@
               id = "Clock";
               useMonospacedFont = true;
               usePrimaryColor = true;
+            }
+            {
+              id = "NotificationHistory";
+              showUnreadBadge = true;
+            }
+            {
+              id = "SystemMonitor";
+              compactMode = true;
+              showCpuTemp = true;
+              showCpuUsage = true;
+              showDiskUsage = true;
+              showLoadAverage = true;
+              showMemoryAsPercent = true;
+              showMemoryUsage = true;
+              showNetworkStats = true;
+              useMonospaceFont = true;
             }
           ];
         };
@@ -70,28 +94,24 @@
         name = "Official Noctalia Plugins";
         url = "https://github.com/noctalia-dev/noctalia-plugins";
       }];
-      states = {
-        # catwalk = {
-        #   enabled = true;
-        #   sourceUrcompactl = "https://github.com/noctalia-dev/noctalia-plugins";
-        # };
-        pomodoro = {
-          enabled = true;
-          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
+      states = let
+        defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
+        mkPlugin = name: {
+          name = name;
+          value = {
+            enabled = true;
+            sourceUrl = defaultSource;
+          };
         };
-        todo = {
-          enabled = true;
-          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
-        };
-        unicode-picker = {
-          enabled = true;
-          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
-        };
-        clipper = {
-          enabled = true;
-          sourceUrl = "https://github.com/noctalia-dev/noctalia-plugins";
-        };
-      };
+        plugins = [
+          "pomodoro"
+          "todo"
+          "unicode-picker"
+          "clipper"
+          "screen-recorder"
+          "privacy-indicator"
+        ];
+      in builtins.listToAttrs (map mkPlugin plugins);
       version = 1;
     };
   };
