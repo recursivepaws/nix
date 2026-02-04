@@ -15,6 +15,7 @@
     ./ipod.nix
     ./camera.nix
     ./flatpak.nix
+    # ./whatsapp.nix
     ./webcam.nix
     # ./v4l2loopback.nix
     inputs.home-manager.nixosModules.home-manager
@@ -225,6 +226,8 @@
       localNetworkGameTransfers.openFirewall = true;
     };
   };
+
+  nixpkgs.config.permittedInsecurePackages = [ "qtwebengine-5.15.19" ];
 
   # Make sure these are also enabled
   services.dbus.enable = true;

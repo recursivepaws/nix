@@ -11,14 +11,30 @@
           { command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }
           { command = [ "bash" "-c" "1password --silent" ]; }
         ];
+        layer-rules = [{
+          matches = [{ namespace = "^notifications$"; }];
+          block-out-from = "screencast";
+        }];
         window-rules = [
           {
             matches = [
               { app-id = "^signal$"; }
-              { app-id = "^org.telegram.desktop$"; }
+              { app-id = "^org\\.telegram\\.desktop$"; }
               { app-id = "^1Password$"; }
+              { app-id = "^whatsie$"; }
             ];
             block-out-from = "screencast";
+          }
+          {
+            matches = [
+              { app-id = "^Pinentry-gtk$"; }
+              { app-id = "^xdg-desktop-portal-gtk"; }
+              {
+                app-id = "^hyprpolkitagent$";
+              }
+              # { = "^whatsie$"; }
+            ];
+            open-floating = true;
           }
           {
             geometry-corner-radius = {
@@ -32,7 +48,6 @@
         ];
         debug.honor-xdg-activation-with-invalid-serial = [ ];
         binds = with config.lib.niri.actions;
-        # let
           let
             sh = spawn "sh" "-c";
             ns = x: sh ("noctalia-shell ipc call " + x);
