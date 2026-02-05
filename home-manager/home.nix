@@ -14,9 +14,14 @@
     stateVersion = "25.05";
   };
 
-  programs = { home-manager.enable = true; };
+  programs = {
+    home-manager.enable = true;
+    satty.enable = true;
+  };
 
   home.packages = with pkgs; [
+    slurp
+    grim
     eog
     handbrake
     avidemux
