@@ -109,10 +109,10 @@
             "Mod+Ctrl+K".action = move-window-up;
             "Mod+Ctrl+L".action = move-column-right;
 
-            "Mod+Minus".action = set-column-width "-10%";
-            "Mod+Shift+Minus".action = set-window-height "-10%";
-            "Mod+Shift+Plus".action = set-window-height "+10%";
-            "Mod+Plus".action = set-column-width "+10%";
+            "Mod+I".action = set-column-width "-10%";
+            "Mod+O".action = set-column-width "+10%";
+            "Mod+Ctrl+I".action = set-window-height "-10%";
+            "Mod+Ctrl+O".action = set-window-height "+10%";
 
             "Mod+Shift+P".action = power-off-monitors;
 
