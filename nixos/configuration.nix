@@ -159,6 +159,7 @@
     htop
     xprop
     clang-tools
+    (callPackage ./lotion.nix { })
   ];
 
   environment.etc = {
