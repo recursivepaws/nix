@@ -1,8 +1,16 @@
-{ pkgs, inputs, ... }: {
-  # import the home manager module
+{ pkgs, inputs, ... }:
+let
+  defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
+  plugins = [
+    "pomodoro"
+    "todo"
+    "unicode-picker"
+    "clipper"
+    "screen-recorder"
+    "privacy-indicator"
+  ];
+in {
   imports = [ inputs.noctalia.homeModules.default ];
-
-  programs.noctalia-shell.systemd.enable = true;
 
   xdg.configFile."noctalia/colorschemes/Oxocarbon/Oxocarbon.json".source =
     pkgs.fetchurl {
@@ -11,12 +19,10 @@
       hash = "sha256-/MyJJcQhxFSf8oku6DZmbqA2SZmoQru8e/IMo9vSZ7c=";
     };
 
-  # configure options
   programs.noctalia-shell = {
     enable = true;
-    # package = null;
+    systemd.enable = true;
     settings = {
-      # configure noctalia here
       bar = {
         density = "spacious";
         position = "top";
@@ -26,21 +32,6 @@
             {
               id = "ControlCenter";
               useDistroLogo = true;
-            }
-            { id = "Network"; }
-            { id = "Bluetooth"; }
-            { id = "WallpaperSelector"; }
-          ];
-          center = [{
-            hideUnoccupied = false;
-            id = "Workspace";
-            labelMode = "none";
-          }];
-          right = [
-            {
-              id = "Tray";
-              hidePassive = true;
-              drawerEnabled = false;
             }
             {
               id = "microphone";
@@ -73,7 +64,18 @@
               showNetworkStats = true;
               useMonospaceFont = true;
             }
+            {
+              id = "Tray";
+              hidePassive = true;
+              drawerEnabled = true;
+            }
           ];
+          center = [{
+            hideUnoccupied = false;
+            id = "Workspace";
+            labelMode = "none";
+          }];
+          right = map (name: { id = "plugin:" + name; }) plugins;
         };
       };
       wallpaper = { directory = ../assets/fungi; };
@@ -87,15 +89,13 @@
         name = "Washington, DC";
       };
     };
-    # this may also be a string or a path to a JSON file.
     plugins = {
       sources = [{
         enabled = true;
         name = "Official Noctalia Plugins";
-        url = "https://github.com/noctalia-dev/noctalia-plugins";
+        url = defaultSource;
       }];
       states = let
-        defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
         mkPlugin = name: {
           name = name;
           value = {
@@ -103,14 +103,6 @@
             sourceUrl = defaultSource;
           };
         };
-        plugins = [
-          "pomodoro"
-          "todo"
-          "unicode-picker"
-          "clipper"
-          "screen-recorder"
-          "privacy-indicator"
-        ];
       in builtins.listToAttrs (map mkPlugin plugins);
       version = 1;
     };
