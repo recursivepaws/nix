@@ -125,6 +125,7 @@
     mold
     # rustc
     # rustfmt
+    tor-browser
     cargo
     go
     uv
@@ -246,6 +247,10 @@
   services.pipewire.enable = true;
   services.avahi.enable = true;
   services.trezord.enable = true;
+  services.tor = {
+    enable = true;
+    openFirewall = true;
+  };
   # services.blueman.enable = true;
 
   # xdg.autostart.enable = true;

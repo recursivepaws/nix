@@ -8,6 +8,7 @@
     '' + lib.strings.join "\n" (map ({ package, source ? "flathub" }:
       "flatpak install -y ${source} ${package}") [
         { package = "hu.irl.cameractrls"; }
+        { package = "com.fastmail.Fastmail"; }
         { package = "com.core447.StreamController"; }
         { package = "be.alexandervanhee.gradia"; }
         { package = "com.spotify.Client"; }
