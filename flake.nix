@@ -19,19 +19,9 @@
       url = "github:AvengeMedia/dgop";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # dms-cli = {
-    #   url = "github:AvengeMedia/danklinux";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    dms-official-plugins = {
-      url = "github:AvengeMedia/dms-plugins";
-      flake = false;
-    };
-    dankMaterialShell = {
-      url = "github:AvengeMedia/DankMaterialShell";
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.dgop.follows = "dgop";
-      # inputs.dms-cli.follows = "dms-cli";
     };
     home-manager = {
       # Follow corresponding `release` branch from Home Manager

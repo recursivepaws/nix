@@ -1,5 +1,12 @@
 { pkgs, config, ... }: {
-  imports = [ ./niri ./gtk.nix ./signing.nix ./terminal.nix ];
+  imports = [
+    ./niri
+    ./gtk.nix
+    ./signing.nix
+    ./terminal.nix
+    ./noctalia.nix
+    ./whatsie.nix
+  ];
 
   home = {
     username = "vera";
@@ -7,9 +14,14 @@
     stateVersion = "25.05";
   };
 
-  programs = { home-manager.enable = true; };
+  programs = {
+    home-manager.enable = true;
+    satty.enable = true;
+  };
 
   home.packages = with pkgs; [
+    slurp
+    grim
     eog
     handbrake
     avidemux

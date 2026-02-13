@@ -7,13 +7,15 @@
     ./age.nix
     ./network.nix
     ./niri.nix
-    ./dms.nix
+    # ./dms.nix
+    ./noctalia.nix
     ./gpu.nix
     ./amd.nix
     ./davinci.nix
     ./ipod.nix
     ./camera.nix
     ./flatpak.nix
+    # ./whatsapp.nix
     ./webcam.nix
     # ./v4l2loopback.nix
     inputs.home-manager.nixosModules.home-manager
@@ -123,6 +125,7 @@
     mold
     # rustc
     # rustfmt
+    tor-browser
     cargo
     go
     uv
@@ -156,6 +159,7 @@
     htop
     xprop
     clang-tools
+    (callPackage ./lotion.nix { })
   ];
 
   environment.etc = {
@@ -191,6 +195,7 @@
     gnupg.agent = {
       enable = true;
       enableSSHSupport = true;
+      pinentryPackage = pkgs.pinentry-gnome3;
     };
     zsh = {
       enable = true;
@@ -225,6 +230,8 @@
     };
   };
 
+  nixpkgs.config.permittedInsecurePackages = [ "qtwebengine-5.15.19" ];
+
   # Make sure these are also enabled
   services.dbus.enable = true;
 
@@ -241,6 +248,10 @@
   services.pipewire.enable = true;
   services.avahi.enable = true;
   services.trezord.enable = true;
+  services.tor = {
+    enable = true;
+    openFirewall = true;
+  };
   # services.blueman.enable = true;
 
   # xdg.autostart.enable = true;

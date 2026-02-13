@@ -6,14 +6,21 @@
       # font = "Caskaydia Cove";
     };
   };
+  # home.sessionVariables = { KITTY_SHELL_INTEGRATION = "enabled"; };
   programs.kitty = {
     enable = true;
+    shellIntegration = {
+      enableZshIntegration = true;
+      # mode = "no-cursor";
+    };
     settings = {
       linux_display_server = "x11";
       font_size = 12.25;
       font_family = "Caskaydia Cove";
       window_margin_width = 15;
       remember_window_size = "no";
+      confirm_os_window_close = 0;
+      shell = "${pkgs.zsh}/bin/zsh";
       symbol_map = let
         mappings = [
           "U+e000-U+e00a"

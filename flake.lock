@@ -148,29 +148,6 @@
         "type": "github"
       }
     },
-    "dankMaterialShell": {
-      "inputs": {
-        "dgop": [
-          "dgop"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1764485030,
-        "narHash": "sha256-h4gc3mUw/yJfEuh0ckxvehfBSu8GO+9XEz0z9nhj8iE=",
-        "owner": "AvengeMedia",
-        "repo": "DankMaterialShell",
-        "rev": "6297b0679c05207bac83d859c30780ce6d2b2fb9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "AvengeMedia",
-        "repo": "DankMaterialShell",
-        "type": "github"
-      }
-    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -211,22 +188,6 @@
       "original": {
         "owner": "AvengeMedia",
         "repo": "dgop",
-        "type": "github"
-      }
-    },
-    "dms-official-plugins": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1764085668,
-        "narHash": "sha256-KtOu12NVLdyho9T4EXJaReNhFO98nAXpemkb6yeOvwE=",
-        "owner": "AvengeMedia",
-        "repo": "dms-plugins",
-        "rev": "3bc66f186a8184cb8eca5fdfc0699cb4a828cd90",
-        "type": "github"
-      },
-      "original": {
-        "owner": "AvengeMedia",
-        "repo": "dms-plugins",
         "type": "github"
       }
     },
@@ -534,6 +495,26 @@
         "type": "github"
       }
     },
+    "noctalia": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770131150,
+        "narHash": "sha256-CO+aupFZw7WvZJ5PUQWCHOwSA4uKkA+DpbczT22BjP8=",
+        "owner": "noctalia-dev",
+        "repo": "noctalia-shell",
+        "rev": "6f3603fcc2bb36110b738a841bc51abd9a917363",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "repo": "noctalia-shell",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -563,14 +544,13 @@
       "inputs": {
         "agenix": "agenix",
         "claude-code": "claude-code",
-        "dankMaterialShell": "dankMaterialShell",
         "dgop": "dgop",
-        "dms-official-plugins": "dms-official-plugins",
         "home-manager": "home-manager_2",
         "mesa-good": "mesa-good",
         "niri-flake": "niri-flake",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-stable": "nixpkgs-stable_2",
+        "noctalia": "noctalia",
         "stylix": "stylix"
       }
     },
