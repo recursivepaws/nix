@@ -2,12 +2,14 @@
 let
   defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
   plugins = [
+    "timer"
     "pomodoro"
     "todo"
     "unicode-picker"
     "clipper"
     "screen-recorder"
     "privacy-indicator"
+    "catwalk"
   ];
 in {
   imports = [ inputs.noctalia.homeModules.default ];
@@ -105,6 +107,12 @@ in {
         };
       in builtins.listToAttrs (map mkPlugin plugins);
       version = 1;
+    };
+    pluginSettings = {
+      pomodoro = {
+        workDuration = 30;
+        playSound = true;
+      };
     };
   };
 }
