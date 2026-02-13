@@ -1,7 +1,9 @@
-{ config, lib, ... }: {
-  imports = [ ./portal.nix ];
+{ config, lib, pkgs, inputs, ... }: {
+  imports = with inputs; [ ./portal.nix niri-flake.homeModules.niri ];
   programs = {
     niri = {
+      enable = true;
+      package = pkgs.niri-stable;
       settings = {
         environment = {
           QT_QPA_PLATFORMTHEME = "gtk3";

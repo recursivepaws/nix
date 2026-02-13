@@ -7,7 +7,6 @@
     ./age.nix
     ./network.nix
     ./niri.nix
-    # ./dms.nix
     ./noctalia.nix
     ./gpu.nix
     ./amd.nix
@@ -15,7 +14,6 @@
     ./ipod.nix
     ./camera.nix
     ./flatpak.nix
-    # ./whatsapp.nix
     ./webcam.nix
     # ./v4l2loopback.nix
     inputs.home-manager.nixosModules.home-manager
