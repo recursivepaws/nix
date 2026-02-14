@@ -1,5 +1,5 @@
 { inputs, pkgs, ... }: {
-  # imports = with inputs; [ niri-flake.nixosModules.niri ];
+  imports = with inputs; [ niri-flake.nixosModules.niri ];
   nixpkgs.overlays = with inputs; [ niri-flake.overlays.niri ];
 
   environment.systemPackages = with pkgs; [
@@ -10,10 +10,10 @@
     gnome-tweaks
   ];
 
-  # programs.niri = {
-  #   enable = true;
-  #   package = pkgs.niri-stable;
-  # };
+  programs.niri = {
+    enable = true;
+    package = pkgs.niri-stable;
+  };
 
   systemd.tmpfiles.rules = let username = "vera";
   in [
