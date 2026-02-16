@@ -6,6 +6,11 @@
         environment = {
           QT_QPA_PLATFORMTHEME = "gtk3";
           QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
+          QT_QPA_PLATFORM = "wayland";
+          XDG_SESSION_TYPE = "wayland";
+          NIXOS_OZONE_WL = "1";
+          QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+          GDK_BACKEND = "wayland";
         };
         spawn-at-startup = [
           { command = [ "bash" "-c" "wl-paste --watch cliphist store &" ]; }
@@ -33,16 +38,17 @@
           };
         };
         layer-rules = [{
-          matches = [{ namespace = "^notifications$"; }];
+          matches = [{ namespace = "^noctalia-notifications$"; }];
           block-out-from = "screencast";
         }];
         window-rules = [
           {
             matches = [
-              { app-id = "^signal$"; }
               { app-id = "^org\\.telegram\\.desktop$"; }
-              { app-id = "^1Password$"; }
-              { app-id = "^whatsie$"; }
+              { app-id = "^com\\.ktechpit\\.whatsie$"; }
+              { app-id = "^discord$"; }
+              { app-id = "^signal$"; }
+              { app-id = "^1password$"; }
             ];
             block-out-from = "screencast";
           }
