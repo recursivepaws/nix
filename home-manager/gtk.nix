@@ -32,14 +32,23 @@
     };
     gtk4.extraConfig = { gtk-application-prefer-dark-theme = 1; };
     gtk3 = {
-      bookmarks = [
-        "file://${config.xdg.userDirs.documents}"
-        "smb://vera@MeowStation.local/ MeowStation"
-        "sftp://vera@BarkStation.local/ BarkStation"
-      ];
+      bookmarks =
+        (map (bookmark: "file://${config.home.homeDirectory}/${bookmark}") [
+          "Documents"
+          "Downloads"
+          "Pictures"
+          "Pictures/Screenshots"
+          "Music"
+          "Videos"
+          "Software"
+        ]) ++ [
+          "smb://vera@MeowStation.local/ MeowStation"
+          "sftp://vera@BarkStation.local/ BarkStation"
+        ];
       extraConfig = { gtk-application-prefer-dark-theme = 1; };
     };
   };
+
   home.pointerCursor = {
     gtk.enable = true;
     x11.enable = true;
