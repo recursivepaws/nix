@@ -38,16 +38,17 @@
           };
         };
         layer-rules = [{
-          matches = [{ namespace = "^notifications$"; }];
+          matches = [{ namespace = "^noctalia-notifications$"; }];
           block-out-from = "screencast";
         }];
         window-rules = [
           {
             matches = [
-              { app-id = "^signal$"; }
               { app-id = "^org\\.telegram\\.desktop$"; }
-              { app-id = "^1Password$"; }
-              { app-id = "^whatsie$"; }
+              { app-id = "^com\\.ktechpit\\.whatsie$"; }
+              { app-id = "^discord$"; }
+              { app-id = "^signal$"; }
+              { app-id = "^1password$"; }
             ];
             block-out-from = "screencast";
           }
