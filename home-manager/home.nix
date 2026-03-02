@@ -6,7 +6,7 @@
     ./signing.nix
     ./terminal.nix
     ./noctalia.nix
-    ./whatsie.nix
+    # ./whatsie.nix
   ];
 
   home = {

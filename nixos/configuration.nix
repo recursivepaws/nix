@@ -181,7 +181,6 @@
   ];
 
   programs = {
-    adb.enable = true;
     coolercontrol.enable = true;
     localsend.enable = true;
     chromium.enable = true;
@@ -229,7 +228,7 @@
     };
   };
 
-  nixpkgs.config.permittedInsecurePackages = [ "qtwebengine-5.15.19" ];
+  # nixpkgs.config.permittedInsecurePackages = [ "qtwebengine-5.15.19" ];
 
   # Make sure these are also enabled
   services.dbus.enable = true;
