@@ -4,6 +4,7 @@
     ./file-manager.nix
     # ./stylix.nix
     ./fonts.nix
+    ./draw.nix
     ./age.nix
     ./network.nix
     ./niri.nix
