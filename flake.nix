@@ -29,6 +29,17 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    #
+    # musnix = { url = "github:musnix/musnix"; };
+    nix-automatic-windows-vsts = {
+      url = "github:yaanae/nix-automatic-windows-vsts";
+    };
+    grace = {
+      url =
+        "file+https://osc.sfo2.digitaloceanspaces.com/Setup_Grace_64bit_Full_1-0-4-9_Windows.exe";
+      flake = false;
+    };
+
     # BUG: https://github.com/NixOS/nixpkgs/issues/448456
     # terrible terrible terrible terrible terrible
     mesa-good.url =

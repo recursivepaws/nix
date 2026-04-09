@@ -6,6 +6,7 @@
     ./signing.nix
     ./terminal.nix
     ./noctalia.nix
+    ./chrome.nix
     # ./whatsie.nix
   ];
 
@@ -32,7 +33,6 @@
       baobab
       seahorse
       immich-go
-      google-chrome
       zoom-us
       trezor-suite
     ];

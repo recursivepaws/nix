@@ -2,6 +2,7 @@
   imports = [
     ./hardware-configuration.nix
     ./file-manager.nix
+    # ./plugins/serum2.nix
     # ./stylix.nix
     ./fonts.nix
     ./draw.nix
@@ -19,6 +20,9 @@
     # ./v4l2loopback.nix
     inputs.home-manager.nixosModules.home-manager
     inputs.agenix.nixosModules.default
+    # inputs.musnix.nixosModules.musnix
+    inputs.nix-automatic-windows-vsts.nixosModules.nix-automatic-windows-vsts
+    # ./music.nix
   ];
 
   # Bootloader.
@@ -48,6 +52,21 @@
     '';
   };
 
+  environment.variables = let
+    makePluginPath = format:
+      (lib.makeSearchPath format [
+        "$HOME/.nix-profile/lib"
+        "/run/current-system/sw/lib"
+        "/etc/profiles/per-user/$USER/lib"
+      ]) + ":$HOME/.${format}";
+  in {
+    DSSI_PATH = makePluginPath "dssi";
+    LADSPA_PATH = makePluginPath "ladspa";
+    LV2_PATH = makePluginPath "lv2";
+    LXVST_PATH = makePluginPath "lxvst";
+    VST_PATH = makePluginPath "vst";
+    VST3_PATH = makePluginPath "vst3";
+  };
   # boot.kernelPatches = [{
   #   name = "webcam-fix";
   #   patch = ./webcam-fix.patch;
@@ -81,6 +100,39 @@
   #   layout = "us";
   #   variant = "";
   # };
+  nix-automatic-windows-vsts = {
+    enable = true;
+    # With example plugins
+    # plugins."nes-vst" = {
+    #   enable = true;
+    #   install = ''
+    #     unzip ${inputs.nes-vst}
+    #     mv "NES VST 1.2.dll" "$VST2_DIR/NES VST 1.2.dll"
+    #   '';
+    #   inputs = [ pkgs.unzip ];
+    # };
+    plugins."grace" = {
+      enable = true;
+      install = ''
+        cp ${inputs.grace} installer.exe
+        wine installer.exe
+      '';
+    };
+  };
+  system.activationScripts.yabridgeVstSymlinks = {
+    text = ''
+      # Ensure the directory exists
+      mkdir -p /home/vera/.vst/yabridge
+
+      # Symlink through the stable /run/current-system path rather than
+      # directly into the store, so this survives yabridge version updates
+      ln -sf /run/current-system/sw/bin/yabridge-host.exe \
+        /home/vera/.vst/yabridge/yabridge-host.exe
+      ln -sf /run/current-system/sw/lib/yabridge/yabridge-host.exe.so \
+        /home/vera/.vst/yabridge/yabridge-host.exe.so
+    '';
+    deps = [ ];
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
 
@@ -88,7 +140,7 @@
   users.users.vera = {
     isNormalUser = true;
     description = "Vera Gonzalez";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "render" ];
     ##packages = with pkgs; [ chezmoi cargo pnpm kitty fuzzel ];
     # openssh.authorizedKeys.keys = [
     #   # TODO: Add your SSH public key(s) here, if you plan on using SSH to connect
@@ -124,6 +176,12 @@
     mold
     # rustc
     # rustfmt
+    gparted
+    gimp
+
+    yabridge
+    yabridgectl
+    # davinci-resolve-studio
     tor-browser
     cargo
     go

@@ -299,6 +299,18 @@
         "type": "gitlab"
       }
     },
+    "grace": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-gx5G3Vx9Z8C8PXP1VJjGvySDhALz4LBkpocUS9zdWVU=",
+        "type": "file",
+        "url": "https://osc.sfo2.digitaloceanspaces.com/Setup_Grace_64bit_Full_1-0-4-9_Windows.exe"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://osc.sfo2.digitaloceanspaces.com/Setup_Grace_64bit_Full_1-0-4-9_Windows.exe"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -415,6 +427,24 @@
         "type": "github"
       }
     },
+    "nix-automatic-windows-vsts": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1774858905,
+        "narHash": "sha256-GX7aSTH8TBqpB9/rn7rjXnqyPn/LW4pr20vxTYmgSvY=",
+        "owner": "yaanae",
+        "repo": "nix-automatic-windows-vsts",
+        "rev": "ac0a53a60cf2a3ac452fd1caa814bc04af924ee2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yaanae",
+        "repo": "nix-automatic-windows-vsts",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1761672384,
@@ -480,6 +510,22 @@
       }
     },
     "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1774709303,
+        "narHash": "sha256-D3Q07BbIA2KnTcSXIqqu9P586uWxN74zNoCH3h2ESHg=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "8110df5ad7abf5d4c0f6fb0f8f978390e77f9685",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1772198003,
         "narHash": "sha256-I45esRSssFtJ8p/gLHUZ1OUaaTaVLluNkABkk6arQwE=",
@@ -567,10 +613,12 @@
         "agenix": "agenix",
         "claude-code": "claude-code",
         "dgop": "dgop",
+        "grace": "grace",
         "home-manager": "home-manager_2",
         "mesa-good": "mesa-good",
         "niri-flake": "niri-flake",
-        "nixpkgs": "nixpkgs_3",
+        "nix-automatic-windows-vsts": "nix-automatic-windows-vsts",
+        "nixpkgs": "nixpkgs_4",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "noctalia": "noctalia",
         "stylix": "stylix"
