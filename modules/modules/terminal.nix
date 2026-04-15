@@ -1,13 +1,14 @@
 {
   den.aspects.terminal = {
-    nixos = { pkgs, ... }: {
-      programs.foot = {
-        enable = true;
-        settings = {
-          main = { term = "xterm-256color"; };
-          # font = "Caskaydia Cove";
-        };
-      };
+    homeManager = { pkgs, ... }: {
+      /* programs.foot = {
+           enable = true;
+           settings = {
+             main = { term = "xterm-256color"; };
+             # font = "Caskaydia Cove";
+           };
+         };
+      */
       # home.sessionVariables = { KITTY_SHELL_INTEGRATION = "enabled"; };
       programs.kitty = {
         enable = true;

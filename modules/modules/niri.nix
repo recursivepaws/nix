@@ -75,7 +75,7 @@
       };
     };
 
-    homeManager = { pkgs, config, ... }: {
+    homeManager = { pkgs, config, lib, ... }: {
       home.packages = with pkgs; [
         qt5.qtwayland
         qt6.qtwayland

@@ -1,6 +1,5 @@
 { den, ... }: {
   den.aspects.hericium = {
-    includes = with den.aspects; [ amd gpu niri noctalia ];
     nixos = { pkgs, ... }: {
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
@@ -134,8 +133,21 @@
           openFirewall = true;
         };
       };
-      security = { polkit.enable = true; };
+      # enabled in the niri flake aspect
+      # security = { polkit.enable = true; };
     };
+
+    provides.to-users.includes = with den.aspects; [
+      amd
+      gpu
+      niri
+      noctalia
+      file-manager
+      terminal
+      ipod
+      browser
+    ];
+
     provides.to-users.homeManager = { pkgs, ... }: {
       home.packages = [ pkgs.neovim ];
     };

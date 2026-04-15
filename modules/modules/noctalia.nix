@@ -96,10 +96,10 @@
                 right = map (name: { id = "plugin:" + name; }) plugins;
               };
             };
-            wallpaper = { directory = ../assets/fungi; };
+            wallpaper = { directory = ../../assets/fungi; };
             colorSchemes.predefinedScheme = "Oxocarbon";
             general = {
-              avatarImage = ../assets/recursivepaws.png;
+              avatarImage = ../../assets/recursivepaws.png;
               radiusRatio = 0.2;
             };
             location = {

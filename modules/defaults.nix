@@ -13,6 +13,8 @@
     # Set your time zone.
     time.timeZone = "America/New_York";
 
+    nix.settings.experimental-features =
+      [ "nix-command" "flakes" "recursive-nix" ];
     # Select internationalisation properties.
     i18n.defaultLocale = "en_US.UTF-8";
 

@@ -7,13 +7,11 @@
     ];
     homeManager = { pkgs, config, ... }: {
       home.packages = with pkgs; [
-
         slurp
         grim
         eog
         handbrake
         avidemux
-        manim
         cameractrls
         playerctl
         wl-clipboard
@@ -28,7 +26,6 @@
         immich-go
         zoom-us
         trezor-suite
-
       ];
 
       home.file."${config.xdg.configHome}/starship.toml".source =
