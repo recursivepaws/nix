@@ -156,28 +156,14 @@
     SDL2
     yasm
     nasm
-    # sdl2-compat
-    # sdl3
-    #
     tree
-
     gawk
     bc
-
     htop
     xprop
     clang-tools
     (callPackage ./lotion.nix { })
   ];
-
-  environment.etc = {
-    "1password/custom_allowed_browsers" = {
-      text = ''
-        zen
-      '';
-      mode = "0755";
-    };
-  };
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -259,18 +245,6 @@
     enable = true;
     openFirewall = true;
   };
-  # services.blueman.enable = true;
-
-  # xdg.autostart.enable = true;
-
-  # services.uvcvideo.dynctrl.enable = true;
-
-  # nix = {
-  #   package = pkgs.nixVersions.stable;
-  #   extraOptions = ''
-  #     experimental-features = nix-command flakes
-  #   '';
-  # };
 
   nix.package = pkgs.nix;
   nix.settings.experimental-features =
