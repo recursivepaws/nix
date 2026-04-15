@@ -147,6 +147,10 @@ else
   log "SMB share mounted successfully"
 fi
 
+# # Copy logging information including scrobbles
+# mkdir -p "/home/vera/.rockbox"
+# cp "$IPOD_MOUNT/.rockbox/*.log" "/home/vera/.rockbox/"
+
 # 3. Sync from SMB server to iPod
 log "Starting rsync from server to iPod..."
 

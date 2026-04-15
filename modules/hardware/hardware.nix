@@ -1,0 +1,70 @@
+{
+  flake.modules.nixos.hardware = { config, lib, pkgs, modulesPath, ... }: {
+    imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+    boot.initrd.availableKernelModules =
+      [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
+    boot.initrd.kernelModules = [ ];
+    boot.kernelModules = [ "kvm-amd" ];
+    boot.extraModulePackages = [ ];
+
+    boot.loader.systemd-boot.extraEntries = {
+      "arch.conf" = ''
+        title Arch Linux
+        linux /vmlinuz-arch
+        initrd /amd-ucode.img
+        initrd /initramfs-arch.img
+        options root=UUID=49e09db5-a4ba-4790-b6e3-79fc890625dd rw
+      '';
+      "arch-fallback.conf" = ''
+        title Arch Linux (Fallback)
+        linux /vmlinuz-arch
+        initrd /amd-ucode.img
+        initrd /initramfs-arch-fallback.img
+        options root=UUID=49e09db5-a4ba-4790-b6e3-79fc890625dd rw
+      '';
+    };
+
+    fileSystems."/" = {
+      device = "/dev/disk/by-uuid/e7af2e84-7a26-4982-8650-fb8dc445a9cd";
+      fsType = "ext4";
+    };
+
+    boot.initrd.luks.devices."luks-584cfacc-8903-4129-b845-ede590df54dc".device =
+      "/dev/disk/by-uuid/584cfacc-8903-4129-b845-ede590df54dc";
+
+    fileSystems."/boot" = {
+      device = "/dev/disk/by-uuid/62E0-E258";
+      fsType = "vfat";
+      options = [ "fmask=0077" "dmask=0077" ];
+    };
+
+    swapDevices =
+      [{ device = "/dev/disk/by-uuid/36d5a706-cddc-47a7-bf7f-e673ab3cfac2"; }];
+
+    # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
+    # (the default) this is the recommended approach. When using systemd-networkd it's
+    # still possible to use this option, but it's recommended to use it in conjunction
+    # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
+    networking.useDHCP = lib.mkDefault true;
+    # networking.interfaces.enp6s0.useDHCP = lib.mkDefault true;
+    # networking.interfaces.wlp7s0.useDHCP = lib.mkDefault true;
+
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+    hardware.cpu.amd.updateMicrocode =
+      lib.mkDefault config.hardware.enableRedistributableFirmware;
+    hardware.enableAllFirmware = true;
+    hardware.bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings = {
+        General = {
+          Experimental = true;
+          FastConnectable = true;
+        };
+        Policy = { AutoEnable = true; };
+      };
+
+    };
+  };
+}

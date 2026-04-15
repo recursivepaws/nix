@@ -33,6 +33,13 @@
         wine installer.exe
       '';
     };
+    plugins."serum2" = {
+      enable = true;
+      install = ''
+        cp ${inputs.serum2} installer.exe
+        wine installer.exe
+      '';
+    };
   };
   system.activationScripts.yabridgeVstSymlinks = {
     text = ''

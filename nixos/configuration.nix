@@ -17,7 +17,8 @@
     ./camera.nix
     ./flatpak.nix
     ./webcam.nix
-    ./music.nix
+    # ./music.nix
+    # ./audio
     inputs.home-manager.nixosModules.home-manager
     inputs.agenix.nixosModules.default
   ];
