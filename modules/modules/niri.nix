@@ -5,7 +5,7 @@
   };
 
   den.aspects.niri = {
-    nixos = { pkgs, user, ... }: {
+    nixos = { pkgs, ... }: {
       imports = with inputs; [ niri-flake.nixosModules.niri ];
       nixpkgs.overlays = with inputs; [ niri-flake.overlays.niri ];
 
@@ -22,9 +22,10 @@
         package = pkgs.niri-stable;
       };
 
-      systemd.tmpfiles.rules = [
-        "f+ /var/lib/AccountsService/users/${user.username} 0600 root root - [User]\\nIcon=/var/lib/AccountsService/icons/${user.username}\\n"
-        "L+ /var/lib/AccountsService/icons/${user.username} - - - - ${
+      systemd.tmpfiles.rules = let username = "vera";
+      in [
+        "f+ /var/lib/AccountsService/users/${username} 0600 root root - [User]\\nIcon=/var/lib/AccountsService/icons/${username}\\n"
+        "L+ /var/lib/AccountsService/icons/${username} - - - - ${
           ../../assets/recursivepaws.png
         }"
       ];
