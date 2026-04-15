@@ -1,6 +1,5 @@
 {
   den.aspects.gpu = {
-
     nixos = { pkgs, ... }: {
       hardware.graphics = {
         enable = true;

@@ -1,21 +1,24 @@
+# DO-NOT-EDIT. This file was auto-generated using github:vic/flake-file.
+# Use `nix run .#write-flake` to regenerate it.
 {
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+
   inputs = {
     den.url = "github:vic/den";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
-      inputs.nixpkgs-lib.follows = "nixpkgs-lib";
       url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     import-tree.url = "github:vic/import-tree";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
-    home-manager = {
+    niri-flake = {
+      url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:nix-community/home-manager";
     };
-    nixpkgs-lib.follows = "nixpkgs";
+    nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
   };
-
-  outputs = inputs@{ flake-parts, import-tree, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } (import-tree ./modules);
 }

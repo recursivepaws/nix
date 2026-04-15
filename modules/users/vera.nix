@@ -8,5 +8,9 @@
     homeManager = { pkgs, ... }: { home.packages = [ pkgs.htop ]; };
 
     provides.to-hosts.nixos = { pkgs, ... }: { };
+
+    user = {
+      extraGroups = [ "video" "audio" "wheel" "render" "networkmanager" ];
+    };
   };
 }
