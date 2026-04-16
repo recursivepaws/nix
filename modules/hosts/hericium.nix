@@ -146,6 +146,7 @@
       terminal
       ipod
       browser
+      davinci
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {
