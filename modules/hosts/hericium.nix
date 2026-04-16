@@ -5,6 +5,7 @@
       boot.loader.efi.canTouchEfiVariables = true;
 
       environment.systemPackages = with pkgs; [
+        bitwig-studio
         claude-code
         nixfmt-rfc-style
         figma-linux
@@ -146,7 +147,6 @@
       terminal
       ipod
       browser
-      davinci
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {
