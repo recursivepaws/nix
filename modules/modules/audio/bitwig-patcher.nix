@@ -1,5 +1,0 @@
-{
-  den.aspects.bitwig-patcher = {
-
-  };
-}
