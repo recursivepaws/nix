@@ -13,6 +13,8 @@
     # Set your time zone.
     time.timeZone = "America/New_York";
 
+    nix.settings.trusted-users = [ "root" "@wheel" ];
+
     nix.settings.experimental-features =
       [ "nix-command" "flakes" "recursive-nix" ];
     # Select internationalisation properties.

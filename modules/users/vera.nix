@@ -25,7 +25,6 @@
         seahorse
         immich-go
         zoom-us
-        trezor-suite
       ];
 
       home.file."${config.xdg.configHome}/starship.toml".source =

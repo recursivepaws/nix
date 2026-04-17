@@ -5,7 +5,7 @@
       boot.loader.efi.canTouchEfiVariables = true;
 
       environment.systemPackages = with pkgs; [
-        bitwig-studio
+        # bitwig-studio
         claude-code
         nixfmt-rfc-style
         figma-linux
@@ -33,7 +33,6 @@
         gimp
 
         # davinci-resolve-studio
-        tor-browser
         cargo
         go
         uv
@@ -128,11 +127,6 @@
         };
         pipewire.enable = true;
         avahi.enable = true;
-        trezord.enable = true;
-        tor = {
-          enable = true;
-          openFirewall = true;
-        };
       };
       # enabled in the niri flake aspect
       # security = { polkit.enable = true; };
@@ -147,6 +141,8 @@
       terminal
       ipod
       browser
+      crypto
+      musical-wine
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {
