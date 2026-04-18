@@ -143,6 +143,7 @@
       browser
       crypto
       musical-wine
+      vst-plugins
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {
