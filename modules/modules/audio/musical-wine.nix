@@ -1,4 +1,4 @@
-{ den, ... }: {
+{
   den.aspects.musical-wine = {
     # includes = [ den.aspects.bitwig-theme-editor ];
     homeManager = { pkgs, lib, ... }:
@@ -55,6 +55,65 @@
           prePatch = "";
         });
 
+        crystal = let
+        in pkgs.stdenv.mkDerivation {
+          src = pkgs.requireFile rec {
+            name = "Crystal.zip";
+            # sha256 = "09f7lplg4md58sq5b6a3lwp6nvaw4333lnhr314rwlk4ar1xrbr6";
+            url = "https://www.greenoak.com/crystal/dl/${name}";
+          };
+          unpackPhase = "unzip $src .";
+          installPhase = "\n";
+        };
+        /* serum2 = let
+             pname = "serum2";
+             version = "2.0.22";
+             installer = pkgs.requireFile {
+               name = "Install_Xfer_Serum2_${version}.exe";
+               sha256 = "09f7lplg4md58sq5b6a3lwp6nvaw4333lnhr314rwlk4ar1xrbr6";
+               url =
+                 "https://xferrecords.com/product_downloads/serum-2-0-22-for-windows/start";
+             };
+
+           in pkgs.stdenvNoCC.mkDerivation {
+             inherit pname version;
+             src = installer;
+             dontUnpack = true;
+
+             nativeBuildInputs = [ wineGiang pkgs.xvfb-run ];
+
+             installPhase = ''
+               runHook preInstall
+
+               export HOME="$PWD"
+               export WINEPREFIX="$PWD/serum"
+               export XDG_CONFIG_HOME="$PWD/.config"
+               export WINEDEBUG=-all
+
+               xvfb-run wineboot --init
+               wineserver --wait
+
+               xvfb-run wine $src /S
+               wineserver --wait
+
+               mkdir -p $out/lib/vst
+
+               cp -r "$WINEPREFIX/drive_c/Program Files/Common Files/VST3/Serum2.vst3" "$out"
+               cp -r "$WINEPREFIX/drive_c/users/vera/Documents/Xfer/Serum 2 Presets" "$out"
+
+               runHook postInstall
+             '';
+
+             meta = with lib; {
+               description =
+                 "Advanced Wavetable Synthesizer by Xfer Records (via Yabridge)";
+               homepage = "https://xferrecords.com/products/serum";
+               license = licenses.unfree;
+               platforms = [ "x86_64-linux" ];
+             };
+           };
+        */
+
         # The most recent stable wine in nixpkgs for my system wine. Change this if you want. Could just rune giang's fork as your system wine, too
         systemWine = wineGiang;
 
@@ -108,23 +167,6 @@
             "https://www.bitwig.com/dl/Bitwig%20Studio/${version}/installer_linux";
           hash = "sha256-jrCTgaxfeWhfKwLeKLmqTQWS7RVbVnHqJ0InCipmm8k=";
         };
-
-        # bitwig-theme-editor-jar = let
-        #   version = "2.3.1";
-        #   filename = "bitwig-theme-editor-${version}-hotfix.jar";
-        # in pkgs.fetchurl {
-        #   name = filename;
-        #   url =
-        #     "https://github.com/Berikai/bitwig-theme-editor/releases/download/${version}/${filename}";
-        #   hash = "sha256-jrCTgaxfeWhfKwLeKLmqTQWS7RVbVnHqJ0InCipmm8k=";
-        # };
-
-        # bitwig-theme-editor = pkgs.stdenv.mkDerivation {
-        #   name = "bitwig-theme-editor";
-        #   nativeBuildInputs = [ pkgs.jdk];
-        #
-        #
-        # };
 
         bitwig-theme-editor = let
           description = "Bitwig Theme Editor";
@@ -197,10 +239,17 @@
             # COPY THE ICONS AND DESKTOP FILES (This was missing!)
             cp -r usr/share/* $out/share/
 
-            # Overwrite original JAR with your patched one
-            # rm $out/libexec/bin/bitwig.jar
             # Patch the bitwig jar to use the theme editor
-            java -jar ${bitwig-theme-editor}/share/java/bitwig-theme-editor.jar $out/libexec/bin/bitwig.jar
+            rm $out/libexec/bin/bitwig.jar
+
+            cp ${./bitwig.jar} $out/libexec/bin/bitwig.jar
+
+            #
+            # echo "contents:"
+            # echo $(ls /build/.bitwig-theme-editor)
+            #
+            # mkdir -p $out/share/bitwig/
+            # cp -r /build/.bitwig-theme-editor $out/share/bitwig/
 
             # Link the binary
             ln -s $out/libexec/bitwig-studio $out/bin/bitwig-studio
@@ -332,6 +381,7 @@
           wine-router
           wineserver-router
           winetricks-router
+          # serum2
           pkgs.curl
           pkgs.libGL
           pkgs.libGLU
@@ -342,17 +392,24 @@
 
         # If the bitwig icon doesn't work for you:
 
-        # xdg.enable = true;
-        # xdg.desktopEntries.bitwig-studio = {
-        #   name = "Bitwig Studio";
-        #   exec = "bitwig-studio %U";
-        #   terminal = false;
-        #   icon = "bitwig-studio";
-        #   categories = ["AudioVideo" "Audio" "Midi"];
-        #   settings = {
-        #     StartupWMClass = "com.bitwig.BitwigStudio";
-        #   };
-        # };
+        xdg.enable = true;
+        xdg.desktopEntries.bitwig-studio = {
+          name = "Bitwig Studio";
+          exec = "bitwig-studio %U";
+          terminal = false;
+          icon = "bitwig-studio";
+          categories = [ "AudioVideo" "Audio" "Midi" ];
+          settings = { StartupWMClass = "com.bitwig.BitwigStudio"; };
+        };
+
+        # home.file.".vst3/Serum2.vst3".source = "${serum2}/Serum2.vst3";
+
+        # # Configure the theme editor
+        # home.activation.setupBitwigTheme =
+        #   lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        #     echo "Setting up Bitwig theme editor..."
+        #     ln ${bitwig6-local}/share/bitwig/.bitwig-theme-editor ${bitwig6-local}/libexec/bin/bitwig.jar
+        #   '';
 
         home.sessionVariables = {
           # You need this for Kilohearts plugins
