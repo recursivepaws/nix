@@ -19,7 +19,6 @@
     ./webcam.nix
     ./music.nix
     inputs.home-manager.nixosModules.home-manager
-    inputs.agenix.nixosModules.default
   ];
 
   programs.nh = {
