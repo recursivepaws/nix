@@ -60,15 +60,15 @@ let
     '';
   installScript = builtins.concatStringsSep "\n" (map fetchAndInstall native);
 in {
-  den.aspects.vst-plugins = {
-    homeManager = { pkgs, lib, ... }: {
-      home.activation.installVstPlugins =
-        let libs = with pkgs; [ curl unzip gnutar gzip xz findutils p7zip ];
-        in lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          export PATH="${lib.makeBinPath libs}:$PATH"
-          mkdir -p "$HOME/.vst3"
-          ${installScript}
-        '';
-    };
-  };
+  # den.aspects.vst-plugins = {
+  #   homeManager = { pkgs, lib, ... }: {
+  #     home.activation.installVstPlugins =
+  #       let libs = with pkgs; [ curl unzip gnutar gzip xz findutils p7zip ];
+  #       in lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #         export PATH="${lib.makeBinPath libs}:$PATH"
+  #         mkdir -p "$HOME/.vst3"
+  #         ${installScript}
+  #       '';
+  #   };
+  # };
 }
