@@ -1,421 +1,139 @@
+{ den, ... }:
 {
-  den.aspects.musical-wine = {
-    # includes = [ den.aspects.bitwig-theme-editor ];
-    homeManager = { pkgs, lib, ... }:
-      let
-        # Wine 9.21 for stability for some plugins
-        wine921 = pkgs.wineWow64Packages.yabridge;
-
-        wineGiang = pkgs.wineWow64Packages.full.overrideAttrs (oldAttrs: {
-          version = "11.0-giang17";
-          src = pkgs.fetchFromGitHub {
-            owner = "giang17";
-            repo = "wine";
-            rev = "588c5e1942cb68d01e14bf17581a653a668ec18d";
-            hash = "sha256-eH26xBjaFyxbKorguAMx5LPsj/II8Qe7BBKR+Y7qPIQ=";
-          };
-          configureFlags = (oldAttrs.configureFlags or [ ])
-            ++ [ "--enable-archs=i386,x86_64" ];
-
-          buildInputs = (oldAttrs.buildInputs or [ ]) ++ [
-            pkgs.pkgsi686Linux.xorg.libX11
-            pkgs.pkgsi686Linux.wayland
-            pkgs.pkgsi686Linux.libxkbcommon
-          ];
-
-          # llvm is only needed for the host; winebuild handles PE indexing itself
-          nativeBuildInputs = oldAttrs.nativeBuildInputs or [ ];
-
-          postInstall = (oldAttrs.postInstall or "") + ''
-            echo "Re-indexing Wine archives..."
-
-            # ELF archives — only x86_64-unix exists in Wine 11 wow64 mode
-            for dir in x86_64-unix i386-unix; do
-              full="$out/lib/wine/$dir"
-              [ -d "$full" ] || continue
-              find "$full" -name "*.a" -print0 \
-                | xargs -0 -r ${pkgs.binutils}/bin/ranlib
-            done
-
-            # PE import libraries — winebuild --lib re-indexes in-place
-            for arch in i386-windows x86_64-windows; do
-              dir="$out/lib/wine/$arch"
-              [ -d "$dir" ] || continue
-              echo "  indexing $arch..."
-              for a in "$dir"/*.a; do
-                [ -f "$a" ] || continue
-                $out/bin/winebuild --lib -o "$a" "$a" 2>/dev/null || true
-              done
-            done
-
-            echo "Archive indexing complete."
-          '';
-
-          patches = [ ];
-          prePatch = "";
-        });
-
-        crystal = let
-        in pkgs.stdenv.mkDerivation {
-          src = pkgs.requireFile rec {
-            name = "Crystal.zip";
-            # sha256 = "09f7lplg4md58sq5b6a3lwp6nvaw4333lnhr314rwlk4ar1xrbr6";
-            url = "https://www.greenoak.com/crystal/dl/${name}";
-          };
-          unpackPhase = "unzip $src .";
-          installPhase = "\n";
-        };
-        /* serum2 = let
-             pname = "serum2";
-             version = "2.0.22";
-             installer = pkgs.requireFile {
-               name = "Install_Xfer_Serum2_${version}.exe";
-               sha256 = "09f7lplg4md58sq5b6a3lwp6nvaw4333lnhr314rwlk4ar1xrbr6";
-               url =
-                 "https://xferrecords.com/product_downloads/serum-2-0-22-for-windows/start";
-             };
-
-           in pkgs.stdenvNoCC.mkDerivation {
-             inherit pname version;
-             src = installer;
-             dontUnpack = true;
-
-             nativeBuildInputs = [ wineGiang pkgs.xvfb-run ];
-
-             installPhase = ''
-               runHook preInstall
-
-               export HOME="$PWD"
-               export WINEPREFIX="$PWD/serum"
-               export XDG_CONFIG_HOME="$PWD/.config"
-               export WINEDEBUG=-all
-
-               xvfb-run wineboot --init
-               wineserver --wait
-
-               xvfb-run wine $src /S
-               wineserver --wait
-
-               mkdir -p $out/lib/vst
-
-               cp -r "$WINEPREFIX/drive_c/Program Files/Common Files/VST3/Serum2.vst3" "$out"
-               cp -r "$WINEPREFIX/drive_c/users/vera/Documents/Xfer/Serum 2 Presets" "$out"
-
-               runHook postInstall
-             '';
-
-             meta = with lib; {
-               description =
-                 "Advanced Wavetable Synthesizer by Xfer Records (via Yabridge)";
-               homepage = "https://xferrecords.com/products/serum";
-               license = licenses.unfree;
-               platforms = [ "x86_64-linux" ];
-             };
-           };
-        */
-
-        # The most recent stable wine in nixpkgs for my system wine. Change this if you want. Could just rune giang's fork as your system wine, too
-        systemWine = wineGiang;
-
-        yabridge-custom = (pkgs.yabridge.override {
-          wineWow64Packages = pkgs.wineWow64Packages // {
-            yabridge = wineGiang;
-          };
-        }).overrideAttrs (oldAttrs: {
-          pname = "yabridge";
-          version = "6.0.0-embedding-beta";
-
-          src = pkgs.fetchFromGitHub {
-            owner = "robbert-vdh";
-            repo = "yabridge";
-            rev = "945528cd7f898d717d772b93f939343dad122d91";
-            hash = "sha256-qjyBnwdd/yRIiiAApHyxc/XkkEwB33YP0GpIjG4Upro=";
-          };
-
-          patches = [ ];
-
-          # Turn off 32-bit bit bridge
-          mesonFlags = (builtins.filter (f: !lib.hasPrefix "-Dbitbridge=" f)
-            (oldAttrs.mesonFlags or [ ])) ++ [ "-Dbitbridge=false" ];
-
-          installPhase = ''
-            runHook preInstall
-            mkdir -p $out/bin $out/lib
-
-            # Only install the 64-bit host binaries
-            cp yabridge-host.exe $out/bin/ || true
-            cp yabridge-host.exe.so $out/bin/ || true
-
-            for type in vst2 vst3 clap; do
-              src=$(ls *yabridge-$type.so 2>/dev/null | head -n 1)
-              if [ -n "$src" ]; then
-                cp "$src" "$out/lib/libyabridge-$type.so"
-                ln -s "$out/lib/libyabridge-$type.so" "$out/lib/libyabridge-chainloader-$type.so"
-              fi
-            done
-
-            runHook postInstall
-          '';
-
-          doCheck = false;
-        });
-
-        bitwig-studio-deb = let version = "6.0";
-        in pkgs.fetchurl {
-          name = "bitwig-studio-${version}.deb";
-          url =
-            "https://www.bitwig.com/dl/Bitwig%20Studio/${version}/installer_linux";
-          hash = "sha256-jrCTgaxfeWhfKwLeKLmqTQWS7RVbVnHqJ0InCipmm8k=";
-        };
-
-        bitwig-theme-editor = let
-          description = "Bitwig Theme Editor";
-          pname = "bitwig-theme-editor";
-          version = "2.3.1";
-        in pkgs.stdenv.mkDerivation rec {
-          inherit pname version;
-          src = let filename = "${pname}-${version}-hotfix.jar";
-          in pkgs.fetchurl {
-            name = filename;
-            url =
-              "https://github.com/Berikai/${pname}/releases/download/${version}/${filename}";
-            hash = "sha256-Fkz1s5DY8Ey3Il7CBHNmV87JyJ8clSEF1CltVwlq3/w=";
-          };
-
-          nativeBuildInputs = with pkgs; [ jre makeWrapper copyDesktopItems ];
-
-          # Skip the normal build phases — there's nothing to compile
-          dontUnpack = true;
-          dontBuild = true;
-
-          desktopItems = [
-            (pkgs.makeDesktopItem {
-              name = pname;
-              exec = pname;
-              icon = pname;
-              desktopName = description;
-              comment = description;
-              categories = [ "Utility" ];
-            })
-          ];
-
-          installPhase = ''
-            # Install the JAR
-            mkdir -p $out/share/java
-            cp $src $out/share/java/${pname}.jar
-
-            # Create a wrapper script in bin/
-            mkdir -p $out/bin
-            makeWrapper ${pkgs.jre}/bin/java $out/bin/${pname} \
-              --add-flags "-jar $out/share/java/${pname}.jar"
-          '';
-
-          meta = {
-            description = description;
-            mainProgram = pname;
-          };
-        };
-
-        bitwig6-local = pkgs.stdenv.mkDerivation {
-          pname = "bitwig-studio-local";
-          version = "6.0";
-          src = bitwig-studio-deb;
-
-          nativeBuildInputs = with pkgs; [
-            dpkg
-            makeWrapper
-            jdk
-            bitwig-theme-editor
-          ];
-
-          unpackPhase = "dpkg-deb -x $src .";
-
-          installPhase = ''
-            mkdir -p $out/bin $out/libexec $out/share
-
-            # Copy the app files
-            cp -r opt/bitwig-studio/* $out/libexec/
-
-            # COPY THE ICONS AND DESKTOP FILES (This was missing!)
-            cp -r usr/share/* $out/share/
-
-            # Patch the bitwig jar to use the theme editor
-            rm $out/libexec/bin/bitwig.jar
-
-            cp ${./bitwig.jar} $out/libexec/bin/bitwig.jar
-
-            #
-            # echo "contents:"
-            # echo $(ls /build/.bitwig-theme-editor)
-            #
-            # mkdir -p $out/share/bitwig/
-            # cp -r /build/.bitwig-theme-editor $out/share/bitwig/
-
-            # Link the binary
-            ln -s $out/libexec/bitwig-studio $out/bin/bitwig-studio
-          '';
-        };
-
-        # Bitwig FHS
-        bitwig-fhs = pkgs.buildFHSEnv {
-          name = "bitwig-studio";
-          targetPkgs = p:
-            with p; [
-              bitwig6-local
-              zlib
-              libjack2
-              libpulseaudio
-              icu
-              # Graphics & X11
-              xorg.libX11
-              xorg.libXcursor
-              xorg.libXext
-              xorg.libXfixes
-              xorg.libXi
-              xorg.libXrender
-              xorg.libXtst
-              libxcb
-              xcbutilxrm
-              xorg.xcbutilwm
-              xorg.xcbutilimage
-              libxcb-util
-              xorg.xcbutilkeysyms
-              xorg.xcbutilrenderutil
-              libxcursor
-              libx11
-              libxtst
-              libxkbcommon
-              harfbuzz
-              curl
-              libudev-zero
-              # System Deps
-              alsa-lib
-              at-spi2-atk
-              cairo
-              cups
-              dbus
-              expat
-              fontconfig
-              freetype
-              mesa
-              gdk-pixbuf
-              glib
-              gtk3
-              libGL
-              libglvnd
-              libxkbcommon
-              nspr
-              nss
-              pango
-              pipewire
-              stdenv.cc.cc.lib
-              vulkan-loader
-              zlib
-              libGLU
-              libGLX
-              libGL
-              freeglut
-              libglvnd
-              glibc
-            ];
-          runScript = "bitwig-studio";
-          extraInstallCommands = ''
-            mkdir -p $out/share/icons/hicolor/scalable/apps
-            mkdir -p $out/share/applications
-
-            # Link icons from our fixed local build
-            # Note: Using a wildcard *bitwig* ensures we catch whatever name they used
-            cp ${bitwig6-local}/share/icons/hicolor/scalable/apps/*.svg \
-               $out/share/icons/hicolor/scalable/apps/bitwig-studio.svg
-
-            # Link the desktop file
-            cp ${bitwig6-local}/share/applications/*.desktop \
-               $out/share/applications/bitwig-studio.desktop
-          '';
-        };
-
-        wine-router = pkgs.writeShellScriptBin "wine" ''
-          # If the prefix contains serum, use the Giang17 audio build
-          # If the prefix contains vst-wine-prefixes/default, use wine 9.21 for yabridge
-          if [[ "$WINEPREFIX" == *"/serum"* ]]; then
-            export WINEDLLOVERRIDES="d3d11,dxgi,d3d10core,d3d9=b"
-            exec ${wineGiang}/bin/wine "$@"
-          elif [[ "$WINEPREFIX" == *"vst-wine-prefixes/default"* ]]; then
-              exec ${wine921}/bin/wine "$@"
-          else
-            # Fall back to the system-wide modern Wine for everything else
-            exec ${systemWine}/bin/wine "$@"
-          fi
-        '';
-
-        wineserver-router = pkgs.writeShellScriptBin "wineserver" ''
-          if [[ "$WINEPREFIX" == *"/serum"* ]]; then
-              exec ${wineGiang}/bin/wineserver "$@"
-          elif [[ "$WINEPREFIX" == *"vst-wine-prefixes/default"* ]]; then
-              exec ${wine921}/bin/wineserver "$@"
-          else
-              # Fall back to the system-wide modern Wine for everything else
-              exec ${systemWine}/bin/wineserver "$@"
-          fi
-        '';
-
-        winetricks-router = pkgs.writeShellScriptBin "winetricks" ''
-          if [[ "$WINEPREFIX" == *"/serum"* ]]; then
-            export WINE="${wineGiang}/bin/wine"
-            export WINESERVER="${wineGiang}/bin/wineserver"
-          elif [[ "$WINEPREFIX" == *"vst-wine-prefixes/default"* ]]; then
-            export WINE="${wine921}/bin/wine"
-            export WINESERVER="${wine921}/bin/wineserver"
-          else
-            export WINE="${systemWine}/bin/wine"
-            export WINESERVER="${systemWine}/bin/wineserver"
-          fi
-
-          # Run the real winetricks with the real binary paths injected
-          exec ${pkgs.winetricks}/bin/winetricks "$@"
-        '';
-      in {
-        home.packages = [
-          bitwig-theme-editor
-          bitwig-fhs
-          wine-router
-          wineserver-router
-          winetricks-router
-          # serum2
-          pkgs.curl
-          pkgs.libGL
-          pkgs.libGLU
-          pkgs.libGLX
-          pkgs.yabridgectl
-          yabridge-custom
-        ];
-
-        # If the bitwig icon doesn't work for you:
-
-        xdg.enable = true;
-        xdg.desktopEntries.bitwig-studio = {
-          name = "Bitwig Studio";
-          exec = "bitwig-studio %U";
-          terminal = false;
-          icon = "bitwig-studio";
-          categories = [ "AudioVideo" "Audio" "Midi" ];
-          settings = { StartupWMClass = "com.bitwig.BitwigStudio"; };
-        };
-
-        # home.file.".vst3/Serum2.vst3".source = "${serum2}/Serum2.vst3";
-
-        # # Configure the theme editor
-        # home.activation.setupBitwigTheme =
-        #   lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        #     echo "Setting up Bitwig theme editor..."
-        #     ln ${bitwig6-local}/share/bitwig/.bitwig-theme-editor ${bitwig6-local}/libexec/bin/bitwig.jar
-        #   '';
-
-        home.sessionVariables = {
-          # You need this for Kilohearts plugins
-          WINEFSYNC = "1";
-        };
-      };
-
-  };
+  # den.aspects.musical-wine = {
+  #   includes = [ den.aspects.custom-wine ];
+  #   homeManager = { pkgs, lib, ... }:
+  #     let
+  #
+  #       crystal = let
+  #       in pkgs.stdenv.mkDerivation {
+  #         src = pkgs.requireFile rec {
+  #           name = "Crystal.zip";
+  #           # sha256 = "09f7lplg4md58sq5b6a3lwp6nvaw4333lnhr314rwlk4ar1xrbr6";
+  #           url = "https://www.greenoak.com/crystal/dl/${name}";
+  #         };
+  #         unpackPhase = "unzip $src .";
+  #         installPhase = "\n";
+  #       };
+  #       /* serum2 = let
+  #            pname = "serum2";
+  #            version = "2.0.22";
+  #            installer = pkgs.requireFile {
+  #              name = "Install_Xfer_Serum2_${version}.exe";
+  #              sha256 = "09f7lplg4md58sq5b6a3lwp6nvaw4333lnhr314rwlk4ar1xrbr6";
+  #              url =
+  #                "https://xferrecords.com/product_downloads/serum-2-0-22-for-windows/start";
+  #            };
+  #
+  #          in pkgs.stdenvNoCC.mkDerivation {
+  #            inherit pname version;
+  #            src = installer;
+  #            dontUnpack = true;
+  #
+  #            nativeBuildInputs = [ wineGiang pkgs.xvfb-run ];
+  #
+  #            installPhase = ''
+  #              runHook preInstall
+  #
+  #              export HOME="$PWD"
+  #              export WINEPREFIX="$PWD/serum"
+  #              export XDG_CONFIG_HOME="$PWD/.config"
+  #              export WINEDEBUG=-all
+  #
+  #              xvfb-run wineboot --init
+  #              wineserver --wait
+  #
+  #              xvfb-run wine $src /S
+  #              wineserver --wait
+  #
+  #              mkdir -p $out/lib/vst
+  #
+  #              cp -r "$WINEPREFIX/drive_c/Program Files/Common Files/VST3/Serum2.vst3" "$out"
+  #              cp -r "$WINEPREFIX/drive_c/users/vera/Documents/Xfer/Serum 2 Presets" "$out"
+  #
+  #              runHook postInstall
+  #            '';
+  #
+  #            meta = with lib; {
+  #              description =
+  #                "Advanced Wavetable Synthesizer by Xfer Records (via Yabridge)";
+  #              homepage = "https://xferrecords.com/products/serum";
+  #              license = licenses.unfree;
+  #              platforms = [ "x86_64-linux" ];
+  #            };
+  #          };
+  #       */
+  #
+  #
+  #       # wine-router = pkgs.writeShellScriptBin "wine" ''
+  #       #   # If the prefix contains serum, use the Giang17 audio build
+  #       #   # If the prefix contains vst-wine-prefixes/default, use wine 9.21 for yabridge
+  #       #   if [[ "$WINEPREFIX" == *"/serum"* ]]; then
+  #       #     export WINEDLLOVERRIDES="d3d11,dxgi,d3d10core,d3d9=b"
+  #       #     exec ${pkgs.wine-experimental}/bin/wine "$@"
+  #       #   elif [[ "$WINEPREFIX" == *"vst-wine-prefixes/default"* ]]; then
+  #       #       exec ${pkgs.wine-fallback}/bin/wine "$@"
+  #       #   else
+  #       #     # Fall back to the system-wide modern Wine for everything else
+  #       #     exec ${pkgs.wine-stable}/bin/wine "$@"
+  #       #   fi
+  #       # '';
+  #       #
+  #       # wineserver-router = pkgs.writeShellScriptBin "wineserver" ''
+  #       #   if [[ "$WINEPREFIX" == *"/serum"* ]]; then
+  #       #       exec ${pkgs.wine-experimental}/bin/wineserver "$@"
+  #       #   elif [[ "$WINEPREFIX" == *"vst-wine-prefixes/default"* ]]; then
+  #       #       exec ${pkgs.wine-fallback}/bin/wineserver "$@"
+  #       #   else
+  #       #       # Fall back to the system-wide modern Wine for everything else
+  #       #       exec ${pkgs.wine-stable}/bin/wineserver "$@"
+  #       #   fi
+  #       # '';
+  #       #
+  #       # winetricks-router = pkgs.writeShellScriptBin "winetricks" ''
+  #       #   if [[ "$WINEPREFIX" == *"/serum"* ]]; then
+  #       #     export WINE="${pkgs.wine-experimental}/bin/wine"
+  #       #     export WINESERVER="${pkgs.wine-experimental}/bin/wineserver"
+  #       #   elif [[ "$WINEPREFIX" == *"vst-wine-prefixes/default"* ]]; then
+  #       #     export WINE="${pkgs.wine-fallback}/bin/wine"
+  #       #     export WINESERVER="${pkgs.wine-fallback}/bin/wineserver"
+  #       #   else
+  #       #     export WINE="${pkgs.wine-stable}/bin/wine"
+  #       #     export WINESERVER="${pkgs.wine-stable}/bin/wineserver"
+  #       #   fi
+  #       #
+  #       #   # Run the real winetricks with the real binary paths injected
+  #       #   exec ${pkgs.winetricks}/bin/winetricks "$@"
+  #       # '';
+  #     in {
+  #       home.packages = [
+  #         # wine-router
+  #         # wineserver-router
+  #         # winetricks-router
+  #         # serum2
+  #         pkgs.curl
+  #         pkgs.libGL
+  #         pkgs.libGLU
+  #         pkgs.libGLX
+  #         pkgs.yabridgectl
+  #       ];
+  #
+  #       # If the bitwig icon doesn't work for you:
+  #
+  #       # home.file.".vst3/Serum2.vst3".source = "${serum2}/Serum2.vst3";
+  #
+  #       # # Configure the theme editor
+  #       # home.activation.setupBitwigTheme =
+  #       #   lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #       #     echo "Setting up Bitwig theme editor..."
+  #       #     ln ${bitwig6-local}/share/bitwig/.bitwig-theme-editor ${bitwig6-local}/libexec/bin/bitwig.jar
+  #       #   '';
+  #
+  #       home.sessionVariables = {
+  #         # You need this for Kilohearts plugins
+  #         WINEFSYNC = "1";
+  #       };
+  #     };
+  #
+  # };
 }

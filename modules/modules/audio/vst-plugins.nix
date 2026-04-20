@@ -1,4 +1,4 @@
-{ inputs, ... }: {
+{ den, inputs, ... }: {
   flake-file.inputs = {
     nix-automatic-windows-vsts.url = "github:yaanae/nix-automatic-windows-vsts";
 
@@ -10,14 +10,16 @@
   };
 
   den.aspects.vst-plugins = {
+    includes = with den.aspects; [ custom-wine custom-yabridge ];
     nixos = { lib, pkgs, ... }: {
       imports = [
         inputs.nix-automatic-windows-vsts.nixosModules.nix-automatic-windows-vsts
       ];
+
       environment.systemPackages = with pkgs; [
-        yabridge
         yabridgectl
-        # wineWowPackages.yabridge
+        yabridge
+        wine-experimental
       ];
 
       environment.variables = let

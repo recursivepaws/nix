@@ -141,7 +141,8 @@
       ipod
       browser
       crypto
-      musical-wine
+      # musical-wine
+      bitwig-studio
       vst-plugins
     ];
 
