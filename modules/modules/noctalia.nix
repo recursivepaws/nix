@@ -1,4 +1,16 @@
-{ inputs, ... }: {
+{ inputs, ... }:
+let
+  disable-screenrec-hardware = final: prev: {
+    wl-screenrec = prev.wl-screenrec.overrideAttrs (old: {
+      nativeBuildInputs = (old.nativeBuildInputs or [ ])
+        ++ [ final.makeWrapper ];
+      postInstall = (old.postInstall or "") + ''
+        wrapProgram $out/bin/wl-screenrec \
+          --add-flags "--no-hw"
+      '';
+    });
+  };
+in {
   flake-file.inputs.noctalia = {
     url = "github:noctalia-dev/noctalia-shell";
     inputs.nixpkgs.follows = "nixpkgs";
@@ -6,9 +18,34 @@
 
   den.aspects.noctalia = {
     nixos = { pkgs, ... }: {
+      # My lame w6400 does not support hardware encoding
+      nixpkgs.overlays = [ disable-screenrec-hardware ];
+
       environment.systemPackages = with pkgs; [
         inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
-        gpu-screen-recorder-gtk
+
+        # start deps for clipper
+        cliphist
+        wl-clipboard
+        # end deps for clipper
+
+        # start deps for screen-toolkit
+        grim
+        slurp
+        wl-clipboard
+        tesseract
+        imagemagick
+        zbar
+        curl
+        translate-shell
+
+        wl-screenrec
+        # wf-recorder
+
+        ffmpeg
+        gifski
+        jq
+        # end deps for screen-toolkit
       ];
 
       programs.gpu-screen-recorder.enable = true;
@@ -23,9 +60,9 @@
           "todo"
           "unicode-picker"
           "clipper"
-          "screen-recorder"
           "privacy-indicator"
           "catwalk"
+          "screen-toolkit"
         ];
       in {
         imports = [ inputs.noctalia.homeModules.default ];
@@ -105,7 +142,10 @@
             location = {
               monthBeforeDay = false;
               name = "Washington, DC";
+              use12hourFormat = true;
+              useFahrenheit = true;
             };
+            appLauncher = { enableClipboardHistory = true; };
           };
           plugins = {
             sources = [{
