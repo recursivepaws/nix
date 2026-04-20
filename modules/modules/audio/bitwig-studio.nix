@@ -109,24 +109,22 @@
               libpulseaudio
               icu
               # Graphics & X11
-              xorg.libX11
-              xorg.libXcursor
-              xorg.libXext
-              xorg.libXfixes
-              xorg.libXi
-              xorg.libXrender
-              xorg.libXtst
-              libxcb
-              xcbutilxrm
-              xorg.xcbutilwm
-              xorg.xcbutilimage
-              libxcb-util
-              xorg.xcbutilkeysyms
-              xorg.xcbutilrenderutil
-              libxcursor
               libx11
+              libxcursor
+              libxext
+              libxfixes
+              libxi
+              libxrender
               libxtst
+              libxcb
               libxkbcommon
+              xcbutilxrm
+              libxcb-wm
+              libxcb-image
+              libxcb-util
+              libxcb-keysyms
+              libxcb-render-util
+              libxcursor
               harfbuzz
               curl
               libudev-zero
