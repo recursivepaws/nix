@@ -141,10 +141,8 @@
       ipod
       browser
       crypto
-      # musical-wine
       bitwig-studio
-      # vst-plugins
-      native-vst-plugins
+      windows-vst
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {

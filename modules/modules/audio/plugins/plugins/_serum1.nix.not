@@ -1,0 +1,33 @@
+{ stdenvNoCC, lib, pkgs, requireFile, }:
+let
+  _version = "136b8";
+  serum-installer = requireFile {
+    name = "Install_Xfer_Serum_${_version}.exe";
+    sha256 = "0x3s4nny5g8nm5sxqxpacwdlgavvy390jdvrb80imncrwgsxnc66";
+    url =
+      "https://xferrecords.com/product_downloads/serum-release-1-282-full-with-factory-content-windows/start";
+  };
+in stdenvNoCC.mkDerivation {
+  pname = "serum";
+  version = _version;
+  src = serum-installer;
+  dontUnpack = true;
+  nativeBuildInputs = [ pkgs.wine-staging pkgs.xvfb-run ];
+  installPhase = ''
+    runHook preInstall
+    export WINEPREFIX="$PWD/wineprefix"
+    export XDG_CONFIG_HOME="$PWD/.config"
+    xvfb-run wine $src /S
+    mkdir -p $out/lib/vst
+    cp -r "$WINEPREFIX/drive_c/Program Files/Common Files/VST3/Serum.vst3" "$out"
+    cp -r "$WINEPREFIX/drive_c/users/nixbld/Documents/Xfer/Serum Presets" "$out"
+    runHook postInstall
+  '';
+  meta = with lib; {
+    description =
+      "Advanced Wavetable Synthesizer by Xfer Records (via Yabridge)";
+    homepage = "https://xferrecords.com/products/serum";
+    license = licenses.unfree;
+    platforms = [ "x86_64-linux" ];
+  };
+}
