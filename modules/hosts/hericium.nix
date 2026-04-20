@@ -143,7 +143,8 @@
       crypto
       # musical-wine
       bitwig-studio
-      vst-plugins
+      # vst-plugins
+      native-vst-plugins
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {
