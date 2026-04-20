@@ -1,6 +1,6 @@
 {
   den.aspects.yabridge = {
-    homeManager = { pkgs, lib, ... }:
+    homeManager = { pkgs, lib, config, ... }:
       let
         # Script to configure yabridge
         yabridgeSetup = pkgs.writeShellApplication {
@@ -31,16 +31,31 @@
               fi
             done
 
+            # Here's where we store actual preset resources
+            PRESET_PATH="${config.home.homeDirectory}/Documents/Presets/"
+            echo "Preset Path: $PLUGIN_PATHS"
+            mkdir -p "$PRESET_PATH"
+
             # Add current plugins
             if [ -n "$PLUGIN_PATHS" ]; then
               for plugin_path in $PLUGIN_PATHS; do
                 # Check if this path contains VST files
-                if [ -d "$plugin_path" ] && (find "$plugin_path" -name "*.vst3" -o -name "*.dll" 2>/dev/null | grep -q .); then
-                  # Only add if not already in the list
-                  if ! echo "$CURRENT_PATHS" | grep -q "^$plugin_path$"; then
-                    PLUGIN_NAME=$(basename "$plugin_path" | sed 's/-[0-9].*//')
-                    echo "Adding plugin: $PLUGIN_NAME"
-                    ${pkgs.yabridgectl}/bin/yabridgectl add "$plugin_path"
+                if [ -d "$plugin_path" ]; then
+                  # Extract Plugin name from folder name
+                  PLUGIN_NAME=$(basename "$plugin_path" | sed 's/-[0-9].*//')
+
+                  if (find "$plugin_path" -name "*.vst3" -o -name "*.dll" 2>/dev/null | grep -q .); then
+                    # Only add if not already in the list
+                    if ! echo "$CURRENT_PATHS" | grep -q "^$plugin_path$"; then
+                      echo "Adding plugin: $PLUGIN_NAME"
+                      yabridgectl add "$plugin_path"
+                    fi
+                  fi
+
+                  plugin_presets=$(find "$plugin_path" -maxdepth 1 -mindepth 1 -type d -iname '*presets*')
+                  if [ -n "$plugin_presets" ]; then
+                    echo "Adding $PLUGIN_NAME presets to $PRESET_PATH"
+                    cp -r "$plugin_presets" "$PRESET_PATH"
                   fi
                 fi
               done
