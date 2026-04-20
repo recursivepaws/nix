@@ -143,6 +143,7 @@
       crypto
       bitwig-studio
       windows-vst
+      davinci
     ];
 
     provides.to-users.homeManager = { pkgs, ... }: {

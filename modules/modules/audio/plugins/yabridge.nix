@@ -35,6 +35,7 @@
             PRESET_PATH="${config.home.homeDirectory}/Documents/Presets/"
             echo "Preset Path: $PLUGIN_PATHS"
             mkdir -p "$PRESET_PATH"
+            chmod -R u+w "$PRESET_PATH"
 
             # Add current plugins
             if [ -n "$PLUGIN_PATHS" ]; then
@@ -55,7 +56,7 @@
                   plugin_presets=$(find "$plugin_path" -maxdepth 1 -mindepth 1 -type d -iname '*presets*')
                   if [ -n "$plugin_presets" ]; then
                     echo "Adding $PLUGIN_NAME presets to $PRESET_PATH"
-                    cp -r "$plugin_presets" "$PRESET_PATH"
+                    cp -r --no-preserve=mode "$plugin_presets" "$PRESET_PATH"
                   fi
                 fi
               done
