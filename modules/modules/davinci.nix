@@ -34,6 +34,7 @@
 
           runScript = "${pkgs.bash}/bin/bash ${
               pkgs.writeText "davinci-wrapper-goodmesa" ''
+                export QT_QPA_PLATFORM=xcb
                 export QT_XKB_CONFIG_ROOT="${pkgs.xkeyboard_config}/share/X11/xkb"
                 export QT_PLUGIN_PATH="${davinci}/libs/plugins:$QT_PLUGIN_PATH"
 
