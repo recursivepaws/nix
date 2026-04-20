@@ -15,7 +15,7 @@ in stdenvNoCC.mkDerivation {
   src = serum2-installer;
   dontUnpack = true;
 
-  nativeBuildInputs = [ pkgs.wine-staging pkgs.xvfb-run ];
+  nativeBuildInputs = with pkgs; [ wine-staging xvfb-run ];
 
   installPhase = ''
     runHook preInstall
