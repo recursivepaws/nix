@@ -170,16 +170,7 @@
                 "Mod+Shift+F".action = fullscreen-window;
                 "Mod+C".action = close-window;
                 "Mod+E".action = spawn "thunar";
-                "Mod+Ctrl+S".action.spawn = [
-                  "bash"
-                  "-c"
-                  ''
-                    set -e; grim -t ppm -g "$(slurp -o -d -F monospace)" - | satty --filename - --copy-command=wl-copy --annotation-size-factor 2.0 --output-filename="${
-                      lib.escapeShellArg
-                      config.programs.niri.settings.screenshot-path
-                    }" --actions-on-enter="save-to-clipboard,exit" --brush-smooth-history-size=5 --disable-notifications''
-                ];
-
+                "Mod+Ctrl+S".action = ns "plugin:screen-toolkit annotate";
                 "Mod+S".action = toggle-column-tabbed-display;
 
                 "Mod+V".action = center-column;

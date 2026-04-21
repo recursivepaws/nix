@@ -7,8 +7,6 @@
     ];
     homeManager = { pkgs, config, ... }: {
       home.packages = with pkgs; [
-        slurp
-        grim
         eog
         handbrake
         avidemux
@@ -35,10 +33,7 @@
         };
 
       systemd.user.startServices = "sd-switch";
-      programs = {
-        home-manager.enable = true;
-        satty.enable = true;
-      };
+      programs = { home-manager.enable = true; };
     };
 
     provides.to-hosts.nixos = { pkgs, ... }: { };
