@@ -26,6 +26,9 @@ in
         environment.systemPackages = with pkgs; [
           inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
+          # sync wallpapers from r2
+          rclone
+
           # start deps for clipper
           cliphist
           wl-clipboard
@@ -51,6 +54,34 @@ in
         ];
 
         programs.gpu-screen-recorder.enable = true;
+
+        # One-shot sync service
+        systemd.services.sync-wallpapers = {
+          description = "Sync wallpapers from R2";
+          serviceConfig = {
+            Type = "oneshot";
+            User = "vera";
+            ExecStart = pkgs.writeShellScript "sync-wallpapers" ''
+              source /run/agenix/startup
+              ${pkgs.rclone}/bin/rclone sync \
+              :s3:wallpapers \
+              /home/vera/Pictures/wallpapers \
+              --s3-provider Cloudflare \
+              --s3-endpoint https://df83fe57e6346adcb5072f073702daea.r2.cloudflarestorage.com \
+              --s3-access-key-id "$S3_ACCESS_KEY_ID" \
+              --s3-secret-access-key "$S3_SECRET_ACCESS_KEY" \
+              --s3-no-check-bucket
+            '';
+          };
+        };
+        # Run sync on boot + once a day
+        systemd.timers.sync-wallpapers = {
+          wantedBy = [ "timers.target" ];
+          timerConfig = {
+            OnBootSec = "2min";
+            OnCalendar = "daily";
+          };
+        };
       };
 
     homeManager =
@@ -138,7 +169,8 @@ in
               };
             };
             wallpaper = {
-              directory = ../../assets/fungi;
+              # directory = ../../assets/fungi;
+              directory = "/home/vera/Pictures/wallpapers";
               automationEnabled = true;
               wallPaperChangeMode = "random";
               randomIntervalSec = 300;
