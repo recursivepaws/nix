@@ -5,11 +5,6 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  # den.default.homeManager =
-  #   { pkgs, ... }:
-  #   {
-  #     home.sessionPath = with pkgs; [ "${age-plugin-yubikey}/bin" ];
-  #   };
   den.default.nixos =
     { pkgs, ... }:
     let
@@ -44,8 +39,8 @@
       ];
 
       age.secrets = {
-        startup = {
-          file = ../../secrets/startup.age;
+        secrets = {
+          file = ../../secrets/secrets.age;
           owner = "root";
           group = "secrets";
           mode = "0440";

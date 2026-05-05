@@ -17,7 +17,7 @@ CAMERA_PRODUCT="$2"
 # Configuration
 CAMERA_MOUNT="/mnt/CAMERA"
 IMMICH_HOST="192.168.1.181:2283"
-SECRET_FILE="/run/agenix/startup"
+SECRET_FILE="/run/agenix/secrets"
 
 MAX_WAIT=30 # seconds to wait for device
 

@@ -62,7 +62,7 @@ in
             Type = "oneshot";
             User = "vera";
             ExecStart = pkgs.writeShellScript "sync-wallpapers" ''
-              source /run/agenix/startup
+              source /run/agenix/secrets
               ${pkgs.rclone}/bin/rclone sync \
               :s3:wallpapers \
               /home/vera/Pictures/wallpapers \
