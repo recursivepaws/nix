@@ -169,11 +169,11 @@ in
               };
             };
             wallpaper = {
-              # directory = ../../assets/fungi;
               directory = "/home/vera/Pictures/wallpapers";
               automationEnabled = true;
               wallPaperChangeMode = "random";
-              randomIntervalSec = 300;
+              # Change wallpaper every two hours
+              randomIntervalSec = 60 * 60 * 2;
               transitionType = [ "pixelate" ];
             };
             colorSchemes.predefinedScheme = "Oxocarbon";
