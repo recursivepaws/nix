@@ -16,7 +16,7 @@ SMB_HOST="192.168.1.167"
 SMB_USER="vera"
 SMB_SHARE="data/media/"
 SMB_MOUNT="/mnt/MeowStationSMB"
-SECRET_FILE="/run/agenix/startup"
+SECRET_FILE="/run/agenix/secrets"
 MAX_WAIT=30 # seconds to wait for device
 
 show_zenity() {

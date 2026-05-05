@@ -2,3 +2,4 @@ result
 result-*
 *.swp
 *.lock.tmp
+*.qcow2
