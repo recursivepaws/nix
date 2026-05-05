@@ -13,26 +13,34 @@
   den.default.nixos =
     { pkgs, ... }:
     let
+      plugins = with pkgs; [
+        age-plugin-yubikey
+        age-plugin-1p
+      ];
+      pluginPaths = (builtins.concatStringsSep ":" (map (plugin: "${plugin}/bin") plugins));
       ageBin = pkgs.writeShellScript "age-with-plugins" ''
-        export PATH="${pkgs.age-plugin-yubikey}/bin:$PATH"
+        export PATH="${pluginPaths}:$PATH"
         exec ${pkgs.rage}/bin/rage "$@"
       '';
     in
     {
       imports = [ inputs.agenix.nixosModules.default ];
 
-      environment.systemPackages = with pkgs; [
-        rage
-        ragenix
-        age-plugin-yubikey
-      ];
+      environment.systemPackages =
+        with pkgs;
+        [
+          rage
+          ragenix
+        ]
+        ++ plugins;
 
       services.pcscd.enable = true;
 
       age.ageBin = "${ageBin}";
       age.identityPaths = [
         "/etc/ssh/ssh_host_ed25519_key"
-        ../../assets/age-yubikey-identity-8f6fdf41.txt
+        ../../assets/age-1p-identity.txt
+        ../../assets/age-yubikey-identity.txt
       ];
 
       age.secrets = {
