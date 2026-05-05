@@ -22,6 +22,7 @@
           telegram-desktop
           signal-desktop
           discord
+          gnome-disk-utility
           baobab
           seahorse
           immich-go
