@@ -1,4 +1,5 @@
-{ lib, den, ... }: {
+{ lib, den, ... }:
+{
   den.default.nixos.system.stateVersion = "25.11";
   den.default.homeManager.home.stateVersion = "25.11";
 
@@ -13,10 +14,16 @@
     # Set your time zone.
     time.timeZone = "America/New_York";
 
-    nix.settings.trusted-users = [ "root" "@wheel" ];
+    nix.settings.trusted-users = [
+      "root"
+      "@wheel"
+    ];
 
-    nix.settings.experimental-features =
-      [ "nix-command" "flakes" "recursive-nix" ];
+    nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+      "recursive-nix"
+    ];
     # Select internationalisation properties.
     i18n.defaultLocale = "en_US.UTF-8";
 
@@ -35,5 +42,7 @@
 
     nixpkgs.config.allowUnfree = true;
   };
-  den.default.homeManager = { nixpkgs.config.allowUnfree = true; };
+  den.default.homeManager = {
+    nixpkgs.config.allowUnfree = true;
+  };
 }

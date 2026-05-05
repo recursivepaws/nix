@@ -1,7 +1,8 @@
-{ den, lib, ... }: {
-  den.aspects.custom-yabridge = let
-    overlay = final: prev:
-      {
+{ den, lib, ... }:
+{
+  den.aspects.custom-yabridge =
+    let
+      overlay = final: prev: {
         # yabridgectl =
         #   prev.yabridgectl.override { wine = prev.wineWowPackages.stableFull; };
         # yabridge = prev.yabridge.override { wineWowPackages = true; };
@@ -51,9 +52,10 @@
         #   doCheck = false;
         # });
       };
-  in {
-    includes = [ den.aspects.custom-wine ];
-    nixos.nixpkgs.overlays = [ overlay ];
-    homeManager.nixpkgs.overlays = [ overlay ];
-  };
+    in
+    {
+      includes = [ den.aspects.custom-wine ];
+      nixos.nixpkgs.overlays = [ overlay ];
+      homeManager.nixpkgs.overlays = [ overlay ];
+    };
 }

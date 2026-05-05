@@ -178,7 +178,7 @@ in
             };
             colorSchemes.predefinedScheme = "Oxocarbon";
             general = {
-              avatarImage = ../../assets/recursivepaws.png;
+              avatarImage = ../../assets/vera.png;
               radiusRatio = 0.2;
             };
             location = {

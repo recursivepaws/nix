@@ -1,11 +1,22 @@
 {
   den.aspects.yabridge = {
-    homeManager = { pkgs, lib, config, ... }:
+    homeManager =
+      {
+        pkgs,
+        lib,
+        config,
+        ...
+      }:
       let
         # Script to configure yabridge
         yabridgeSetup = pkgs.writeShellApplication {
           name = "yabridge-setup";
-          runtimeInputs = with pkgs; [ gnugrep nix gnused yabridgectl ];
+          runtimeInputs = with pkgs; [
+            gnugrep
+            nix
+            gnused
+            yabridgectl
+          ];
           text = ''
             # Get plugins from the current system's package closure
             # Use recursive query to find all dependencies, including plugins
@@ -70,13 +81,13 @@
           '';
         };
 
-      in {
+      in
+      {
         home = {
           # Run yabridge setup when home configuration is activated
-          activation.yabridgeSetup =
-            lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-              $DRY_RUN_CMD ${yabridgeSetup}/bin/yabridge-setup
-            '';
+          activation.yabridgeSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            $DRY_RUN_CMD ${yabridgeSetup}/bin/yabridge-setup
+          '';
 
           # Ensure yabridge directories exist
           file = {

@@ -1,6 +1,7 @@
 {
   den.aspects.ipod = {
-    nixos = { pkgs, ... }:
+    nixos =
+      { pkgs, ... }:
       let
         ipod = {
           vendor = "05ac";
@@ -22,9 +23,9 @@
           ];
           text = builtins.readFile ../../scripts/ipod-sync.sh;
         };
-      in {
-        services.udev.extraRules = ''
-          ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="${ipod.vendor}", ATTR{idProduct}=="${ipod.id}", TAG+="systemd", ENV{SYSTEMD_WANTS}="ipod-sync.service"'';
+      in
+      {
+        services.udev.extraRules = ''ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="${ipod.vendor}", ATTR{idProduct}=="${ipod.id}", TAG+="systemd", ENV{SYSTEMD_WANTS}="ipod-sync.service"'';
         systemd.services.ipod-sync = {
           description = "Sync files from SMB server to iPod";
           environment = {
@@ -35,8 +36,7 @@
           wants = [ "network-online.target" ];
           serviceConfig = {
             Type = "oneshot";
-            ExecStart =
-              "${ipodSyncScript}/bin/ipod-sync ${ipod.vendor} ${ipod.id}";
+            ExecStart = "${ipodSyncScript}/bin/ipod-sync ${ipod.vendor} ${ipod.id}";
             User = "root"; # Needs root for mounting
             # Allow access to the agenix secret
             SupplementaryGroups = [ "keys" ];
@@ -45,4 +45,3 @@
       };
   };
 }
-
