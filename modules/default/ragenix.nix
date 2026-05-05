@@ -31,8 +31,8 @@
 
       age.ageBin = "${ageBin}";
       age.identityPaths = [
-        ../../assets/age-yubikey-identity-8f6fdf41.txt
         "/etc/ssh/ssh_host_ed25519_key"
+        ../../assets/age-yubikey-identity-8f6fdf41.txt
       ];
 
       age.secrets = {
