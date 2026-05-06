@@ -85,28 +85,24 @@
             depPaths = (builtins.concatStringsSep ":" (map (dep: "${dep}/bin") deps));
           in
           {
-            activation = {
-              # npmrc = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-              #   source /run/agenix/secrets
-              # '';
-
-              hightouchSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-                export PATH="${depPaths}:$PATH"
-                export PNPM_HOME="${config.home.homeDirectory}/.local/share/pnpm"
-                export ENV_FILE="/dev/null"
-                export PROJECT_PATH="${config.home.homeDirectory}/Software/hightouch";
-                if [[ ! -d "$PROJECT_PATH" ]]; then
-                  mkdir -p "$PROJECT_PATH"
-                fi
-                cd "$PROJECT_PATH"
-
-                # Install pnpm
-                curl -fsSL https://get.pnpm.io/install.sh | sh -
-
-                # Set the nodeVersion based on the workspace yaml
-                # pnpm env use --global $(grep "nodeVersion" pnpm-workspace.yaml | sed 's/.*nodeVersion: *\([0-9.]*\).*/\1/')
-              '';
-            };
+            # activation = {
+            #   hightouchSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            #     export PATH="${depPaths}:$PATH"
+            #     export PNPM_HOME="${config.home.homeDirectory}/.local/share/pnpm"
+            #     export ENV_FILE="/dev/null"
+            #     export PROJECT_PATH="${config.home.homeDirectory}/Software/hightouch";
+            #     if [[ ! -d "$PROJECT_PATH" ]]; then
+            #       mkdir -p "$PROJECT_PATH"
+            #     fi
+            #     cd "$PROJECT_PATH"
+            #
+            #     # Install pnpm
+            #     curl -fsSL https://get.pnpm.io/install.sh | sh -
+            #
+            #     # Set the nodeVersion based on the workspace yaml
+            #     # pnpm env use --global $(grep "nodeVersion" pnpm-workspace.yaml | sed 's/.*nodeVersion: *\([0-9.]*\).*/\1/')
+            #   '';
+            # };
 
             sessionVariables = {
               JAVA_HOME = "${pkgs.openjdk}";
