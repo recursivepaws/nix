@@ -116,7 +116,10 @@
           _1password.enable = true;
           _1password-gui = {
             enable = true;
-            polkitPolicyOwners = [ "vera" ];
+            polkitPolicyOwners = [
+              "vera"
+              "work"
+            ];
           };
           dconf.enable = true;
           steam = {

@@ -1,7 +1,10 @@
 { lib, den, ... }:
+let
+  stateVersion = "25.11";
+in
 {
-  den.default.nixos.system.stateVersion = "25.11";
-  den.default.homeManager.home.stateVersion = "25.11";
+  #den.default.nixos.system.stateVersion = "25.11";
+  # den.default.homeManager.home.stateVersion = "25.11";
 
   # enable hm by default
   den.schema.user.classes = lib.mkDefault [ "homeManager" ];
@@ -11,6 +14,7 @@
 
   # Allow unfree packages
   den.default.nixos = {
+    system.stateVersion = stateVersion;
     # Set your time zone.
     time.timeZone = "America/New_York";
 
@@ -42,7 +46,21 @@
 
     nixpkgs.config.allowUnfree = true;
   };
-  den.default.homeManager = {
-    nixpkgs.config.allowUnfree = true;
-  };
+
+  den.default.homeManager =
+    { pkgs, config, ... }:
+    {
+      home.stateVersion = stateVersion;
+      nixpkgs.config.allowUnfree = true;
+
+      home.file."${config.xdg.configHome}/starship.toml".source = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/refs/heads/main/extra/carbonfox/starship.toml";
+        hash = "sha256-NneOWmWRhL5sgP/qFSSeVhf41W+waiadwz+KXL7s04s=";
+      };
+
+      systemd.user.startServices = "sd-switch";
+      programs = {
+        home-manager.enable = true;
+      };
+    };
 }
