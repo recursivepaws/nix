@@ -88,6 +88,7 @@
       }:
       {
         home.packages = with pkgs; [
+          playerctl
           qt5.qtwayland
           qt6.qtwayland
           libsForQt5.qt5.qtbase

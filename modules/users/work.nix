@@ -10,14 +10,9 @@
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
-          eog
-          cameractrls
-          playerctl
-          wl-clipboard
-          chezmoi
-          baobab
           seahorse
           zoom-us
+          slack
         ];
       };
 

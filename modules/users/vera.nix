@@ -10,23 +10,16 @@
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
-          eog
           handbrake
           avidemux
-          cameractrls
-          playerctl
-          wl-clipboard
           fuzzel
           spotifyd
           chezmoi
           telegram-desktop
           signal-desktop
           discord
-          gnome-disk-utility
-          baobab
           seahorse
           immich-go
-          zoom-us
         ];
       };
 

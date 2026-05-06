@@ -59,8 +59,21 @@ in
       };
 
       systemd.user.startServices = "sd-switch";
+
       programs = {
         home-manager.enable = true;
       };
+
+      # Packages I consider essential for all users on all systems
+      home.packages = with pkgs; [
+        eog
+        cameractrls
+        wl-clipboard
+        baobab
+        gnome-disk-utility
+
+        # TODO: remove in favor of NixVim
+        chezmoi
+      ];
     };
 }
