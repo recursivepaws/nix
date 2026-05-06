@@ -5,6 +5,7 @@
       den.provides.define-user
       (den.provides.user-shell "zsh")
     ];
+
     homeManager =
       { pkgs, ... }:
       {

@@ -67,7 +67,7 @@ in
                 source /run/agenix/secrets
                 ${pkgs.rclone}/bin/rclone sync \
                 :s3:wallpapers \
-                /home/${user.userName}/Pictures/wallpapers \
+                /home/${user.userName}/Pictures/Wallpapers \
                 --s3-provider Cloudflare \
                 --s3-endpoint https://df83fe57e6346adcb5072f073702daea.r2.cloudflarestorage.com \
                 --s3-access-key-id "$S3_ACCESS_KEY_ID" \
@@ -171,7 +171,7 @@ in
                 };
               };
               wallpaper = {
-                directory = "/home/vera/Pictures/wallpapers";
+                directory = "/home/${user.userName}/Pictures/Wallpapers";
                 automationEnabled = true;
                 wallPaperChangeMode = "random";
                 # Change wallpaper every two hours
@@ -180,7 +180,7 @@ in
               };
               colorSchemes.predefinedScheme = "Oxocarbon";
               general = {
-                avatarImage = ../../assets/vera.png;
+                avatarImage = user.profilePicture;
                 radiusRatio = 0.2;
               };
               location = {
