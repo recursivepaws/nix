@@ -3,15 +3,6 @@
     homeManager =
       { pkgs, ... }:
       {
-        /*
-          programs.foot = {
-            enable = true;
-            settings = {
-              main = { term = "xterm-256color"; };
-              # font = "Caskaydia Cove";
-            };
-          };
-        */
         # home.sessionVariables = { KITTY_SHELL_INTEGRATION = "enabled"; };
         programs.kitty = {
           enable = true;
@@ -20,7 +11,7 @@
             # mode = "no-cursor";
           };
           settings = {
-            linux_display_server = "x11";
+            linux_display_server = "wayland";
             font_size = 12.25;
             font_family = "Caskaydia Cove";
             window_margin_width = 15;
