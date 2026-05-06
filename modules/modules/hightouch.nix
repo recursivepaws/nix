@@ -1,3 +1,4 @@
+{ den, ... }:
 {
   den.aspects.hightouch = {
 
@@ -7,14 +8,17 @@
     #     users.groups.docker = { };
     #   };
     #
-    # provides.to-users =
-    #   { user, ... }:
-    #   {
-    #     nixos.users.users.${user.name}.extraGroups = [ "docker" ];
-    #   };
+    # includes = [
+    #   den.provides.to-users =
+    # ];
 
     nixos =
-      { pkgs, config, ... }:
+      {
+        pkgs,
+        config,
+        user,
+        ...
+      }:
       {
         environment.systemPackages = with pkgs; [
           # Core CLI tools
@@ -74,6 +78,20 @@
         lib,
         ...
       }:
+      let
+        # The specific version of node pinned in `pnpm-workspace.yaml`
+        nodejs =
+          let
+            version = "20.19.2";
+          in
+          pkgs.nodejs_20.overrideAttrs (old: {
+            version = version;
+            src = pkgs.fetchurl {
+              url = "https://nodejs.org/dist/v${version}/node-v${version}.tar.xz";
+              sha256 = "sha256-Sn/2EdUYD05CAgT6byL5+d6yrF6YYZ3ZpN6H7fWwO24=";
+            };
+          });
+      in
       {
         home =
           let
@@ -112,6 +130,8 @@
             packages =
               with pkgs;
               [
+                nodejs
+                pnpm
 
                 # Dev workflow
                 git-spice # Stacked PRs

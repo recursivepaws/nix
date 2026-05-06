@@ -29,6 +29,7 @@
         "render"
         "networkmanager"
         "secrets"
+        "docker"
       ];
     };
   };
