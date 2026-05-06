@@ -1,6 +1,8 @@
 { den, ... }:
 {
   den.aspects.amanita = {
+    den.aspects.work.includes = [ den.provides.primary-user ];
+
     nixos =
       { pkgs, ... }:
       {

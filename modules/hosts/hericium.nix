@@ -1,6 +1,7 @@
 { den, ... }:
 {
   den.aspects.hericium = {
+    den.aspects.vera.includes = [ den.provides.primary-user ];
     nixos =
       { pkgs, ... }:
       {
