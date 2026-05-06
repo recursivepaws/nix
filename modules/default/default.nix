@@ -54,7 +54,7 @@ in
 
       programs = {
         nix-ld.enable = true;
-
+        lazygit.enable = true;
         localsend.enable = true;
         neovim = {
           enable = true;

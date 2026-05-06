@@ -15,6 +15,8 @@
         boot.loader.efi.canTouchEfiVariables = true;
         boot.loader.efi.efiSysMountPoint = "/boot";
 
+        hardware.system76.enableAll = true;
+
         environment.systemPackages = with pkgs; [
           claude-code
           nixfmt-rfc-style
@@ -116,6 +118,7 @@
       file-manager
       terminal
       browser
+      hightouch
     ];
 
     provides.to-users.homeManager =
