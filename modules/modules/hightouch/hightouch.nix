@@ -1,6 +1,7 @@
-{ ... }:
+{ den, ... }:
 {
   den.aspects.hightouch = {
+    includes = [ den.aspects.kubernetes ];
     nixos =
       {
         pkgs,
