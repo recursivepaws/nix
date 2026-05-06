@@ -34,6 +34,13 @@
 
         # Required by tilt
         virtualisation.docker.enable = true;
+
+        security.pki.certificateFiles = [
+          (pkgs.fetchurl {
+            url = "https://ht-dev-agents-assets.s3.us-west-2.amazonaws.com/hightouch-development-root.cer";
+            hash = "sha256-yRYHTdTico/Zd1uwAho4CG+TnmeEyJ2vJEEGAf7bxVQ=";
+          })
+        ];
       };
 
     homeManager =
