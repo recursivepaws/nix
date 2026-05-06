@@ -56,10 +56,6 @@ in
         nix-ld.enable = true;
         lazygit.enable = true;
         localsend.enable = true;
-        neovim = {
-          enable = true;
-          defaultEditor = true;
-        };
         gnupg.agent = {
           enable = true;
           enableSSHSupport = true;

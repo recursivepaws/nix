@@ -16,7 +16,6 @@
         environment.systemPackages = with pkgs; [
           # bitwig-studio
           claude-code
-          nixfmt-rfc-style
           figma-linux
           lm_sensors
           blender
@@ -34,12 +33,6 @@
           ripgrep
           fd
           clang
-
-          # TODO: fix nvim building without these
-          gcc
-          gnumake
-          # TODO: end
-
           mold
           # rustc
           # rustfmt
@@ -51,16 +44,10 @@
           go
           uv
           python314
-          lua5_1
-          luarocks
-          stylua
           pnpm
-          tree-sitter
-          nodejs_22
           delta
           xwayland-satellite
           v4l-utils
-          lua-language-server
           eza
           bat
           zoxide
@@ -141,11 +128,5 @@
       windows-vst
       davinci
     ];
-
-    provides.to-users.homeManager =
-      { pkgs, ... }:
-      {
-        home.packages = [ pkgs.neovim ];
-      };
   };
 }

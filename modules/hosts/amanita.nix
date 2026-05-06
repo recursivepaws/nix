@@ -19,7 +19,6 @@
 
         environment.systemPackages = with pkgs; [
           claude-code
-          nixfmt-rfc-style
           lm_sensors
           scrcpy
           #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
@@ -44,16 +43,9 @@
           go
           uv
           python314
-          lua5_1
-          luarocks
-          stylua
-          pnpm
-          tree-sitter
-          nodejs_22
           delta
           xwayland-satellite
           v4l-utils
-          lua-language-server
           eza
           bat
           zoxide
@@ -120,11 +112,5 @@
       browser
       hightouch
     ];
-
-    provides.to-users.homeManager =
-      { pkgs, ... }:
-      {
-        home.packages = [ pkgs.neovim ];
-      };
   };
 }
