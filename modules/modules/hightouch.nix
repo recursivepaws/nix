@@ -14,7 +14,7 @@
     #   };
 
     nixos =
-      { pkgs, ... }:
+      { pkgs, config, ... }:
       {
         environment.systemPackages = with pkgs; [
           # Core CLI tools
@@ -41,29 +41,99 @@
             hash = "sha256-yRYHTdTico/Zd1uwAho4CG+TnmeEyJ2vJEEGAf7bxVQ=";
           })
         ];
+
+        # systemd.services.write-npmrc = {
+        #   description = "Establish Authorized NPM Connection";
+        #   wantedBy = [ "multi-user.target" ];
+        #   after = [ "run-agenix.d.mount" ];
+        #   # requires = [ "run-agenix.d.mount" ];
+        #   serviceConfig = {
+        #     Type = "oneshot";
+        #     User = user.userName;
+        #     ExecStart = pkgs.writeShellScript "write-npmrc" ''
+        #       source /run/agenix/secrets
+        #       echo "meow meow!"
+        #     '';
+        #   };
+        #
+        # };
+
+        # systemd.timers.write-npmrc = {
+        #   wantedBy = [ "timers.target" ];
+        #   timerConfig = {
+        #     OnBootSec = "2min";
+        #     OnCalendar = "daily";
+        #   };
+        # };
       };
 
     homeManager =
-      { pkgs, ... }:
       {
-        home.sessionVariables = {
-          JAVA_HOME = "${pkgs.openjdk}";
-          CPPFLAGS = "-I${pkgs.openjdk}/include";
-        };
+        pkgs,
+        config,
+        lib,
+        ...
+      }:
+      {
+        home =
+          let
+            deps = with pkgs; [
+              curl
+              wget
+              getconf
+            ];
+            depPaths = (builtins.concatStringsSep ":" (map (dep: "${dep}/bin") deps));
+          in
+          {
+            activation = {
+              # npmrc = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+              #   source /run/agenix/secrets
+              # '';
 
-        home.packages = with pkgs; [
-          # Dev workflow
-          git-spice # Stacked PRs
-          tilt # Local dev orchestration (Docker Compose)
-          _1password-cli # Secrets management
-          autossh
-          fzf
+              hightouchSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+                export PATH="${depPaths}:$PATH"
+                export PNPM_HOME="${config.home.homeDirectory}/.local/share/pnpm"
+                export ENV_FILE="/dev/null"
+                export PROJECT_PATH="${config.home.homeDirectory}/Software/hightouch";
+                if [[ ! -d "$PROJECT_PATH" ]]; then
+                  mkdir -p "$PROJECT_PATH"
+                fi
+                cd "$PROJECT_PATH"
 
-          # Python tooling
-          pipx
-          python312Packages.setuptools # python-setuptools
-          # libomp # OpenMP for LightGBM
-        ];
+                # Install pnpm
+                curl -fsSL https://get.pnpm.io/install.sh | sh -
+
+                # Set the nodeVersion based on the workspace yaml
+                # pnpm env use --global $(grep "nodeVersion" pnpm-workspace.yaml | sed 's/.*nodeVersion: *\([0-9.]*\).*/\1/')
+              '';
+            };
+
+            sessionVariables = {
+              JAVA_HOME = "${pkgs.openjdk}";
+              CPPFLAGS = "-I${pkgs.openjdk}/include";
+            };
+
+            packages =
+              with pkgs;
+              [
+
+                # Dev workflow
+                git-spice # Stacked PRs
+                tilt # Local dev orchestration (Docker Compose)
+                _1password-cli # Secrets management
+                autossh
+                fzf
+
+                # Python tooling
+                pipx
+                python312Packages.setuptools # python-setuptools
+                # libomp # OpenMP for LightGBM
+              ]
+              ++ deps;
+
+            # file.".npmrc".source = config.age.secrets.npmrc.path;
+          };
+
       };
   };
 }
