@@ -88,30 +88,7 @@
 
         programs = {
           coolercontrol.enable = true;
-          localsend.enable = true;
           chromium.enable = true;
-          nix-ld.enable = true;
-          lazygit.enable = true;
-          neovim = {
-            enable = true;
-            defaultEditor = true;
-          };
-          gnupg.agent = {
-            enable = true;
-            enableSSHSupport = true;
-            pinentryPackage = pkgs.pinentry-gnome3;
-          };
-          zsh = {
-            enable = true;
-            ohMyZsh = {
-              enable = true;
-              plugins = [
-                "git"
-                "fzf"
-                "history"
-              ];
-            };
-          };
           obs-studio = {
             enable = true;
             enableVirtualCamera = true;
@@ -123,13 +100,11 @@
             # enableZshIntegration = true;
             # defaultCommand = "fd --hidden --strip-cwd-prefix --exclude .git";
           };
-          starship.enable = true;
           _1password.enable = true;
           _1password-gui = {
             enable = true;
             polkitPolicyOwners = [ "vera" ];
           };
-          dconf.enable = true;
           steam = {
             enable = true;
             remotePlay.openFirewall = true;

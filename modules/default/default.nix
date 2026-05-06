@@ -1,4 +1,8 @@
-{ lib, den, ... }:
+{
+  lib,
+  den,
+  ...
+}:
 let
   stateVersion = "25.11";
 in
@@ -13,39 +17,77 @@ in
   den.ctx.user.includes = [ den._.mutual-provider ];
 
   # Allow unfree packages
-  den.default.nixos = {
-    system.stateVersion = stateVersion;
-    # Set your time zone.
-    time.timeZone = "America/New_York";
+  den.default.nixos =
+    { pkgs, ... }:
+    {
+      system.stateVersion = stateVersion;
+      # Set your time zone.
+      time.timeZone = "America/New_York";
 
-    nix.settings.trusted-users = [
-      "root"
-      "@wheel"
-    ];
+      nix.settings.trusted-users = [
+        "root"
+        "@wheel"
+      ];
 
-    nix.settings.experimental-features = [
-      "nix-command"
-      "flakes"
-      "recursive-nix"
-    ];
-    # Select internationalisation properties.
-    i18n.defaultLocale = "en_US.UTF-8";
+      nix.settings.experimental-features = [
+        "nix-command"
+        "flakes"
+        "recursive-nix"
+      ];
+      # Select internationalisation properties.
+      i18n.defaultLocale = "en_US.UTF-8";
 
-    # Do i need this?
-    # i18n.extraLocaleSettings = {
-    #   LC_ADDRESS = "en_US.UTF-8";
-    #   LC_IDENTIFICATION = "en_US.UTF-8";
-    #   LC_MEASUREMENT = "en_US.UTF-8";
-    #   LC_MONETARY = "en_US.UTF-8";
-    #   LC_NAME = "en_US.UTF-8";
-    #   LC_NUMERIC = "en_US.UTF-8";
-    #   LC_PAPER = "en_US.UTF-8";
-    #   LC_TELEPHONE = "en_US.UTF-8";
-    #   LC_TIME = "en_US.UTF-8";
-    # };
+      # Do i need this?
+      # i18n.extraLocaleSettings = {
+      #   LC_ADDRESS = "en_US.UTF-8";
+      #   LC_IDENTIFICATION = "en_US.UTF-8";
+      #   LC_MEASUREMENT = "en_US.UTF-8";
+      #   LC_MONETARY = "en_US.UTF-8";
+      #   LC_NAME = "en_US.UTF-8";
+      #   LC_NUMERIC = "en_US.UTF-8";
+      #   LC_PAPER = "en_US.UTF-8";
+      #   LC_TELEPHONE = "en_US.UTF-8";
+      #   LC_TIME = "en_US.UTF-8";
+      # };
 
-    nixpkgs.config.allowUnfree = true;
-  };
+      nixpkgs.config.allowUnfree = true;
+
+      programs = {
+        nix-ld.enable = true;
+
+        localsend.enable = true;
+        neovim = {
+          enable = true;
+          defaultEditor = true;
+        };
+        gnupg.agent = {
+          enable = true;
+          enableSSHSupport = true;
+          pinentryPackage = pkgs.pinentry-gnome3;
+        };
+        zsh = {
+          enable = true;
+          ohMyZsh = {
+            enable = true;
+            plugins = [
+              "git"
+              "fzf"
+              "history"
+            ];
+          };
+        };
+        starship.enable = true;
+        # _1password.enable = true;
+        # _1password-gui = {
+        #   enable = true;
+        #   polkitPolicyOwners = [
+        #     user.userName
+        #   ];
+        # };
+        dconf.enable = true;
+      };
+
+    };
 
   den.default.homeManager =
     { pkgs, config, ... }:
