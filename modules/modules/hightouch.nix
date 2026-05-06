@@ -1,17 +1,6 @@
-{ den, ... }:
+{ ... }:
 {
   den.aspects.hightouch = {
-
-    # provides.to-hosts.nixos =
-    #   { pkgs, ... }:
-    #   {
-    #     users.groups.docker = { };
-    #   };
-    #
-    # includes = [
-    #   den.provides.to-users =
-    # ];
-
     nixos =
       {
         pkgs,
@@ -46,29 +35,46 @@
           })
         ];
 
-        # systemd.services.write-npmrc = {
-        #   description = "Establish Authorized NPM Connection";
-        #   wantedBy = [ "multi-user.target" ];
-        #   after = [ "run-agenix.d.mount" ];
-        #   # requires = [ "run-agenix.d.mount" ];
-        #   serviceConfig = {
-        #     Type = "oneshot";
-        #     User = user.userName;
-        #     ExecStart = pkgs.writeShellScript "write-npmrc" ''
-        #       source /run/agenix/secrets
-        #       echo "meow meow!"
-        #     '';
-        #   };
-        #
-        # };
+        services.tailscale = {
+          enable = true;
+        };
+        services.caddy = {
+          enable = true;
+        };
 
-        # systemd.timers.write-npmrc = {
-        #   wantedBy = [ "timers.target" ];
-        #   timerConfig = {
-        #     OnBootSec = "2min";
-        #     OnCalendar = "daily";
-        #   };
-        # };
+        networking.nftables.enable = true;
+        networking.firewall = {
+          enable = true;
+          trustedInterfaces = [ "tailscale0" ];
+          allowedUDPPorts = [ config.services.tailscale.port ];
+          checkReversePath = "loose";
+        };
+
+        # Force tailscaled to use nftables instead of iptables compat layer
+        systemd.services.tailscaled.serviceConfig.Environment = [
+          "TS_DEBUG_FIREWALL_MODE=nftables"
+        ];
+
+        # 3. Tailscale: permit Caddy to manage TLS certs via Tailscale
+        # (if you want HTTPS on your tailnet via the Caddy+Tailscale integration)
+        services.tailscale.permitCertUid = "caddy";
+
+        # Optional: run caddy trust automatically after service starts
+        systemd.services.caddy-trust = {
+          description = "Trust Caddy local CA";
+          after = [ "caddy.service" ];
+          wants = [ "caddy.service" ];
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            Environment = [
+              "HOME=/root"
+              "PATH=${pkgs.p11-kit}/bin:${pkgs.nssTools}/bin:${pkgs.caddy}/bin"
+            ];
+            ExecStart = "${pkgs.caddy}/bin/caddy trust";
+          };
+        };
       };
 
     homeManager =
@@ -93,63 +99,30 @@
           });
       in
       {
-        home =
-          let
-            deps = with pkgs; [
-              curl
-              wget
-              getconf
-            ];
-            depPaths = (builtins.concatStringsSep ":" (map (dep: "${dep}/bin") deps));
-          in
-          {
-            # activation = {
-            #   hightouchSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            #     export PATH="${depPaths}:$PATH"
-            #     export PNPM_HOME="${config.home.homeDirectory}/.local/share/pnpm"
-            #     export ENV_FILE="/dev/null"
-            #     export PROJECT_PATH="${config.home.homeDirectory}/Software/hightouch";
-            #     if [[ ! -d "$PROJECT_PATH" ]]; then
-            #       mkdir -p "$PROJECT_PATH"
-            #     fi
-            #     cd "$PROJECT_PATH"
-            #
-            #     # Install pnpm
-            #     curl -fsSL https://get.pnpm.io/install.sh | sh -
-            #
-            #     # Set the nodeVersion based on the workspace yaml
-            #     # pnpm env use --global $(grep "nodeVersion" pnpm-workspace.yaml | sed 's/.*nodeVersion: *\([0-9.]*\).*/\1/')
-            #   '';
-            # };
-
-            sessionVariables = {
-              JAVA_HOME = "${pkgs.openjdk}";
-              CPPFLAGS = "-I${pkgs.openjdk}/include";
-            };
-
-            packages =
-              with pkgs;
-              [
-                nodejs
-                pnpm
-
-                # Dev workflow
-                git-spice # Stacked PRs
-                tilt # Local dev orchestration (Docker Compose)
-                _1password-cli # Secrets management
-                autossh
-                fzf
-
-                # Python tooling
-                pipx
-                python312Packages.setuptools # python-setuptools
-                # libomp # OpenMP for LightGBM
-              ]
-              ++ deps;
-
-            # file.".npmrc".source = config.age.secrets.npmrc.path;
+        home = {
+          sessionVariables = {
+            JAVA_HOME = "${pkgs.openjdk}";
+            CPPFLAGS = "-I${pkgs.openjdk}/include";
           };
 
+          packages = with pkgs; [
+            nodejs
+            pnpm
+
+            # Dev workflow
+            git-spice # Stacked PRs
+            tilt # Local dev orchestration (Docker Compose)
+            _1password-cli # Secrets management
+            autossh
+            fzf
+
+            # Python tooling
+            pipx
+            # python312
+            python312Packages.setuptools # python-setuptools
+            # libomp # OpenMP for LightGBM
+          ];
+        };
       };
   };
 }
