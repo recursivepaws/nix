@@ -39,10 +39,6 @@
         services.tailscale = {
           enable = true;
         };
-        services.caddy = {
-          enable = true;
-        };
-
         networking.nftables.enable = true;
         networking.firewall = {
           enable = true;
@@ -55,27 +51,6 @@
         systemd.services.tailscaled.serviceConfig.Environment = [
           "TS_DEBUG_FIREWALL_MODE=nftables"
         ];
-
-        # 3. Tailscale: permit Caddy to manage TLS certs via Tailscale
-        # (if you want HTTPS on your tailnet via the Caddy+Tailscale integration)
-        services.tailscale.permitCertUid = "caddy";
-
-        # Optional: run caddy trust automatically after service starts
-        systemd.services.caddy-trust = {
-          description = "Trust Caddy local CA";
-          after = [ "caddy.service" ];
-          wants = [ "caddy.service" ];
-          wantedBy = [ "multi-user.target" ];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            Environment = [
-              "HOME=/root"
-              "PATH=${pkgs.p11-kit}/bin:${pkgs.nssTools}/bin:${pkgs.caddy}/bin"
-            ];
-            ExecStart = "${pkgs.caddy}/bin/caddy trust";
-          };
-        };
       };
 
     homeManager =
@@ -102,13 +77,51 @@
       {
         home = {
           sessionVariables = {
-            JAVA_HOME = "${pkgs.openjdk}";
-            CPPFLAGS = "-I${pkgs.openjdk}/include";
+            JAVA_HOME = "$HOME/.java-home";
+            CPPFLAGS = "-I${pkgs.openjdk}/lib/openjdk/include";
+            JAVA_TOOL_OPTIONS = "-Djavax.net.ssl.trustStore=$HOME/.java/cacerts";
+          };
+
+          activation.setupJavaCacerts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            $DRY_RUN_CMD mkdir -p "$HOME/.java"
+            $DRY_RUN_CMD cp --no-preserve=mode \
+              ${pkgs.openjdk}/lib/openjdk/lib/security/cacerts \
+              "$HOME/.java/cacerts"
+            $DRY_RUN_CMD chmod 644 "$HOME/.java/cacerts"
+
+            # Mirror the openjdk tree with a writable cacerts
+            $DRY_RUN_CMD rm -rf "$HOME/.java-home"
+            $DRY_RUN_CMD cp -r --no-preserve=mode \
+              ${pkgs.openjdk}/lib/openjdk \
+              "$HOME/.java-home"
+            $DRY_RUN_CMD chmod -R u+w "$HOME/.java-home"
+            $DRY_RUN_CMD ln -sf "$HOME/.java/cacerts" "$HOME/.java-home/lib/security/cacerts"
+          '';
+          # sessionVariables = {
+          #   JAVA_HOME = "${pkgs.openjdk}";
+          #   CPPFLAGS = "-I${pkgs.openjdk}/include";
+          #   JAVA_TOOL_OPTIONS = "-Djavax.net.ssl.trustStore=$HOME/.java/cacerts";
+          # };
+          #
+          # activation.setupJavaCacerts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          #   $DRY_RUN_CMD mkdir -p "$HOME/.java"
+          #   $DRY_RUN_CMD cp --no-preserve=mode \
+          #     ${pkgs.openjdk}/lib/openjdk/lib/security/cacerts \
+          #     "$HOME/.java/cacerts"
+          #   $DRY_RUN_CMD chmod 644 "$HOME/.java/cacerts"
+          #   $DRY_RUN_CMD ln -sf "$HOME/.java/cacerts" "$HOME/.keystore"
+          # '';
+
+          shellAliases = {
+            open = "xdg-open";
           };
 
           packages = with pkgs; [
             nodejs
             pnpm
+
+            # `open` command
+            xdg-utils
 
             # Dev workflow
             git-spice # Stacked PRs
@@ -116,6 +129,7 @@
             _1password-cli # Secrets management
             autossh
             fzf
+            nssTools
 
             # Python tooling
             pipx
