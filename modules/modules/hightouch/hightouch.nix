@@ -1,5 +1,7 @@
-{ den, ... }:
+{ den, inputs, ... }:
 {
+  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/b95255df2360a45ddbb03817a68869d5cb01bf96";
+
   den.aspects.hightouch = {
     includes = [ den.aspects.kubernetes ];
     nixos =
@@ -62,17 +64,19 @@
       }:
       let
         # The specific version of node pinned in `pnpm-workspace.yaml`
-        nodejs =
-          let
-            version = "20.19.2";
-          in
-          pkgs.nodejs_20.overrideAttrs (old: {
-            version = version;
-            src = pkgs.fetchurl {
-              url = "https://nodejs.org/dist/v${version}/node-v${version}.tar.xz";
-              sha256 = "sha256-Sn/2EdUYD05CAgT6byL5+d6yrF6YYZ3ZpN6H7fWwO24=";
-            };
-          });
+        nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.system}.nodejs_20;
+
+        # nodejs =
+        # let
+        #   version = "20.19.2";
+        # in
+        # pkgs.nodejs_20.overrideAttrs (old: {
+        #   version = version;
+        #   src = pkgs.fetchurl {
+        #     url = "https://nodejs.org/dist/v${version}/node-v${version}.tar.xz";
+        #     sha256 = "sha256-Sn/2EdUYD05CAgT6byL5+d6yrF6YYZ3ZpN6H7fWwO24=";
+        #   };
+        # });
       in
       {
         home = {
@@ -118,7 +122,7 @@
 
           packages = with pkgs; [
             nodejs
-            pnpm
+            (pkgs.pnpm.override { nodejs = nodejs; })
 
             # `open` command
             xdg-utils

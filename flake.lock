@@ -238,6 +238,22 @@
         "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
       }
     },
+    "nixpkgs-node": {
+      "locked": {
+        "lastModified": 1751251929,
+        "narHash": "sha256-IJWIzZSkBsDzS7iS/iwSwur+xFkWqeLYC4kdf8ObtOM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b95255df2360a45ddbb03817a68869d5cb01bf96",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b95255df2360a45ddbb03817a68869d5cb01bf96",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1776067740,
@@ -309,6 +325,7 @@
         "mesa-good": "mesa-good",
         "niri-flake": "niri-flake",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-node": "nixpkgs-node",
         "noctalia": "noctalia"
       }
     },

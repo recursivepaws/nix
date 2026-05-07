@@ -18,7 +18,7 @@
         lua5_1
         stylua
         tree-sitter
-        nodejs_22
+        # nodejs_22
         lua-language-server
       ];
     };
