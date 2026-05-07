@@ -122,7 +122,7 @@
 
           packages = with pkgs; [
             nodejs
-            (pkgs.pnpm.override { nodejs = nodejs; })
+            (pnpm.override { nodejs = nodejs; })
 
             # `open` command
             xdg-utils
