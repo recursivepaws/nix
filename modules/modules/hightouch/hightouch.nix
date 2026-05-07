@@ -29,7 +29,13 @@
         ];
 
         # Required by tilt
-        virtualisation.docker.enable = true;
+        virtualisation.docker = {
+          enable = true;
+          # Don't clog up the root partition with images
+          daemon.settings = {
+            data-root = "/home/docker";
+          };
+        };
 
         security.pki.certificateFiles = [
           (pkgs.fetchurl {
