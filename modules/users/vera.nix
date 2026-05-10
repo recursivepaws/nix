@@ -13,7 +13,6 @@
           handbrake
           avidemux
           fuzzel
-          spotifyd
           chezmoi
           telegram-desktop
           signal-desktop

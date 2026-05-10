@@ -14,6 +14,7 @@
         boot.loader.efi.efiSysMountPoint = "/boot";
 
         environment.systemPackages = with pkgs; [
+          nodejs_22
           # bitwig-studio
           claude-code
           figma-linux
@@ -127,6 +128,7 @@
       bitwig-studio
       windows-vst
       davinci
+      spotify
     ];
   };
 }
