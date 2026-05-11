@@ -17,7 +17,6 @@
         environment.systemPackages = with pkgs; [
           nodejs_22
           # bitwig-studio
-          claude-code
           figma-linux
           lm_sensors
           blender

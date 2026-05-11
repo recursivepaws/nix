@@ -19,7 +19,6 @@
         hardware.system76.enableAll = true;
 
         environment.systemPackages = with pkgs; [
-          claude-code
           lm_sensors
           scrcpy
           #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.

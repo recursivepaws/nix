@@ -8,6 +8,7 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-plugins-nix.url = "github:mreimbold/claude-plugins-nix";
     den.url = "github:vic/den";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
