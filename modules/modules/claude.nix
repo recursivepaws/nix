@@ -89,6 +89,8 @@
           };
         };
 
+        home.file.".claude/skills/destination/SKILL.md".text = builtins.readFile ./destination-skill.md;
+
         # Upstream module doesn't add git to PATH during activation, so clone fails.
         # Override the activation script to fix this (pending upstream PR).
         home.activation.installClaudePlugins = lib.mkForce (
