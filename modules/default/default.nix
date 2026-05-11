@@ -129,7 +129,17 @@ in
 
       programs = {
         home-manager.enable = true;
-        zsh.dotDir = config.home.homeDirectory;
+        zsh = {
+          # Source extra environment variables from agenix
+          initContent = ''
+            if [ -f /run/agenix/init-content ]; then
+              source /run/agenix/init-content
+            else
+              echo "warning: /run/agenix/init-content not found, MCP environment variables may be missing" >&2
+            fi
+          '';
+          dotDir = config.home.homeDirectory;
+        };
       };
 
       # Packages I consider essential for all users on all systems

@@ -12,5 +12,6 @@ let
 in
 {
   "github.token.age".publicKeys = keys;
+  "init-content.age".publicKeys = keys;
   "secrets.age".publicKeys = keys;
 }

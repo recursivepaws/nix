@@ -21,6 +21,9 @@
         plugins = [
           "@anthropics/claude-code-plugins/pr-review-toolkit"
           "@anthropics/claude-code-plugins/commit-commands"
+          "@anthropics/claude-code-plugins/code-review"
+          "@anthropics/claude-plugins-official/typescript-lsp"
+          "@anthropics/claude-plugins-official/linear"
         ];
       in
       {
@@ -61,18 +64,28 @@
         };
 
         mcp-servers.programs = {
+          fetch.enable = true;
+          context7.enable = true;
+          memory.enable = true;
+          sequential-thinking.enable = true;
+          nixos.enable = true;
           filesystem = {
             enable = true;
             args = [ "${config.home.homeDirectory}/Software" ];
           };
+
+          git.enable = true;
           github = {
             enable = true;
-            passwordCommand = {
-              GITHUB_PERSONAL_ACCESS_TOKEN = [
-                "cat"
-                "/run/agenix/github.token"
-              ];
+            env = {
+              GITHUB_PERSONAL_ACCESS_TOKEN = "\${GITHUB_PERSONAL_ACCESS_TOKEN}";
             };
+            # passwordCommand = {
+            #   GITHUB_PERSONAL_ACCESS_TOKEN = [
+            #     "cat"
+            #     "/run/agenix/github.token"
+            #   ];
+            # };
           };
         };
 
