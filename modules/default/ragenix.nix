@@ -45,6 +45,12 @@
           group = "secrets";
           mode = "0440";
         };
+        "github.token" = {
+          file = ../../secrets/github.token.age;
+          owner = "root";
+          group = "secrets";
+          mode = "0440";
+        };
       };
     };
 }

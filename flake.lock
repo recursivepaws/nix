@@ -186,6 +186,26 @@
         "type": "github"
       }
     },
+    "mcp-servers-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778509947,
+        "narHash": "sha256-q4VAN6lptgy7Vv4F1LKvvRNABHdj9B1EpTH81VhxzFQ=",
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "rev": "91656c6c73e8955747f47b700041628cbd537095",
+        "type": "github"
+      },
+      "original": {
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "type": "github"
+      }
+    },
     "mesa-good": {
       "locked": {
         "lastModified": 1754501210,
@@ -374,6 +394,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
+        "mcp-servers-nix": "mcp-servers-nix",
         "mesa-good": "mesa-good",
         "niri-flake": "niri-flake",
         "nixpkgs": "nixpkgs_2",
