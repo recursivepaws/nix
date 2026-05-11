@@ -6,6 +6,7 @@
     nixos =
       { pkgs, ... }:
       {
+        networking.hostName = "amanita";
         boot.loader.grub = {
           enable = true;
           efiSupport = false;

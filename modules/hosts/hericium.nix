@@ -5,6 +5,7 @@
     nixos =
       { pkgs, ... }:
       {
+        networking.hostName = "hericium";
         boot.loader.grub = {
           enable = true;
           efiSupport = false;
