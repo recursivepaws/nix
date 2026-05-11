@@ -95,9 +95,23 @@
           };
         };
 
+        mcp-servers.settings.servers.circleci = {
+          command = "${pkgs.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "@circleci/mcp-server-circleci@latest"
+          ];
+          env = {
+            CIRCLECI_TOKEN = "\${CIRCLECI_TOKEN}";
+          };
+        };
+
         mcp-servers.settings.servers.datadog = {
           command = "${pkgs.nodejs}/bin/npx";
-          args = [ "-y" "@winor30/mcp-server-datadog" ];
+          args = [
+            "-y"
+            "@winor30/mcp-server-datadog"
+          ];
           env = {
             DATADOG_API_KEY = "\${DATADOG_API_KEY}";
             DATADOG_APP_KEY = "\${DATADOG_APP_KEY}";
