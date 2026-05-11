@@ -207,15 +207,13 @@
                     "Mod+F".action = maximize-column;
                     "Mod+Shift+F".action = fullscreen-window;
                     "Mod+C".action = close-window;
-                    "Mod+E".action = spawn "thunar";
+                    "Mod+E".action = spawn "nautilus";
                     "Mod+Ctrl+S".action = ns "plugin:screen-toolkit annotate";
                     "Mod+S".action = toggle-column-tabbed-display;
 
                     "Mod+V".action = center-column;
 
                     "Mod+Shift+V".action = toggle-window-floating;
-
-                    # "Mod+Ctrl+S".action = screenshot;
 
                     "Mod+H".action = focus-column-left;
                     "Mod+J".action = focus-window-down;

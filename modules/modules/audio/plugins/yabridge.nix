@@ -24,7 +24,7 @@
             SYSTEM_REFS=$(nix-store -qR /run/current-system/sw 2>/dev/null || echo "")
 
             # Filter for plugin packages (exclude bundle and other non-VST packages)
-            PLUGIN_PATHS=$(echo "$SYSTEM_REFS" | grep -E "(serum-|serum2-|shaperbox3-|vst-)" | grep -v "windows-plugin-bundle" | grep -v "vamp-plugin" | grep -v "thunar" || echo "")
+            PLUGIN_PATHS=$(echo "$SYSTEM_REFS" | grep -E "(serum-|serum2-|shaperbox3-|vst-)" | grep -v "windows-plugin-bundle" | grep -v "vamp-plugin" | grep -v "nautilus" || echo "")
 
             echo "Plugin Paths: $PLUGIN_PATHS"
 

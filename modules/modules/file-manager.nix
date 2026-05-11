@@ -1,18 +1,13 @@
 {
   den.aspects.file-manager = {
-    nixos = { pkgs, ... }: {
-
-      services = {
-        gvfs.enable = true;
-        tumbler.enable = true;
+    nixos =
+      { pkgs, ... }:
+      {
+        services.gvfs.enable = true;
+        environment.systemPackages = with pkgs; [ nautilus file-roller ];
+        xdg.mime.defaultApplications = {
+          "inode/directory" = "org.gnome.Nautilus.desktop";
+        };
       };
-
-      programs.thunar = {
-        enable = true;
-        plugins = with pkgs; [ thunar-volman thunar-archive-plugin ];
-      };
-
-      xdg.mime.defaultApplications = { "inode/directory" = "thunar.desktop"; };
-    };
   };
 }

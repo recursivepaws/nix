@@ -49,7 +49,7 @@ trap cleanup EXIT
 # 0. Find and mount Camera
 log "Looking for Camera device..."
 
-# Find the device node for the iPod (it's /dev/sdc2 based on your Thunar message)
+# Find the device node for the iPod
 DEVICE=""
 for i in $(seq 1 $MAX_WAIT); do
   # Look for block devices matching our USB vendor/product ID
