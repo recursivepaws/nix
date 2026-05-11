@@ -18,8 +18,9 @@
           enabledExtensions = with spicePkgs.extensions; [
             adblock
             aiBandBlocker
+            beautifulLyrics
           ];
-          theme = spicePkgs.themes.bloom;
+          theme = spicePkgs.themes.blossom;
         };
       };
   };
