@@ -121,6 +121,20 @@
           };
         };
 
+        mcp-servers.settings.servers.slack = {
+          command = "${pkgs.nodejs}/bin/npx";
+          args = [
+            "-y"
+            "slack-mcp-server@latest"
+            "--transport"
+            "stdio"
+          ];
+          env = {
+            SLACK_MCP_XOXC_TOKEN = "\${SLACK_MCP_XOXC_TOKEN}";
+            SLACK_MCP_XOXD_TOKEN = "\${SLACK_MCP_XOXD_TOKEN}";
+          };
+        };
+
         home.file.".claude/skills/destination/SKILL.md".text = builtins.readFile ./destination-skill.md;
 
         # Upstream module doesn't add git to PATH during activation, so clone fails.
