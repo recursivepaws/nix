@@ -23,7 +23,10 @@
           "@anthropics/claude-code-plugins/commit-commands"
           "@anthropics/claude-code-plugins/code-review"
           "@anthropics/claude-plugins-official/typescript-lsp"
+          # "@anthropics/claude-plugins-official/rust-analyzer-lsp"
           "@anthropics/claude-plugins-official/linear"
+          "@anthropics/claude-plugins-official/code-simplifier"
+          "@anthropics/claude-plugins-official/skill-creator"
         ];
       in
       {
@@ -50,7 +53,7 @@
                 # "cursor"
               ];
               globalSkills = [
-                "@anthropics/skills/frontend-design"
+                # "@anthropics/skills/frontend-design"
                 "@anthropics/skills/pdf"
               ];
             };
