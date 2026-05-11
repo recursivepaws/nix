@@ -23,18 +23,9 @@
           blender
           anki
           scrcpy
-          #neovim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-          networkmanager
           # libwebcam
           sccache
-          wayland
           wget
-          unzip
-          gh
-          fzf
-          ripgrep
-          fd
-          clang
           mold
           # rustc
           # rustfmt
@@ -50,18 +41,13 @@
           delta
           xwayland-satellite
           v4l-utils
-          eza
-          bat
-          zoxide
           guvcview
           ffmpeg-full
           SDL2
           yasm
           nasm
-          tree
           gawk
           bc
-          htop
           xprop
           clang-tools
         ];

@@ -27,12 +27,6 @@
           sccache
           wayland
           wget
-          unzip
-          gh
-          fzf
-          ripgrep
-          fd
-          clang
 
           # TODO: fix nvim building without these
           gcc

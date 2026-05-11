@@ -44,6 +44,7 @@ in
         "flakes"
         "recursive-nix"
       ];
+
       # Select internationalisation properties.
       i18n.defaultLocale = "en_US.UTF-8";
 
@@ -61,6 +62,23 @@ in
       # };
 
       nixpkgs.config.allowUnfree = true;
+
+      # Essential system packages
+      environment.systemPackages = with pkgs; [
+        eza
+        bat
+        zoxide
+        tree
+        wayland
+        networkmanager
+        unzip
+        gh
+        fzf
+        ripgrep
+        fd
+        clang
+        htop
+      ];
 
       programs = {
         nix-ld.enable = true;
