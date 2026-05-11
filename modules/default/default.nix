@@ -16,6 +16,16 @@ in
   # host<->user provides
   den.ctx.user.includes = [ den._.mutual-provider ];
 
+  # Default aspects
+  den.default.includes = with den.aspects; [
+    spotify
+    niri
+    noctalia
+    file-manager
+    terminal
+    browser
+  ];
+
   # Allow unfree packages
   den.default.nixos =
     { pkgs, ... }:
@@ -106,6 +116,7 @@ in
       home.packages = with pkgs; [
         eog
         cameractrls
+        cameractrls-gtk4
         wl-clipboard
         baobab
         gnome-disk-utility

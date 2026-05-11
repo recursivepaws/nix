@@ -105,11 +105,6 @@
       };
 
     provides.to-users.includes = with den.aspects; [
-      niri
-      noctalia
-      file-manager
-      terminal
-      browser
       hightouch
     ];
   };

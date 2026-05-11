@@ -76,7 +76,6 @@
 
         programs = {
           coolercontrol.enable = true;
-          chromium.enable = true;
           obs-studio = {
             enable = true;
             enableVirtualCamera = true;
@@ -118,17 +117,11 @@
     provides.to-users.includes = with den.aspects; [
       amd
       gpu
-      niri
-      noctalia
-      file-manager
-      terminal
       ipod
-      browser
       crypto
       bitwig-studio
       windows-vst
       davinci
-      spotify
     ];
   };
 }
