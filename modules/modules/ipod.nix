@@ -28,6 +28,7 @@
         services.udev.extraRules = ''ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="${ipod.vendor}", ATTR{idProduct}=="${ipod.id}", TAG+="systemd", ENV{SYSTEMD_WANTS}="ipod-sync.service"'';
         systemd.services.ipod-sync = {
           description = "Sync files from SMB server to iPod";
+          restartIfChanged = false;
           environment = {
             DISPLAY = ":0";
             # XAUTHORITY = "/home/vera/.Xauthority";

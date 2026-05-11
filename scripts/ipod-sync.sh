@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e # Exit on error
 
 # Parse command-line arguments
@@ -50,20 +51,26 @@ cleanup() {
 # Set trap to cleanup on exit (both success and failure)
 trap cleanup EXIT
 
-# 0. Find and mount iPod
-log "Looking for iPod device..."
-
-# Find the device node for the iPod
-DEVICE=""
-
+# Open a single zenity progress dialog for the entire operation
 exec 3> >(show_zenity --progress \
-  --title="Waiting for iPod" \
-  --text="Connecting..." \
+  --title="iPod Sync" \
+  --text="Starting..." \
   --percentage=0 \
   --auto-close)
 
+zpct() { echo "$1" >&3; }
+zmsg() { echo "# $1" >&3; }
+
+# ---------------------------------------------------------------------------
+# Stage 1: Wait for iPod (0–20%)
+# ---------------------------------------------------------------------------
+log "Looking for iPod device..."
+DEVICE=""
+
+zmsg "Waiting for iPod to connect..."
+zpct 0
+
 for i in $(seq 1 $MAX_WAIT); do
-  # Look for block devices matching our USB vendor/product ID
   for syspath in /sys/bus/usb/devices/*; do
     if [ -f "$syspath/idVendor" ] && [ -f "$syspath/idProduct" ]; then
       vendor=$(cat "$syspath/idVendor" 2>/dev/null || echo "")
@@ -88,29 +95,28 @@ for i in $(seq 1 $MAX_WAIT); do
     fi
   done
 
-  if [ -n "$DEVICE" ]; then
-    echo "100" >&3
-    echo "# iPod detected!" >&3
-    break
-  else
-    echo "# Waiting for iPod device... ($i/$MAX_WAIT)" >&3
-    echo "$((i * 100 / MAX_WAIT))" >&3
-    sleep 1
-  fi
+  zmsg "Waiting for iPod... ($i/$MAX_WAIT)"
+  zpct "$((i * 20 / MAX_WAIT))"
+  sleep 1
 done
-
-exec 3>&- # Close the file descriptor
 
 if [ -z "$DEVICE" ]; then
   log "ERROR: iPod device not found after ${MAX_WAIT}s"
+  exec 3>&-
   exit 1
 fi
 
-# Ensure mount points exist
+log "Found iPod device: $DEVICE"
+
+# ---------------------------------------------------------------------------
+# Stage 2: Mount iPod + SMB share (20%)
+# ---------------------------------------------------------------------------
+zmsg "Mounting iPod..."
+zpct 20
+
 mkdir -p "$IPOD_MOUNT"
 mkdir -p "$SMB_MOUNT"
 
-# Check if already mounted, if not mount it
 if mountpoint -q "$IPOD_MOUNT"; then
   log "iPod already mounted at $IPOD_MOUNT"
 else
@@ -119,55 +125,87 @@ else
   log "iPod mounted successfully"
 fi
 
-# 1. Check if secret file exists
 if [ ! -f "$SECRET_FILE" ]; then
   log "ERROR: Secret file not found at $SECRET_FILE"
+  exec 3>&-
   exit 1
 fi
 
-# Read password from secret
 # shellcheck disable=SC1090
 source "$SECRET_FILE"
 
 if [ -z "$SMB_PASSWORD" ]; then
   log "Secret file did not contain SMB password"
+  exec 3>&-
   exit 1
 fi
 
-# 2. Mount SMB share if not already mounted
 if mountpoint -q "$SMB_MOUNT"; then
   log "SMB share already mounted at $SMB_MOUNT"
 else
   log "Mounting SMB share..."
-  mkdir -p "$SMB_MOUNT"
-
   mount -t cifs "//$SMB_HOST/$SMB_SHARE" "$SMB_MOUNT" \
     -o "username=$SMB_USER,password=$SMB_PASSWORD,uid=$(id -u vera),gid=$(id -g vera)"
-
   log "SMB share mounted successfully"
 fi
 
-# 3. Sync from SMB server to iPod
-log "Starting rsync from server to iPod..."
+# ---------------------------------------------------------------------------
+# Stage 3: Sync music (20–60%)
+# ---------------------------------------------------------------------------
+log "Starting music sync..."
+zmsg "Syncing music..."
+zpct 20
 
 rsync -av \
   --size-only \
   --info=progress2 \
-  --delete \
   "$SMB_MOUNT/beets/" \
-  "$IPOD_MOUNT/Music" |
-  grep -oP '\d+(?=%)' |
-  show_zenity --progress --title="IPod Music Sync" --text="Copying music files..." --auto-close
+  "$IPOD_MOUNT/Music" | \
+  while IFS= read -r -d $'\r' line; do
+    pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
+    if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
+      zpct "$((20 + pct * 40 / 100))"
+    fi
+  done || true
 
-log "Sync music completed successfully"
+log "Music sync completed"
+zmsg "Music sync complete"
+zpct 60
+
+# ---------------------------------------------------------------------------
+# Stage 4: Sync podcasts (60–95%)
+# ---------------------------------------------------------------------------
+log "Starting podcast sync..."
+zmsg "Syncing podcasts..."
 
 rsync -av \
   --size-only \
   --info=progress2 \
   --delete \
   "$SMB_MOUNT/podcasts/" \
-  "$IPOD_MOUNT/Podcasts" |
-  grep -oP '\d+(?=%)' |
-  show_zenity --progress --title="IPod Podcast Sync" --text="Copying files..." --auto-close
+  "$IPOD_MOUNT/Podcasts" | \
+  while IFS= read -r -d $'\r' line; do
+    pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
+    if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
+      zpct "$((60 + pct * 35 / 100))"
+    fi
+  done || true
 
-log "Sync podcasts completed successfully"
+log "Podcast sync completed"
+zmsg "Podcast sync complete"
+zpct 95
+
+# ---------------------------------------------------------------------------
+# Stage 5: Unmount (95–100%)
+# ---------------------------------------------------------------------------
+zmsg "Unmounting iPod..."
+log "Unmounting iPod..."
+
+umount "$IPOD_MOUNT" 2>/dev/null || umount -l "$IPOD_MOUNT" 2>/dev/null || true
+umount "$SMB_MOUNT" 2>/dev/null || umount -l "$SMB_MOUNT" 2>/dev/null || true
+
+log "Sync complete"
+zmsg "Done!"
+zpct 100
+
+exec 3>&-
