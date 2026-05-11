@@ -73,7 +73,6 @@
             enable = true;
             args = [ "${config.home.homeDirectory}/Software" ];
           };
-
           git.enable = true;
           github = {
             enable = true;
@@ -86,6 +85,15 @@
             #     "/run/agenix/github.token"
             #   ];
             # };
+          };
+        };
+
+        mcp-servers.settings.servers.datadog = {
+          command = "${pkgs.nodejs}/bin/npx";
+          args = [ "-y" "@winor30/mcp-server-datadog" ];
+          env = {
+            DATADOG_API_KEY = "\${DATADOG_API_KEY}";
+            DATADOG_APP_KEY = "\${DATADOG_APP_KEY}";
           };
         };
 
