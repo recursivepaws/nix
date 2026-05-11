@@ -110,6 +110,7 @@ in
 
       programs = {
         home-manager.enable = true;
+        zsh.dotDir = config.home.homeDirectory;
       };
 
       # Packages I consider essential for all users on all systems

@@ -13,7 +13,7 @@
         gnumake
         # TODO: end
 
-        nixfmt-rfc-style
+        nixfmt
         luarocks
         lua5_1
         stylua

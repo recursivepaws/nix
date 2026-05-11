@@ -9,11 +9,8 @@
           in
           {
             enable = true;
-            # enableDefaultConfig = false;
-            extraConfig = ''
-              Host *
-                IdentityAgent ${opAgent}
-            '';
+            enableDefaultConfig = false;
+            matchBlocks."*".extraOptions.IdentityAgent = opAgent;
           };
         git = {
           enable = true;
@@ -33,7 +30,7 @@
               signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIINY5xZYRlbxjdw4N47VADFRSU3EeSI3Yze97F8cWGLS";
             };
           };
-          aliases = {
+          settings.alias = {
             default-branch = "config init.defaultBranch";
             current-branch = "rev-parse --abbrev-ref HEAD";
             upstream-branch = ''!git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)"'';
