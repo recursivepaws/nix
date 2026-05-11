@@ -150,7 +150,35 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Stage 3: Sync music (20–60%)
+# Stage 3: Space check before music sync
+# ---------------------------------------------------------------------------
+zmsg "Checking available space..."
+log "Checking available space on iPod..."
+
+server_music_size=$(du -sb "$SMB_MOUNT/beets/" | cut -f1)
+ipod_music_size=$(du -sb "$IPOD_MOUNT/Music" 2>/dev/null | cut -f1 || echo 0)
+ipod_free=$(df -B1 --output=avail "$IPOD_MOUNT" | tail -1 | tr -d ' ')
+available=$((ipod_free + ipod_music_size))
+
+log "Server music size:      $((server_music_size / 1048576)) MiB"
+log "iPod Music folder size: $((ipod_music_size / 1048576)) MiB"
+log "iPod free space:        $((ipod_free / 1048576)) MiB"
+log "Effective available:    $((available / 1048576)) MiB"
+
+if [ "$server_music_size" -gt "$available" ]; then
+  needed=$(((server_music_size - available) / 1048576))
+  log "ERROR: Not enough space on iPod (need ${needed} MiB more)"
+  exec 3>&-
+  show_zenity --error \
+    --title="iPod Sync: Not Enough Space" \
+    --text="Not enough space on iPod to sync music.\n\nNeed $((server_music_size / 1048576)) MiB, but only $((available / 1048576)) MiB available (${needed} MiB short)."
+  exit 1
+fi
+
+log "Space check passed"
+
+# ---------------------------------------------------------------------------
+# Stage 4: Sync music (20–60%)
 # ---------------------------------------------------------------------------
 log "Starting music sync..."
 zmsg "Syncing music..."
@@ -160,7 +188,7 @@ rsync -av \
   --size-only \
   --info=progress2 \
   "$SMB_MOUNT/beets/" \
-  "$IPOD_MOUNT/Music" | \
+  "$IPOD_MOUNT/Music" |
   while IFS= read -r -d $'\r' line; do
     pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
     if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
@@ -173,7 +201,7 @@ zmsg "Music sync complete"
 zpct 60
 
 # ---------------------------------------------------------------------------
-# Stage 4: Sync podcasts (60–95%)
+# Stage 5: Sync podcasts (60–95%)
 # ---------------------------------------------------------------------------
 log "Starting podcast sync..."
 zmsg "Syncing podcasts..."
@@ -183,7 +211,7 @@ rsync -av \
   --info=progress2 \
   --delete \
   "$SMB_MOUNT/podcasts/" \
-  "$IPOD_MOUNT/Podcasts" | \
+  "$IPOD_MOUNT/Podcasts" |
   while IFS= read -r -d $'\r' line; do
     pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
     if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
@@ -196,7 +224,7 @@ zmsg "Podcast sync complete"
 zpct 95
 
 # ---------------------------------------------------------------------------
-# Stage 5: Unmount (95–100%)
+# Stage 6: Unmount (95–100%)
 # ---------------------------------------------------------------------------
 zmsg "Unmounting iPod..."
 log "Unmounting iPod..."
