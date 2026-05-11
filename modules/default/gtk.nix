@@ -1,11 +1,31 @@
 {
   den.default.homeManager =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      config,
+      lib,
+      ...
+    }:
+    let
+      localDirs = [
+        "Documents"
+        "Downloads"
+        "Pictures"
+        "Pictures/Screenshots"
+        "Music"
+        "Videos"
+        "Software"
+      ];
+    in
     {
       home.packages = with pkgs; [
         gnome-shell
         sassc
       ];
+
+      # Ensure the existence of the local dirs used for bookmarks
+      systemd.user.tmpfiles.rules = map (dir: "d %h/${dir} 0755 - - -") localDirs;
+
       gtk = {
         enable = true;
         theme = {
@@ -41,20 +61,10 @@
           gtk-application-prefer-dark-theme = 1;
         };
         gtk3 = {
-          bookmarks =
-            (map (bookmark: "file://${config.home.homeDirectory}/${bookmark}") [
-              "Documents"
-              "Downloads"
-              "Pictures"
-              "Pictures/Screenshots"
-              "Music"
-              "Videos"
-              "Software"
-            ])
-            ++ [
-              "smb://vera@MeowStation.local/ MeowStation"
-              "sftp://vera@BarkStation.local/ BarkStation"
-            ];
+          bookmarks = (map (dir: "file://${config.home.homeDirectory}/${dir}") localDirs) ++ [
+            "smb://vera@MeowStation.local/ MeowStation"
+            "sftp://vera@BarkStation.local/ BarkStation"
+          ];
           extraConfig = {
             gtk-application-prefer-dark-theme = 1;
           };
