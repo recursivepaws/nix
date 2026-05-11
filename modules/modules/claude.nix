@@ -88,6 +88,13 @@
           };
         };
 
+        mcp-servers.settings.servers.snowflake = {
+          url = "\${SNOWFLAKE_MCP_URL}";
+          headers = {
+            Authorization = "Bearer \${SNOWFLAKE_PAT}";
+          };
+        };
+
         mcp-servers.settings.servers.datadog = {
           command = "${pkgs.nodejs}/bin/npx";
           args = [ "-y" "@winor30/mcp-server-datadog" ];
