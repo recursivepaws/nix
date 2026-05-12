@@ -77,5 +77,20 @@
           };
         };
       };
+
+      programs.zsh.initContent = ''
+        gh() {
+          if [ -f /run/agenix/github.token ]; then
+            GH_TOKEN=$(cat /run/agenix/github.token) command gh "$@"
+          else
+            echo "warning: /run/agenix/github.token not found, gh may not be authenticated" >&2
+            command gh "$@"
+          fi
+        }
+      '';
+
+      home.packages = with pkgs; [
+        gh
+      ];
     };
 }

@@ -73,7 +73,6 @@ in
         wayland
         networkmanager
         unzip
-        gh
         fzf
         ripgrep
         fd
