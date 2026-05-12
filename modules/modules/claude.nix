@@ -137,6 +137,10 @@
 
         home.file.".claude/skills/destination/SKILL.md".text = builtins.readFile ./destination-skill.md;
 
+        home.file.".claude/skills/hightouch-dev/SKILL.md".text = builtins.readFile ./hightouch-dev/SKILL.md;
+        home.file.".claude/skills/hightouch-dev/references/ticket-memory.md".text = builtins.readFile ./hightouch-dev/references/ticket-memory.md;
+        home.file.".claude/skills/hightouch-dev/references/lap-trust.md".text = builtins.readFile ./hightouch-dev/references/lap-trust.md;
+
         # Upstream module doesn't add git to PATH during activation, so clone fails.
         # Override the activation script to fix this (pending upstream PR).
         home.activation.installClaudePlugins = lib.mkForce (
