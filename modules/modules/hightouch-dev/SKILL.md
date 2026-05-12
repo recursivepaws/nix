@@ -31,7 +31,7 @@ Before starting, probe each required MCP with a lightweight call. Retry slow-to-
 | git | git status in HIGHTOUCH_REPO |
 | datadog | get active hosts count |
 | circleci | list followed projects |
-| context7 | resolve-library-id for "react" |
+| context7 | resolve-library-id with libraryName: "react", query: "hooks" |
 | memory | read_graph |
 
 Show a summary. Flag any failures with the MCP name and reason. If slack is down, warn that Phase 3 will be degraded. Continue regardless — skip unavailable MCPs gracefully throughout the workflow.
@@ -40,11 +40,18 @@ Show a summary. Flag any failures with the MCP name and reason. If slack is down
 
 ## Phase 1: Pick a Ticket
 
-Fetch all Linear issues assigned to Vera Gonzalez. **Exclude tickets whose status is `Done`** — they are complete and should not appear in the list.
+Fetch all active Linear issues assigned to you using two calls — one per active state type — to exclude done and cancelled tickets at the query level rather than filtering after the fact:
 
-While fetching, also run a background cleanup: for any ticket whose status is `Done` and whose completion date is more than 14 days ago, delete its memory directory at `{TICKET_MEMORY_ROOT}/<ticket-id>/` entirely. Do this silently unless something goes wrong.
+```
+list_issues(assignee: "me", state: "started", limit: 50)
+list_issues(assignee: "me", state: "unstarted", limit: 50)
+```
 
-Compute an urgency score for each remaining ticket:
+Merge the two result sets in memory. **Do not write the results to disk or parse them with bash** — work with the MCP response directly in context.
+
+While fetching, also silently clean up stale memory: scan `{TICKET_MEMORY_ROOT}/` for any ticket directories whose `context.md` shows a `Done` status with a completion date older than 14 days, and delete those directories. Only mention this to the user if something goes wrong.
+
+Compute an urgency score for each ticket:
 
 - **Priority**: Urgent=40, High=25, Medium=10, Normal=5, No priority=0
 - **Age**: +1 per day since creation (cap at 30)
@@ -103,7 +110,7 @@ Fetch the full ticket: description, comments, labels, assignees, priority, due d
 Look for a Slack thread URL in the Linear ticket description and comments. This thread should almost always exist — if you can't find one, **warn the user prominently** (this is abnormal for this team) and continue without Slack context.
 
 If found:
-- Read the full thread via the slack MCP
+- Read the full thread via the slack MCP using `conversations_replies` with params `channel_id` and `thread_ts` (not `channel` — the parameter name is `channel_id`)
 - Recursively load any Slack URLs referenced within that thread
 - Save all content to `slack.md`
 
