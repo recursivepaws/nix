@@ -24,7 +24,6 @@ in
     file-manager
     terminal
     browser
-    claude
   ];
 
   # Allow unfree packages

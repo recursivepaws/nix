@@ -100,6 +100,7 @@
 
     provides.to-users.includes = with den.aspects; [
       hightouch
+      claude
     ];
   };
 }
