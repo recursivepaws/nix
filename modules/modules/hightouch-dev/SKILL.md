@@ -122,7 +122,8 @@ If `slack.md` already exists: find the timestamp of the last saved message and f
 
 **Skip entirely if**:
 - `context.md` shows `datadog_queried: true`, OR
-- The ticket is inferred to be a **feature request**
+- The ticket is inferred to be a **feature request**, OR
+- The bug description indicates **silent corruption** — syncs complete successfully but written values are wrong, records are missing, or output is subtly incorrect. These bugs produce no errors in Datadog; querying is wasted effort. Signs: "wrong value", "incorrect field", "not what we expected", "data looks off", "records not showing up" without any mention of failures or exceptions.
 
 **Infer feature vs. bug** from the ticket title, description, Slack thread, and labels:
 - Bug signals: error messages, stack traces, customer complaints, "broken", "failing", "regression", "not working"
@@ -204,6 +205,10 @@ With full context loaded, attempt the fix or feature.
 
 Either way, write a test that would catch a regression. Save the test file path(s) to `testing.md`.
 
+**Test fixture guidance**:
+- Before constructing fixtures for complex SDK types (e.g. `DestinationRecord`), grep the same package for existing test files to find established examples.
+- When a type has required fields irrelevant to the test, stub them with minimal values and cast with `as T[]` directly — not `as unknown as T[]`. The latter signals a type mismatch that should be fixed at the fixture level instead.
+
 **Re-entry**: this phase is always re-enterable. If the user says "try again", "take another shot", or "what would you do differently" — re-read all memory files and produce a revised attempt. Use everything you've learned from prior attempts.
 
 After any significant back-and-forth or corrections from the user, update `codebase.md` with what changed and why.
@@ -216,8 +221,8 @@ When the user signals readiness to ship ("this looks good", "open a PR", "ship i
 
 1. **Publish branch**: push to remote if not already up to date.
 2. **Prettier**: run `pnpm prettier --write` on all files changed since `master`. Confirm clean exit.
-3. **Tests**: run all tests associated with this ticket (from `testing.md`). All must pass before continuing.
-4. **Open PR**: create a PR on `hightouchio/hightouch` targeting `master`. Use the Linear ticket title as the PR title. Include the Linear URL in the PR description body.
+3. **Tests**: run all tests associated with this ticket (from `testing.md`). All must pass before continuing. For destination tests, run from `packages/backend/destinations/` — not the monorepo root. The root Jest config does not wire up the TypeScript transformer the same way, so `import type` and other TS syntax will fail with a Babel parse error.
+4. **Open PR**: create a PR on `hightouchio/hightouch` targeting `master` using `mcp__plugin_claude-code-home-manager_github__create_pull_request` — do not use `gh pr create` or any `gh` CLI commands, as `gh` auth is not reliable in this environment. Use the Linear ticket title as the PR title. Include the Linear URL in the PR description body. If push succeeds but PR creation fails, do not re-push — the branch is already on remote, go straight to retrying PR creation via the MCP.
 5. **Monitor CI**:
    - Poll CircleCI every 15 seconds for job status on this PR
    - Do **not** read job logs unless a job fails
