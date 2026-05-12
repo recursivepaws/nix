@@ -42,6 +42,17 @@
             mcp-servers-nix.homeManagerModules.default
           ];
 
+          programs.zsh.initContent = ''
+            claude() {
+              if [ -f /run/agenix/agent-env ]; then
+                ( source /run/agenix/agent-env && exec command claude "$@" )
+              else
+                echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
+                command claude "$@"
+              fi
+            }
+          '';
+
           programs = {
             claude-tools = {
               # Enable plugin manager
