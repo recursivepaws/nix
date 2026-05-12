@@ -22,7 +22,7 @@ When annotations conflict, trust in this order:
 **If `#[crawl]` or `#[human]` contradicts the spec, trust the flag.**
 **If a flag says `MISCLASSIFIED`, the current code is wrong at that point.**
 
-## Cross-referencing with Context7
+## Cross-referencing with Context7 and Web Search
 
 After loading the LAP file, use context7 to pull live documentation for the destination's API. Use this to:
 - Fill gaps where the LAP file has no annotation
@@ -30,6 +30,8 @@ After loading the LAP file, use context7 to pull live documentation for the dest
 - Find recently changed endpoints or parameters not yet reflected in LAP
 
 When context7 and LAP conflict: prefer `#[human]` or `#[crawl]` annotations over context7. Use context7 as supplemental, not authoritative.
+
+If both the LAP file and context7 fail to produce a concrete example for a given endpoint or field, fall back to web search (see Phase 6 of the main skill for the full waterfall). Emit a warning to the user before doing so — web-sourced findings carry lower confidence than LAP or context7.
 
 ## Gap Analysis Output
 
@@ -48,5 +50,6 @@ Vague gap statements like "the API call is wrong" are not acceptable. Be specifi
 
 Some destinations may not have a LAP file yet. In that case:
 1. Note the absence explicitly.
-2. Rely solely on context7 docs and any error evidence from Datadog.
-3. Flag to the user that findings are lower-confidence without a LAP file.
+2. Use context7 docs as the primary reference.
+3. If context7 also has no coverage, fall back to web search for official API documentation.
+4. Flag to the user that findings are lower-confidence without a LAP file — and lower still if web search was the only source.

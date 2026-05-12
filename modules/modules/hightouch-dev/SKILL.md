@@ -63,7 +63,9 @@ allowed-tools: [
   "mcp__plugin_claude-code-home-manager_filesystem__search_files",
   "mcp__plugin_claude-code-home-manager_filesystem__move_file",
   "mcp__plugin_claude-code-home-manager_filesystem__edit_file",
-  "mcp__plugin_claude-code-home-manager_fetch__fetch"
+  "mcp__plugin_claude-code-home-manager_fetch__fetch",
+  "WebSearch",
+  "WebFetch"
 ]
 ---
 
@@ -154,7 +156,7 @@ Given the selected ticket (e.g. `PLAT-1234`, title "Fix webhook retry logic"):
 
 Memory lives at `{TICKET_MEMORY_ROOT}/<ticket-id>/`. See `references/ticket-memory.md` for the full file structure.
 
-**Done tickets**: if the Linear ticket's status is `Done`, do not load Slack, Datadog, or any additional context. Load `context.md` (if it exists) for reference only and skip to Phase 8 or stop — there is nothing left to investigate. If the ticket has been `Done` for more than 14 days, delete its memory directory and inform the user.
+**Done tickets**: if the Linear ticket's status is `Done`, do not load Slack, Datadog, or any additional context. Load `context.md` (if it exists) for reference only and stop — there is nothing left to investigate. If the ticket has been `Done` for more than 14 days, delete its memory directory and inform the user.
 
 **If memory exists**: load all files. Proceed to new-info checks (Slack refresh below).
 
@@ -165,7 +167,7 @@ Memory lives at `{TICKET_MEMORY_ROOT}/<ticket-id>/`. See `references/ticket-memo
 Branch: <branch-name>
 Linear URL: <url>
 Opened: <YYYY-MM-DD>
-Type: (pending)
+Type: (pending — see Phase 4 for valid values)
 datadog_queried: false
 ```
 
@@ -188,35 +190,7 @@ If `slack.md` already exists: find the timestamp of the last saved message and f
 
 ---
 
-## Phase 4: Datadog Investigation
-
-**Skip entirely if**:
-- `context.md` shows `datadog_queried: true`, OR
-- Ticket type (from Phase 5) is any of: `new-destination`, `destination-version-update`, `destination-bug-silent`, `destination-feature`, `platform-feature`
-
-**Run Datadog if** ticket type is `destination-bug-erroring` or `platform-bug`.
-
-**If ticket type is not yet classified** (Phase 5 hasn't run): infer from the ticket title, description, Slack thread, and labels before deciding:
-- Bug signals: error messages, stack traces, customer complaints, "broken", "failing", "regression", "not working"
-- Silent corruption signals: "wrong value", "incorrect field", "not what we expected", "data looks off", "records not showing up" without failures or exceptions — skip Datadog
-- Feature signals: "add", "implement", "support for", "new", "introduce", "allow", "expose" — skip Datadog
-- When ambiguous, ask the user before proceeding.
-
-**If this is a bug and hasn't been queried**:
-
-1. Extract error keywords from `slack.md` and the Linear description. Pick the most specific, least common phrases.
-2. Identify a destination slug if one is mentioned (ticket title, description, Slack, or logs).
-3. Query Datadog APM logs:
-   - Time range: last 3 days
-   - Limit: 100 results max
-   - If a destination slug is known: filter by it
-   - Use exact error strings, not broad terms. Be conservative.
-4. Deduplicate results. Extract: unique error messages, originating call sites (file + function), notable stack frames, any correlated request IDs.
-5. Save findings to `datadog.md`. Set `datadog_queried: true` in `context.md`.
-
----
-
-## Phase 5: Classify the Change
+## Phase 4: Classify the Change
 
 ### Step 1: Ticket Type
 
@@ -236,7 +210,7 @@ Classify into one of the following types based on the ticket title, description,
 
 If the ticket type involves a destination (all `destination-*` types):
 
-1. Identify the destination slug (from ticket, Slack, or Datadog logs).
+1. Identify the destination slug (from ticket title, description, or Slack thread).
 2. Locate its directory: `{HIGHTOUCH_REPO}/packages/core/backend/destinations/<slug>/`
 3. Read its `package.json` and extract available scripts. Save to `context.md`:
 
@@ -250,15 +224,15 @@ Package scripts: <list of script names and their commands>
 
 ### Step 3: Sub-skill Routing
 
-For ticket types that have dedicated sub-skills, hand off now rather than continuing through Phases 6–8:
+For ticket types that have dedicated sub-skills, hand off now rather than continuing through Phases 5–8:
 
-- **`new-destination`** → Ask the user: "Does this destination follow CRUD/ORM patterns (create, update, upsert, delete on named objects), or does it need event/audience/segment sync support?" Then invoke the appropriate skill:
+- **`new-destination`** → Ask the user: "Does this destination follow CRUD/ORM patterns (create, update, upsert, delete on named objects), or does it need event/audience/segment sync support?" Then invoke the appropriate skill from `{HIGHTOUCH_REPO}/.claude/skills/`:
   - CRUD/ORM patterns → `/write-orm-destination <slug>`
   - Event/audience/multi-sync → `/write-destination <slug>`
   - If unclear → show both options and ask
-- **`destination-version-update`** → invoke `/update-destination-version <slug> <current> <target>`
+- **`destination-version-update`** → invoke `/update-destination-version <slug> <current> <target>` from `{HIGHTOUCH_REPO}/.claude/skills/`
 
-For all other types, continue to Phase 6.
+For all other types, continue to Phase 5.
 
 ### Step 4: Change Scope (bug and feature tickets only)
 
@@ -276,17 +250,87 @@ Reasoning: <one sentence>
 
 ---
 
+## Phase 5: Datadog Investigation
+
+**Skip entirely if**:
+- `context.md` shows `datadog_queried: true`, OR
+- Ticket type is any of: `new-destination`, `destination-version-update`, `destination-bug-silent`, `destination-feature`, `platform-feature`
+
+**Run Datadog if** ticket type is `destination-bug-erroring` or `platform-bug`.
+
+**If this is a bug and hasn't been queried**:
+
+1. Extract error keywords from `slack.md` and the Linear description. Pick the most specific, least common phrases.
+2. Identify a destination slug if one is mentioned (ticket title, description, Slack, or logs).
+3. Query Datadog APM logs:
+   - Time range: last 3 days
+   - Limit: 100 results max
+   - If a destination slug is known: filter by it
+   - Use exact error strings, not broad terms. Be conservative.
+4. Deduplicate results. Extract: unique error messages, originating call sites (file + function), notable stack frames, any correlated request IDs.
+5. Save findings to `datadog.md`. Set `datadog_queried: true` in `context.md`.
+
+---
+
 ## Phase 6: API Investigation (API changes only)
 
-Skip if change type is Logic.
+Skip if change scope is Logic.
 
-Read `references/lap-trust.md` for full instructions. Summary:
+**Do not write any implementation code until this phase is complete.** For every API endpoint or request shape involved in the change, you must attempt to find a concrete documented example before touching code. Work through the three sources below in order. Report findings to the user at the end — be explicit about what was and wasn't found.
+
+Read `references/lap-trust.md` for full trust hierarchy instructions.
+
+---
+
+### Source 1: LAP File (primary authority)
 
 1. Identify the destination slug.
-2. Load `{DESTINATIONS_CONTEXT}/destinations/<destination>/context.lap` — this is the primary authority.
-3. Use context7 to pull live docs for the destination's API. Cross-reference against the LAP file.
-4. Identify the specific gap: what is the current implementation doing vs. what should it do? Be precise (e.g. "POST /contacts missing `sync_mode` param", "v2 endpoint deprecated, v3 required").
-5. Save the gap analysis to `codebase.md`.
+2. Load `{DESTINATIONS_CONTEXT}/destinations/<slug>/context.lap`.
+3. For each endpoint or field relevant to the ticket, search the LAP for a concrete example (request shape, response shape, required params).
+4. Note: **found** or **not found** for each.
+
+---
+
+### Source 2: context7
+
+For each relevant endpoint or API feature:
+1. Use `resolve-library-id` to find the destination's official API library or docs in context7.
+2. Use `query-docs` to retrieve documentation for the specific endpoint, field, or behavior.
+3. Note: **found** (with the example) or **not found** for each.
+
+---
+
+### Source 3: Web search (fallback — only if Sources 1 and 2 both fail)
+
+> ⚠️ **Warning to emit if reaching this step**: "Neither the LAP file nor context7 returned a concrete example for `<endpoint/feature>`. Falling back to web search — treat findings with lower confidence until verified."
+
+1. Search for `<destination> API documentation <feature/endpoint>` using `WebSearch`.
+2. Fetch the most promising official developer docs URL using `mcp__plugin_claude-code-home-manager_fetch__fetch` (preferred) or `WebFetch`.
+3. Look for:
+   - Exact endpoint URLs and HTTP methods
+   - Required vs optional parameters
+   - Request/response payload schemas
+   - Error codes and their meanings
+   - Rate limits and behavioral notes
+   - Changelog or migration guides if this is a version update
+
+**Never hallucinate documentation.** If all three sources fail to produce a concrete example for a given endpoint or field, stop and tell the user explicitly: what you were looking for, what you tried, and that you cannot proceed without authoritative documentation for that piece.
+
+---
+
+### Synthesize & Save
+
+After exhausting the applicable sources, produce a gap analysis for each affected endpoint:
+
+```
+Endpoint: <METHOD /path>
+Example found in: LAP | context7 | web | ⚠️ none
+Current implementation: <what the code does now>
+Should be: <what the docs say it should do>
+Gap: <precise description — e.g. "missing sync_mode param", "v2 deprecated, v3 required">
+```
+
+Save to `codebase.md`. Present the summary to the user before moving to Phase 7, flagging any endpoints where no authoritative example was found.
 
 ---
 
@@ -296,7 +340,7 @@ Target: `{HIGHTOUCH_REPO}/packages/core/backend/destinations/<destination>/`
 
 For non-destination tickets, navigate to the relevant package based on ticket context (callsite logs are often the fastest guide).
 
-**If a destination is in scope** (established in Phase 5): confirm the destination path and `package.json` scripts are loaded in context before reading any code. If the destination's `package.json` hasn't been read yet, do that now. These scripts inform how to run tests and builds throughout Phases 7–9 — do not assume commands, always check the scripts first.
+**If a destination is in scope** (established in Phase 4): confirm the destination path and `package.json` scripts are loaded in context before reading any code. If the destination's `package.json` hasn't been read yet, do that now. These scripts inform how to run tests and builds throughout Phases 7–9 — do not assume commands, always check the scripts first.
 
 **Search order**:
 1. If you have specific error call sites (Datadog) or API route names: grep/glob for those first.
@@ -322,9 +366,11 @@ With full context loaded, attempt the fix or feature.
 
 **If not confident**: write a failing test first that encodes the expected behavior. A focused failing test is a better deliverable than a wrong fix.
 
+**Verbosity check**: After writing or proposing any code, actively assess whether it is unnecessarily long, repetitive, or over-engineered relative to the change required. The goal is a minimal git diff — every line added should carry signal. If the change looks verbose, invoke the `code-simplifier` skill (`code-simplifier:code-simplifier`) to simplify before presenting it to the user. Do not wait for the user to notice.
+
 Either way, write a test that would catch a regression. Save the test file path(s) to `testing.md`.
 
-**Running tests and scripts**: Always use the `/pnpm` skill (at `{HIGHTOUCH_REPO}/.claude/skills/pnpm/`) and the scripts from the destination's `package.json` (loaded in Phase 5/7). Do not hardcode `jest`, `tsc`, or other commands directly — the destination's scripts may wrap them with necessary flags or environment setup. When running a destination-scoped command, run it from within the destination's directory, not the monorepo root.
+**Running tests and scripts**: Always use the `/pnpm` skill (at `{HIGHTOUCH_REPO}/.claude/skills/pnpm/`) and the scripts from the destination's `package.json` (loaded in Phase 4/7). Do not hardcode `jest`, `tsc`, or other commands directly — the destination's scripts may wrap them with necessary flags or environment setup. When running a destination-scoped command, run it from within the destination's directory, not the monorepo root.
 
 **Test fixture guidance**:
 - Before constructing fixtures for complex SDK types (e.g. `DestinationRecord`), grep the same package for existing test files to find established examples.
@@ -341,11 +387,28 @@ After any significant back-and-forth or corrections from the user, update `codeb
 When the user signals readiness to ship ("this looks good", "open a PR", "ship it"):
 
 1. **Publish branch**: push to remote if not already up to date.
-2. **Prettier**: run prettier on all files changed since `master` using the `/pnpm` skill. Confirm clean exit.
-3. **Tests**: run all tests associated with this ticket (from `testing.md`) using the scripts defined in the destination's `package.json` via the `/pnpm` skill. All must pass before continuing. Run from the destination's directory, not the monorepo root — the root Jest config does not wire up the TypeScript transformer the same way, so `import type` and other TS syntax will fail with a Babel parse error.
-4. **Open PR**: create a PR on `hightouchio/hightouch` targeting `master` using `gh pr create`. Use the Linear ticket title as the PR title. Include the Linear URL in the PR description body. If push succeeds but PR creation fails, do not re-push — the branch is already on remote, go straight to retrying PR creation.
-5. **Monitor CI**:
+2. **Simplifier pass**: before formatting or tests, run `code-simplifier:code-simplifier` across all files changed since `master`. The goal is a minimal diff — remove any unnecessary verbosity introduced during implementation before it lands in the PR.
+3. **Prettier**: run prettier on all files changed since `master` using the `/pnpm` skill. Confirm clean exit.
+4. **Tests**: run all tests associated with this ticket (from `testing.md`) using the scripts defined in the destination's `package.json` via the `/pnpm` skill. All must pass before continuing. Run from the destination's directory, not the monorepo root — the root Jest config does not wire up the TypeScript transformer the same way, so `import type` and other TS syntax will fail with a Babel parse error.
+5. **Pre-review**: invoke `/pre-review-bot` (at `{HIGHTOUCH_REPO}/.claude/skills/pre-review-bot/`). Do not open the PR until this completes. If it surfaces any **errors**, fix them and re-run before continuing. Warnings and suggestions are at your discretion — surface them to the user and ask whether to address them first.
+6. **Open PR**: create a PR on `hightouchio/hightouch` targeting `master` using `gh pr create`. Use the Linear ticket title as the PR title. Include the Linear URL in the PR description body. If push succeeds but PR creation fails, do not re-push — the branch is already on remote, go straight to retrying PR creation.
+7. **Monitor CI**:
    - Poll CircleCI every 15 seconds for job status on this PR
    - Do **not** read job logs unless a job fails
    - On failure: read the failure logs, diagnose the cause, propose a specific fix, and ask the user if they want to apply it
-6. **Autopilot exception**: if you have extreme confidence in the solution (it's tested, clean, and unambiguous), you may commit, push, and open the PR yourself without additional prompts.
+   - Once **all jobs complete successfully**: offer to run `/review-bot` (see step 8)
+8. **Post-CI review offer**: once CI is green, ask: "All jobs passed — want me to run review-bot on the PR?" If yes, invoke `/review-bot <pr-number>` from `{HIGHTOUCH_REPO}/.claude/skills/review-bot/`.
+9. **Autopilot exception**: if you have extreme confidence in the solution (it's tested, clean, and unambiguous), you may push and open the PR yourself without additional prompts. Committing still requires explicit user approval.
+
+---
+
+## Standing Rule: Review on Demand
+
+At any point after a PR is open, if the user asks for a review (e.g. "review it", "run review-bot", "can you review the PR"):
+
+1. Use the CircleCI MCP to fetch the current pipeline status for the PR branch.
+2. **If all jobs are complete and successful**: invoke `/review-bot <pr-number>` immediately.
+3. **If jobs are still running**: tell the user — "CI is still running (`<job-name>` in progress). I'll hold off on the review until it completes — want me to wait and run it automatically when it's done?"
+4. **If any job has failed**: surface the failure before reviewing — "CI has a failing job (`<job-name>`). Do you want me to diagnose it before running the review?"
+
+Do not run `/review-bot` while CI is in a non-terminal state.
