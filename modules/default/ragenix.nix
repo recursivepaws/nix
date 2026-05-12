@@ -45,8 +45,8 @@
           group = "secrets";
           mode = "0440";
         };
-        init-content = {
-          file = ../../secrets/init-content.age;
+        agent-env = {
+          file = ../../secrets/agent-env.age;
           owner = "root";
           group = "secrets";
           mode = "0440";

@@ -24,6 +24,7 @@ in
     file-manager
     terminal
     browser
+    claude
   ];
 
   # Allow unfree packages
@@ -133,10 +134,10 @@ in
         zsh = {
           # Source extra environment variables from agenix
           initContent = ''
-            if [ -f /run/agenix/init-content ]; then
-              source /run/agenix/init-content
+            if [ -f /run/agenix/agent-env ]; then
+              source /run/agenix/agent-env
             else
-              echo "warning: /run/agenix/init-content not found, MCP environment variables may be missing" >&2
+              echo "warning: /run/agenix/agent-env not found, MCP environment variables may be missing" >&2
             fi
           '';
           dotDir = config.home.homeDirectory;
