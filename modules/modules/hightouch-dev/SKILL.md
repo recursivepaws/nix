@@ -324,6 +324,8 @@ With full context loaded, attempt the fix or feature.
 
 Either way, write a test that would catch a regression. Save the test file path(s) to `testing.md`.
 
+**Running tests and scripts**: Always use the `/pnpm` skill (at `{HIGHTOUCH_REPO}/.claude/skills/pnpm/`) and the scripts from the destination's `package.json` (loaded in Phase 5/7). Do not hardcode `jest`, `tsc`, or other commands directly — the destination's scripts may wrap them with necessary flags or environment setup. When running a destination-scoped command, run it from within the destination's directory, not the monorepo root.
+
 **Test fixture guidance**:
 - Before constructing fixtures for complex SDK types (e.g. `DestinationRecord`), grep the same package for existing test files to find established examples.
 - When a type has required fields irrelevant to the test, stub them with minimal values and cast with `as T[]` directly — not `as unknown as T[]`. The latter signals a type mismatch that should be fixed at the fixture level instead.
@@ -339,8 +341,8 @@ After any significant back-and-forth or corrections from the user, update `codeb
 When the user signals readiness to ship ("this looks good", "open a PR", "ship it"):
 
 1. **Publish branch**: push to remote if not already up to date.
-2. **Prettier**: run `pnpm prettier --write` on all files changed since `master`. Confirm clean exit.
-3. **Tests**: run all tests associated with this ticket (from `testing.md`). All must pass before continuing. For destination tests, run from `packages/backend/destinations/` — not the monorepo root. The root Jest config does not wire up the TypeScript transformer the same way, so `import type` and other TS syntax will fail with a Babel parse error.
+2. **Prettier**: run prettier on all files changed since `master` using the `/pnpm` skill. Confirm clean exit.
+3. **Tests**: run all tests associated with this ticket (from `testing.md`) using the scripts defined in the destination's `package.json` via the `/pnpm` skill. All must pass before continuing. Run from the destination's directory, not the monorepo root — the root Jest config does not wire up the TypeScript transformer the same way, so `import type` and other TS syntax will fail with a Babel parse error.
 4. **Open PR**: create a PR on `hightouchio/hightouch` targeting `master` using `gh pr create`. Use the Linear ticket title as the PR title. Include the Linear URL in the PR description body. If push succeeds but PR creation fails, do not re-push — the branch is already on remote, go straight to retrying PR creation.
 5. **Monitor CI**:
    - Poll CircleCI every 15 seconds for job status on this PR
