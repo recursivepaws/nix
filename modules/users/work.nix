@@ -4,14 +4,14 @@
     includes = [
       den.provides.define-user
       (den.provides.user-shell "zsh")
-    ];
+    ]
+    ++ (with den.aspects; [ hightouch ]);
     homeManager =
       { pkgs, ... }:
       {
         home.packages = with pkgs; [
           seahorse
           zoom-us
-          slack
         ];
       };
 

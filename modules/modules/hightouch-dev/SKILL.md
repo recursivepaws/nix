@@ -2,7 +2,7 @@
 name: hightouch-dev
 description: Full development workflow for the Hightouch repo (hightouchio/hightouch). Orchestrates everything from picking a Linear ticket to opening a PR with passing CI. Use this when starting or resuming work on a Hightouch issue, creating a branch for a Linear ticket, gathering context for a bug or feature, investigating Datadog errors, looking up destination API behavior, or getting ready to ship. Trigger on phrases like "let's work on a ticket", "pick up a Linear issue", "start a Hightouch branch", "resume my ticket", "open a PR for this", or any time the user is working in the Hightouch codebase. Also trigger on "serve the people" — this is a shorthand invocation that goes directly to Phase 1 ticket selection.
 allowed-tools: [
-  "Bash", "Glob", "Grep", "Read", "Write", "Edit",
+  "Bash", "Glob", "Grep", "Read", "Write", "Edit", "Skill",
   "mcp__plugin_linear_linear__list_issues",
   "mcp__plugin_linear_linear__get_issue",
   "mcp__plugin_linear_linear__get_issue_status",
@@ -379,6 +379,16 @@ Either way, write a test that would catch a regression. Save the test file path(
 **Re-entry**: this phase is always re-enterable. If the user says "try again", "take another shot", or "what would you do differently" — re-read all memory files and produce a revised attempt. Use everything you've learned from prior attempts.
 
 After any significant back-and-forth or corrections from the user, update `codebase.md` with what changed and why.
+
+**Local E2E validation (destination tickets only)**: After implementing a destination change, offer to run a full end-to-end local test before opening a PR. The `local-dest-test` skill at `{HIGHTOUCH_REPO}/.claude/skills/local-dest-test/` automates this: it boots all services, loads the shared-dev workspace, seeds bespoke test data, configures a source/model/destination/sync through the real UI, runs the sync, and validates the HTTP request/response payloads from the debug view.
+
+Invoke it when:
+- The ticket type is `destination-bug-erroring`, `destination-bug-silent`, `destination-feature`, or `destination-version-update`
+- The implementation touches destination sync logic, API calls, or field mapping (not just form/UI-only changes)
+
+Invoke as: `/local-dest-test <slug> <description of what to validate>`
+
+If the user declines or this is a logic-only change with good unit test coverage, skip it and proceed to Phase 9. Never skip it silently — always offer and let the user decide.
 
 ---
 

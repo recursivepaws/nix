@@ -3,7 +3,6 @@
     nixos =
       { pkgs, ... }:
       {
-
         environment.systemPackages = with pkgs; [
           kubectl
           kubernetes
@@ -101,7 +100,7 @@
         # Script to merge generated config into existing ~/.kube/config
         mergeKubeconfig = pkgs.writeShellApplication {
           name = "merge-hightouch-kubeconfig";
-          runtimeInputs = [ pkgs.kubectl ];
+          runtimeInputs = with pkgs; [ kubectl ];
           text = ''
             set -euo pipefail
             KUBECONFIG_PATH="''${KUBECONFIG:-$HOME/.kube/config}"

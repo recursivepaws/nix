@@ -42,16 +42,29 @@
             mcp-servers-nix.homeManagerModules.default
           ];
 
-          programs.zsh.initContent = ''
-            claude() {
-              if [ -f /run/agenix/agent-env ]; then
-                ( source /run/agenix/agent-env && exec command claude "$@" )
-              else
-                echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
-                command claude "$@"
-              fi
-            }
-          '';
+          programs.zsh.initContent =
+            let
+              initClaude = pkgs.writeShellScript "init-claude" ''
+                claude() {
+                  if command -v extract-slack-tokens >/dev/null 2>&1; then
+                    # Run extracter
+                    extract-slack-tokens
+                    source "$HOME/.config/slack-mcp-tokens"
+                  else
+                    echo "warning: extract-slack-tokens is unavailable; slack mcp might not work"
+                  fi
+
+                  if [ -f /run/agenix/agent-env ]; then
+                    source /run/agenix/agent-env
+                  else
+                    echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
+                  fi
+
+                  exec command claude "$@"
+                }
+              '';
+            in
+            "${initClaude}";
 
           programs = {
             claude-tools = {

@@ -98,8 +98,8 @@
         # security = { polkit.enable = true; };
       };
 
-    provides.to-users.includes = with den.aspects; [
-      hightouch
-    ];
+    # provides.to-users.includes = with den.aspects; [
+    #   hightouch
+    # ];
   };
 }
