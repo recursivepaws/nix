@@ -1,12 +1,7 @@
 {
   den.aspects.hightouch = {
     homeManager =
-      {
-        pkgs,
-        config,
-        lib,
-        ...
-      }:
+      { pkgs, ... }:
       let
         extractSlackTokens = pkgs.writeShellApplication {
           name = "extract-slack-tokens";
