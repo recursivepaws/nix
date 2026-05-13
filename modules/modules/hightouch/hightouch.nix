@@ -72,6 +72,20 @@
         # The specific version of node pinned in `pnpm-workspace.yaml`
         nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.system}.nodejs_20;
 
+        #  Allows the Hightouch backend (which uses Java/JVM-based tooling) to trust custom CAs
+        setupJavaCacertsScript = pkgs.writeShellScript "setup-java-cacerts" ''
+          set -euo pipefail
+          mkdir -p "$HOME/.java"
+          cp --no-preserve=mode ${pkgs.openjdk}/lib/openjdk/lib/security/cacerts "$HOME/.java/cacerts"
+          chmod 644 "$HOME/.java/cacerts"
+
+          # Mirror the openjdk tree with a writable cacerts
+          rm -rf "$HOME/.java-home"
+          cp -r --no-preserve=mode ${pkgs.openjdk}/lib/openjdk "$HOME/.java-home"
+          chmod -R u+w "$HOME/.java-home"
+          ln -sf "$HOME/.java/cacerts" "$HOME/.java-home/lib/security/cacerts"
+        '';
+
         # Script that trusts Caddy's local root certificate in the NSS database
         # and restarts Chrome so it picks up the new trust anchor.
         # Only runs when the cert fingerprint has actually changed — avoids
@@ -167,15 +181,7 @@
           };
 
           activation.setupJavaCacerts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            $DRY_RUN_CMD mkdir -p "$HOME/.java"
-            $DRY_RUN_CMD cp --no-preserve=mode ${pkgs.openjdk}/lib/openjdk/lib/security/cacerts "$HOME/.java/cacerts"
-            $DRY_RUN_CMD chmod 644 "$HOME/.java/cacerts"
-
-            # Mirror the openjdk tree with a writable cacerts
-            $DRY_RUN_CMD rm -rf "$HOME/.java-home"
-            $DRY_RUN_CMD cp -r --no-preserve=mode ${pkgs.openjdk}/lib/openjdk "$HOME/.java-home"
-            $DRY_RUN_CMD chmod -R u+w "$HOME/.java-home"
-            $DRY_RUN_CMD ln -sf "$HOME/.java/cacerts" "$HOME/.java-home/lib/security/cacerts"
+            ${setupJavaCacertsScript}
           '';
 
           shellAliases = {
