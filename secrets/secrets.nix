@@ -12,6 +12,6 @@ let
 in
 {
   "github.token.age".publicKeys = keys;
-  "agent-env".publicKeys = keys;
+  "agent-env.age".publicKeys = keys;
   "secrets.age".publicKeys = keys;
 }

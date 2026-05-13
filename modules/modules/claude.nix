@@ -47,9 +47,7 @@
               initClaude = pkgs.writeShellScript "init-claude" ''
                 claude() {
                   if command -v extract-slack-tokens >/dev/null 2>&1; then
-                    # Run extracter
-                    extract-slack-tokens
-                    source "$HOME/.config/slack-mcp-tokens"
+                    eval "$(extract-slack-tokens)"
                   else
                     echo "warning: extract-slack-tokens is unavailable; slack mcp might not work"
                   fi
@@ -64,7 +62,7 @@
                 }
               '';
             in
-            "${initClaude}";
+            "source ${initClaude}";
 
           programs = {
             claude-tools = {

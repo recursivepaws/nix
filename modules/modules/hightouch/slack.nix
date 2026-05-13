@@ -57,9 +57,7 @@
 
             # --- xoxc ---
             xoxc=$(strings "$ldb_dir"/*.ldb | grep -o 'xoxc-[A-Za-z0-9_-]*' | head -1)
-            out="$HOME/.config/slack-mcp-tokens"
-            source $(printf 'SLACK_MCP_XOXC_TOKEN="%s"\nSLACK_MCP_XOXD_TOKEN="%s"\n' "$xoxc" "$xoxd" >"$out"
-            chmod 600 "$out"
+            printf 'export SLACK_MCP_XOXC_TOKEN="%s"\nexport SLACK_MCP_XOXD_TOKEN="%s"\n' "$xoxc" "$xoxd"
           '';
         };
       in
