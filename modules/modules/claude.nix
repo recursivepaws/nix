@@ -151,6 +151,15 @@
               # TODO: vera-only servers here
             };
 
+          # These are required for the `typescript-lsp` plugin
+          home.packages = lib.optionals isWork (
+            with pkgs;
+            [
+              typescript-language-server
+              typescript
+            ]
+          );
+
           home.file = lib.mkIf isWork {
             ".claude/skills/destination/SKILL.md".text = builtins.readFile ./destination-skill.md;
             ".claude/skills/hightouch-dev/SKILL.md".text = builtins.readFile ./hightouch-dev/SKILL.md;
