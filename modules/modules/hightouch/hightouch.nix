@@ -53,6 +53,16 @@
           trustedInterfaces = [ "tailscale0" ];
           allowedUDPPorts = [ config.services.tailscale.port ];
           checkReversePath = "loose";
+          # Allow Docker containers to reach host ports.
+          # Without this, container→host TCP is blocked by the INPUT chain —
+          # which is why https://tilt.local.hightouch.dev proxies to 172.17.0.1:10350
+          # but the connection times out.
+          # We match on source IP rather than interface name because Docker Compose
+          # networks use dynamically-named bridges (br-<network-id>), not docker0.
+          # 172.16.0.0/12 covers the full RFC 1918 range Docker assigns to its networks.
+          extraInputRules = ''
+            ip saddr 172.16.0.0/12 tcp dport 10350 accept
+          '';
         };
 
         # Force tailscaled to use nftables instead of iptables compat layer
