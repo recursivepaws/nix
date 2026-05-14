@@ -27,6 +27,7 @@
             "@anthropics/claude-code-plugins/code-review"
             "@anthropics/claude-plugins-official/code-simplifier"
             "@anthropics/claude-plugins-official/skill-creator"
+            "@anthropics/claude-plugins-official/lua-lsp"
           ]
           ++ lib.optionals isWork [
             "@anthropics/claude-plugins-official/linear"
@@ -59,7 +60,7 @@
                 for _hook in "''${_claude_pre_hooks[@]}"; do
                   source "$_hook"
                 done
-                exec command claude "$@"
+                command claude "$@"
               }
             '';
 
