@@ -25,9 +25,40 @@
 
   den.default.homeManager =
     { pkgs, config, ... }:
+    let
+      snapLibs = with pkgs; [
+        nss
+        nspr
+        atk
+        at-spi2-atk
+        libxkbcommon
+        libx11
+        libxcb
+        libxext
+        libxfixes
+        libgbm
+        libxdamage
+        libxrandr
+        libxcomposite
+        alsa-lib
+        glib
+        dbus
+        expat
+      ];
+      neovim-wrapped = pkgs.symlinkJoin {
+        name = "neovim";
+        paths = [ pkgs.neovim ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/nvim \
+            --prefix PATH : "${pkgs.gcc13}/bin" \
+            --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath snapLibs}"
+        '';
+      };
+    in
     {
-      home.packages = with pkgs; [
-        neovim
+      home.packages = [
+        neovim-wrapped
       ];
     };
 }
