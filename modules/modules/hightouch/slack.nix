@@ -1,7 +1,7 @@
 {
   den.aspects.hightouch = {
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
         extractSlackTokens = pkgs.writeShellApplication {
           name = "extract-slack-tokens";
@@ -55,12 +55,24 @@
             printf 'export SLACK_MCP_XOXC_TOKEN="%s"\nexport SLACK_MCP_XOXD_TOKEN="%s"\n' "$xoxc" "$xoxd"
           '';
         };
+        slackHook = pkgs.writeShellScript "claude-hook-slack" ''
+          if command -v extract-slack-tokens >/dev/null 2>&1; then
+            eval "$(extract-slack-tokens)"
+            echo "info: extracted slack tokens"
+          else
+            echo "warning: extract-slack-tokens is unavailable; slack mcp might not work"
+          fi
+        '';
       in
       {
         home.packages = with pkgs; [
           slack
           extractSlackTokens
         ];
+
+        programs.zsh.initContent = lib.mkOrder 950 ''
+          _claude_pre_hooks+=(${slackHook})
+        '';
       };
   };
 }

@@ -44,25 +44,24 @@
 
           programs.zsh.initContent =
             let
-              initClaude = pkgs.writeShellScript "init-claude" ''
-                claude() {
-                  if command -v extract-slack-tokens >/dev/null 2>&1; then
-                    eval "$(extract-slack-tokens)"
-                  else
-                    echo "warning: extract-slack-tokens is unavailable; slack mcp might not work"
-                  fi
-
-                  if [ -f /run/agenix/agent-env ]; then
-                    source /run/agenix/agent-env
-                  else
-                    echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
-                  fi
-
-                  exec command claude "$@"
-                }
+              agenixHook = pkgs.writeShellScript "claude-hook-agenix" ''
+                if [ -f /run/agenix/agent-env ]; then
+                  source /run/agenix/agent-env
+                  echo "info: sourced agenix agent-env"
+                else
+                  echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
+                fi
               '';
             in
-            "source ${initClaude}";
+            lib.mkOrder 900 ''
+              _claude_pre_hooks=(${agenixHook})
+              claude() {
+                for _hook in "''${_claude_pre_hooks[@]}"; do
+                  source "$_hook"
+                done
+                exec command claude "$@"
+              }
+            '';
 
           programs = {
             claude-tools = {
