@@ -200,6 +200,8 @@
                     ns = x: sh ("noctalia-shell ipc call " + x);
                   in
                   {
+                    "Mod+Shift+slash".action = show-hotkey-overlay;
+
                     "Mod+Q".action = spawn "kitty";
                     "Mod+P".action = ns "sessionMenu toggle";
                     "Mod+X".action = ns "launcher toggle";
