@@ -456,6 +456,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-vale": {
+      "locked": {
+        "lastModified": 1702868298,
+        "narHash": "sha256-ea5qulrP3imcaITKWDY6yTySYUYd6UxjgbZADh5wTJY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ca16221251951e9c6261a1a2bb4f9389038d3632",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ca16221251951e9c6261a1a2bb4f9389038d3632",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1776255774,
@@ -529,6 +545,7 @@
         "nix-photogimp": "nix-photogimp",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-node": "nixpkgs-node",
+        "nixpkgs-vale": "nixpkgs-vale",
         "noctalia": "noctalia",
         "spicetify-nix": "spicetify-nix"
       }
