@@ -17,10 +17,7 @@
         environment.systemPackages = with pkgs; [
           nodejs_22
           # bitwig-studio
-          figma-linux
           lm_sensors
-          blender
-          anki
           scrcpy
           # libwebcam
           sccache
@@ -29,7 +26,7 @@
           # rustc
           # rustfmt
           gparted
-          gimp
+          # gimp
 
           # davinci-resolve-studio
           cargo
@@ -59,6 +56,11 @@
           "/share/xdg-desktop-portal"
           "/share/gtksourceview-4"
         ];
+        environment.etc."lvm/lvm.conf".text = ''
+          devices {
+            allow_mixed_block_sizes = 1
+          }
+        '';
 
         programs = {
           coolercontrol.enable = true;
@@ -108,6 +110,7 @@
       bitwig-studio
       windows-vst
       davinci
+      keyboard
     ];
   };
 }

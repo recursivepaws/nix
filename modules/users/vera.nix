@@ -19,6 +19,9 @@
           discord
           seahorse
           immich-go
+          anki
+          r2modman
+          blender
         ];
       };
 

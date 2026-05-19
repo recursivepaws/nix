@@ -25,6 +25,7 @@ in
     terminal
     browser
     claude
+    gimp
   ];
 
   # Allow unfree packages
@@ -143,6 +144,7 @@ in
         wl-clipboard
         baobab
         gnome-disk-utility
+        vlc
 
         # TODO: remove in favor of NixVim
         chezmoi
