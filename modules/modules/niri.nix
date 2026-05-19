@@ -99,9 +99,8 @@
               settings = {
                 prefer-no-csd = true;
                 environment = {
-                  GTK_IM_MODULE = "fcitx"; # GTK3 apps
                   QT_IM_MODULE = "fcitx"; # Qt5 apps
-                  XMODIFIERS = "@im=fcitx"; # XWayland apps
+                  XMODIFIERS = "@im=fcitx"; # XWayland apps (and GTK3/4 via text-input-v3)
                   QT_QPA_PLATFORMTHEME = "gtk3";
                   QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
                   QT_QPA_PLATFORM = "wayland";

@@ -86,7 +86,7 @@ in
           type = "fcitx5";
           fcitx5.addons = [
             p.varnam-fcitx5
-            pkgs.fcitx5-gtk # GTK3 IM module; GTK4/Qt6/Chrome use Wayland protocol natively
+            pkgs.fcitx5-gtk # Needed for GTK3/4 text-input-v3 integration; GTK_IM_MODULE must be unset
           ];
           # waylandFrontend = true: fcitx5 implements zwp_input_method_v2, so
           # candidates follow the cursor in all Wayland-native apps (GTK4, Qt6,
