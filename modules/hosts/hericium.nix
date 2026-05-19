@@ -111,6 +111,7 @@
       windows-vst
       davinci
       keyboard
+      varnam
     ];
   };
 }

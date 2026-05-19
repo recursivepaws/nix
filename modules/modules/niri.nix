@@ -99,6 +99,13 @@
               settings = {
                 prefer-no-csd = true;
                 environment = {
+                  GTK_IM_MODULE = "ibus";
+                  QT_IM_MODULE = "ibus";
+                  XMODIFIERS = "@im=ibus";
+                  # Chrome on Wayland ignores GTK_IM_MODULE; it uses the IBus
+                  # D-Bus portal instead.  Requires ibusPackage in xdg portal
+                  # extras, which waylandFrontend = true provides.
+                  IBUS_USE_PORTAL = "1";
                   QT_QPA_PLATFORMTHEME = "gtk3";
                   QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
                   QT_QPA_PLATFORM = "wayland";
@@ -178,9 +185,22 @@
                       {
                         app-id = "^hyprpolkitagent$";
                       }
-                      # { = "^whatsie$"; }
                     ];
                     open-floating = true;
+                  }
+                  {
+                    matches = [
+                      { app-id = "^ibus-ui-gtk3$"; }
+                      { app-id = "^ibus-ui-gtk4$"; }
+                    ];
+                    open-floating = true;
+                    open-focused = false;
+                  }
+                  {
+                    matches = [
+                      { app-id = "^ibus-setup$"; }
+                    ];
+                    open-floating = false;
                   }
                   {
                     geometry-corner-radius = {
