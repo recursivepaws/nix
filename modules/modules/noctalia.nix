@@ -87,9 +87,10 @@ in
         };
 
       homeManager =
-        { pkgs, ... }:
+        { pkgs, lib, ... }:
         let
           defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
+          isWork = user.userName == "work";
           plugins = [
             "timer"
             "pomodoro"
@@ -99,6 +100,12 @@ in
             "privacy-indicator"
             "catwalk"
             "screen-toolkit"
+          ]
+          ++ lib.optionals isWork [
+            "kubectl-ctx"
+            "tailscale"
+            "mini-docker"
+            "github-feed"
           ];
         in
         {
