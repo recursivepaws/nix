@@ -87,11 +87,52 @@ in
           fcitx5.addons = [
             p.varnam-fcitx5
             pkgs.fcitx5-gtk # Needed for GTK3/4 text-input-v3 integration; GTK_IM_MODULE must be unset
+            pkgs.fcitx5-mellow-themes
           ];
           # waylandFrontend = true: fcitx5 implements zwp_input_method_v2, so
           # candidates follow the cursor in all Wayland-native apps (GTK4, Qt6,
           # Chrome) without any extra env vars.
           fcitx5.waylandFrontend = true;
+
+          fcitx5.settings = {
+            globalOptions = {
+              # Only Ctrl+Space toggles between input methods; drop Zenkaku/Hangul defaults.
+              "Hotkey/TriggerKeys" = {
+                "0" = "Control+space";
+              };
+            };
+
+            inputMethod = {
+              "GroupOrder" = {
+                "0" = "Default";
+              };
+              "Groups/0" = {
+                "Name" = "Default";
+                "Default Layout" = "us";
+                "DefaultIM" = "keyboard-us";
+              };
+              "Groups/0/Items/0" = {
+                "Name" = "keyboard-us";
+              };
+              "Groups/0/Items/1" = {
+                "Name" = "sa";
+              };
+            };
+
+            addons = {
+              classicui.globalSection = {
+                Font = "Noto Sans 16";
+                Theme = "mellow-youlan-dark";
+              };
+              notifications = {
+                globalSection = { };
+                sections.HiddenNotifications = {
+                  # Suppress the Wayland setup advice — we handle it ourselves.
+                  "0" = "wayland-diagnose-gnome";
+                };
+              };
+            };
+          };
         };
 
         # govarnam searches for *.vst scheme files in (priority order):
