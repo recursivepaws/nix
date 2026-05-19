@@ -7,7 +7,6 @@
       modulesPath,
       ...
     }:
-
     {
       imports = [
         (modulesPath + "/installer/scan/not-detected.nix")
@@ -64,9 +63,8 @@
 
       nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
       hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-    }
+    };
 
-  ;
   den.aspects.hericium.nixos =
     {
       config,
@@ -75,7 +73,6 @@
       modulesPath,
       ...
     }:
-
     {
       imports = [
         (modulesPath + "/installer/scan/not-detected.nix")
@@ -114,6 +111,37 @@
       fileSystems."/nix" = {
         device = "/dev/disk/by-uuid/e38a5854-1fda-4a51-a6cf-5b3b25d362c3";
         fsType = "ext4";
+      };
+
+      boot.initrd.luks.devices = {
+        "sda-crypt" = {
+          device = "/dev/disk/by-uuid/d610c823-2623-4c18-b85f-d0c6027bdeff";
+          keyFile = "/ssd-keyfile";
+          preLVM = true;
+        };
+        "sdb-crypt" = {
+          device = "/dev/disk/by-uuid/e2f21827-04e9-4338-a640-308dee6f086b";
+          keyFile = "/ssd-keyfile";
+          preLVM = true;
+        };
+      };
+
+      boot.initrd.secrets = {
+        "/ssd-keyfile" = /ssd-keyfile;
+      };
+
+      services.lvm.enable = true;
+
+      environment.etc."lvm/lvm.conf".text = ''
+        devices {
+          allow_mixed_block_sizes = 1
+        }
+      '';
+
+      fileSystems."/run/media/vera/storage" = {
+        device = "/dev/disk/by-uuid/70721713-667d-4df8-b651-adfe9c3d5236";
+        fsType = "ext4";
+        options = [ "defaults" ];
       };
 
       swapDevices = [ ];
