@@ -1,5 +1,5 @@
 {
-  den.aspects.kubernetes = {
+  den.aspects.hightouch = {
     nixos =
       { pkgs, ... }:
       {
@@ -15,7 +15,6 @@
         lib,
         ...
       }:
-
       let
         tailscaleDomain = "fox-diatonic.ts.net";
         clusters = [

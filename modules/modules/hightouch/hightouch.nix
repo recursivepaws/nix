@@ -1,9 +1,8 @@
-{ den, inputs, ... }:
+{ inputs, ... }:
 {
   flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/b95255df2360a45ddbb03817a68869d5cb01bf96";
 
   den.aspects.hightouch = {
-    includes = [ den.aspects.kubernetes ];
     nixos =
       {
         pkgs,
