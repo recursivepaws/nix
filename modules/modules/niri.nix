@@ -99,13 +99,9 @@
               settings = {
                 prefer-no-csd = true;
                 environment = {
-                  GTK_IM_MODULE = "ibus";
-                  QT_IM_MODULE = "ibus";
-                  XMODIFIERS = "@im=ibus";
-                  # Chrome on Wayland ignores GTK_IM_MODULE; it uses the IBus
-                  # D-Bus portal instead.  Requires ibusPackage in xdg portal
-                  # extras, which waylandFrontend = true provides.
-                  IBUS_USE_PORTAL = "1";
+                  GTK_IM_MODULE = "fcitx"; # GTK3 apps
+                  QT_IM_MODULE = "fcitx"; # Qt5 apps
+                  XMODIFIERS = "@im=fcitx"; # XWayland apps
                   QT_QPA_PLATFORMTHEME = "gtk3";
                   QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
                   QT_QPA_PLATFORM = "wayland";
