@@ -10,6 +10,7 @@
     };
     claude-plugins-nix.url = "github:mreimbold/claude-plugins-nix";
     den.url = "github:vic/den";
+    direnv-instant.url = "github:Mic92/direnv-instant";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
