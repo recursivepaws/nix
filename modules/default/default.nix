@@ -81,6 +81,20 @@ in
         htop
       ];
 
+      # Prevent OOM freezes
+      services.earlyoom = {
+        enable = true;
+        freeMemThreshold = 5;
+        freeSwapThreshold = 10;
+        enableNotifications = true;
+      };
+
+      # Compressed swap in RAM
+      zramSwap = {
+        enable = true;
+        algorithm = "zstd";
+      };
+
       programs = {
         nix-ld.enable = true;
         lazygit.enable = true;
