@@ -226,7 +226,25 @@ in
                 workDuration = 30;
                 playSound = true;
               };
+            } // lib.optionalAttrs isWork {
+              github-feed = {
+                username = "recursivepaws";
+              };
             };
+          };
+
+          home.activation = lib.optionalAttrs isWork {
+            noctaliaGithubFeedToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+              token_file="/run/agenix/github.token"
+              settings_file="$HOME/.config/noctalia/plugins/github-feed/settings.json"
+
+              if [ -r "$token_file" ] && [ -f "$settings_file" ]; then
+                token=$(< "$token_file")
+                tmp="''${settings_file}.tmp"
+                ${pkgs.jq}/bin/jq --arg token "$token" '.token = $token' "$settings_file" > "$tmp"
+                mv "$tmp" "$settings_file"
+              fi
+            '';
           };
         };
     };
