@@ -15,6 +15,10 @@
 
         git = {
           enable = true;
+          ignores = [
+            ".direnv/"
+            "**/.claude/settings.local.json"
+          ];
           settings = {
             gpg = {
               format = "ssh";
