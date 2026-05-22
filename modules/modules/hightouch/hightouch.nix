@@ -105,26 +105,28 @@
           FINGERPRINT_FILE="$HOME/.local/share/caddy-trust/cert.sha256"
           mkdir -p "$(dirname "$FINGERPRINT_FILE")"
 
-          # Wait for the Caddy admin API to become available (it may take a
-          # moment after the container starts before the PKI endpoint is ready).
-          for i in $(seq 1 30); do
-            if ${pkgs.curl}/bin/curl -sf http://localhost:2019/pki/ca/local >/dev/null 2>&1; then
-              break
-            fi
-            echo "caddy-trust: waiting for caddy cert to become available"
-            sleep 1
-          done
-
           CERT_TMP=$(mktemp /tmp/caddy-local-root.XXXXXX.crt)
           trap 'rm -f "$CERT_TMP"' EXIT
 
-          ${pkgs.curl}/bin/curl -sf http://localhost:2019/pki/ca/local \
-            | ${pkgs.jq}/bin/jq -r .root_certificate \
-            > "$CERT_TMP"
+          # Wait for Caddy to serve a valid root certificate. Fetches and
+          # validates in one step to avoid a race between checking API
+          # readiness and the actual fetch.
+          CERT_READY=false
+          for i in $(seq 1 30); do
+            if ${pkgs.curl}/bin/curl -sf --max-time 5 http://localhost:2019/pki/ca/local 2>/dev/null \
+                | ${pkgs.jq}/bin/jq -re '.root_certificate // empty' \
+                > "$CERT_TMP" 2>/dev/null \
+               && [ -s "$CERT_TMP" ]; then
+              CERT_READY=true
+              break
+            fi
+            echo "caddy-trust: waiting for caddy cert to become available ($i/30)"
+            sleep 2
+          done
 
-          if [ ! -s "$CERT_TMP" ] || grep -q "^null$" "$CERT_TMP"; then
-            echo "caddy-trust: could not fetch root certificate, skipping" >&2
-            exit 0
+          if [ "$CERT_READY" != "true" ]; then
+            echo "caddy-trust: could not fetch root certificate after 30 attempts, giving up" >&2
+            exit 1
           fi
 
           NEW_FINGERPRINT=$(${pkgs.openssl}/bin/openssl x509 -fingerprint -noout -sha256 -in "$CERT_TMP" 2>/dev/null | cut -d= -f2)
@@ -176,7 +178,8 @@
             --filter "event=start" \
             --format "{{.TimeNano}}" \
           | while read -r _line; do
-              echo "caddy-trust-watcher: caddy started, checking cert"
+              echo "caddy-trust-watcher: caddy started, waiting for it to initialize"
+              sleep 5
               ${caddyTrustScript} || echo "caddy-trust-watcher: trust script failed, continuing"
             done
         '';
