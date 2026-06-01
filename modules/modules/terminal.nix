@@ -12,8 +12,8 @@
           };
           settings = {
             linux_display_server = "wayland";
-            font_size = 12.25;
-            font_family = "Caskaydia Cove";
+            font_size = 14.5;
+            font_family = "CaskaydiaCoveNFM";
             window_margin_width = 15;
             remember_window_size = "no";
             confirm_os_window_close = 0;
