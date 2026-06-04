@@ -25,6 +25,7 @@
 
           # Database
           postgresql_15
+          tmux
         ];
 
         # Required by tilt
@@ -222,6 +223,10 @@
             # libomp # OpenMP for LightGBM
           ];
         };
+
+        programs.zsh.initContent = ''
+          export LD_LIBRARY_PATH="${pkgs.unixodbc}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        '';
 
         # Watches for the Caddy container to (re)start and re-trusts its local
         # root cert in the NSS database only when the cert has actually changed
