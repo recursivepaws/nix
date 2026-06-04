@@ -139,9 +139,8 @@ in
                       displayMode = "alwaysShow";
                     }
                     {
-                      formatHorizontal = "HH:mm";
-                      formatVertical = "HH mm";
                       id = "Clock";
+                      formatHorizontal = "ddd MMM dd [ hh:mm AP ]";
                       useMonospacedFont = true;
                       usePrimaryColor = true;
                     }
