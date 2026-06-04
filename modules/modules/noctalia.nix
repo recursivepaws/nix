@@ -192,7 +192,7 @@ in
               };
               location = {
                 monthBeforeDay = false;
-                name = "Washington, DC";
+                name = "New York, NY";
                 use12hourFormat = true;
                 useFahrenheit = true;
               };
@@ -226,7 +226,8 @@ in
                 workDuration = 30;
                 playSound = true;
               };
-            } // lib.optionalAttrs isWork {
+            }
+            // lib.optionalAttrs isWork {
               github-feed = {
                 username = "recursivepaws";
               };
