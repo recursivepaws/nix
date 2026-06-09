@@ -96,9 +96,8 @@ in
 
           fcitx5.settings = {
             globalOptions = {
-              # Only Ctrl+Space toggles between input methods; drop Zenkaku/Hangul defaults.
               "Hotkey/TriggerKeys" = {
-                "0" = "Control+space";
+                "0" = "Control+Shift+space";
               };
             };
 
