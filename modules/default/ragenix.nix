@@ -57,6 +57,12 @@
           group = "secrets";
           mode = "0440";
         };
+        "lastfm" = {
+          file = ../../secrets/lastfm.age;
+          owner = "root";
+          group = "secrets";
+          mode = "0440";
+        };
       };
     };
 }

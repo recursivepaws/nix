@@ -20,6 +20,20 @@
           };
 
           mpd-mpris.enable = true;
+          mpdscribble = {
+            enable = true;
+            verbose = 3;
+            endpoints = {
+              "last.fm" = {
+                passwordFile = "/run/agenix/lastfm";
+                username = "recursivepaws";
+              };
+              # "listenbrainz" = {
+              #   passwordFile = "/run/secrets/listenbrainz";
+              #   username = "recursivepaws";
+              # };
+            };
+          };
         };
       };
   };
