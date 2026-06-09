@@ -14,7 +14,7 @@ in
   den.schema.user.classes = lib.mkDefault [ "homeManager" ];
 
   # host<->user provides
-  den.ctx.user.includes = [ den._.mutual-provider ];
+  den.schema.user.includes = [ den._.mutual-provider ];
 
   # Default aspects
   den.default.includes = with den.aspects; [
