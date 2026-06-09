@@ -14,10 +14,11 @@ in
   den.schema.user.classes = lib.mkDefault [ "homeManager" ];
 
   # host<->user provides
-  den.schema.user.includes = [ den._.mutual-provider ];
+  den.ctx.user.includes = [ den._.mutual-provider ];
 
   # Default aspects
   den.default.includes = with den.aspects; [
+    music
     spotify
     niri
     noctalia
