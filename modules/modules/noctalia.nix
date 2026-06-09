@@ -229,6 +229,7 @@ in
             // lib.optionalAttrs isWork {
               github-feed = {
                 username = "recursivepaws";
+                defaultTab = 1;
               };
             };
           };
