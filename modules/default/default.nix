@@ -137,6 +137,11 @@ in
 
       xdg.configFile."nixpkgs/config.nix".text = "{ allowUnfree = true; }";
 
+      # Bugfix for the overloaded pnpm not being able to find the right spot
+      xdg.configFile."pnpm/config.yaml".text = ''
+        storeDir: ${config.home.homeDirectory}/.local/share/pnpm/store
+      '';
+
       home.file."${config.xdg.configHome}/starship.toml".source = pkgs.fetchurl {
         url = "https://raw.githubusercontent.com/EdenEast/nightfox.nvim/refs/heads/main/extra/carbonfox/starship.toml";
         hash = "sha256-NneOWmWRhL5sgP/qFSSeVhf41W+waiadwz+KXL7s04s=";
