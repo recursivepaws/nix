@@ -19,13 +19,13 @@ in
   };
 
   den.aspects.noctalia =
-    { user, ... }:
+    { user, host, ... }:
     {
       nixos =
-        { pkgs, ... }:
+        { pkgs, lib, ... }:
         {
           # My lame w6400 does not support hardware encoding
-          nixpkgs.overlays = [ disable-screenrec-hardware ];
+          nixpkgs.overlays = lib.mkIf (host.name == "hericium") [ disable-screenrec-hardware ];
 
           environment.systemPackages = with pkgs; [
             inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -85,6 +85,12 @@ in
               OnBootSec = "2min";
               OnCalendar = "daily";
             };
+          };
+
+          # Laptop-specific services
+          services = lib.mkIf (host.name == "amanita") {
+            power-profiles-daemon.enable = true;
+            upower.enable = true;
           };
         };
 
@@ -247,7 +253,6 @@ in
               fi
             '';
           };
-
         };
     };
 }
