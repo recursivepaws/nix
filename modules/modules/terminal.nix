@@ -11,6 +11,7 @@
             # mode = "no-cursor";
           };
           settings = {
+            auto_reload_config = -1;
             linux_display_server = "wayland";
             font_size = 14.5;
             font_family = "CaskaydiaCoveNFM";
@@ -47,7 +48,7 @@
                 hash = "sha256-VYHlVMwMO/YN64ZH+GDJQ60DmimokmRMCXbYJh1qH6Y=";
               };
             in
-            "include ${carbonfox}";
+            builtins.readFile carbonfox;
         };
       };
   };
