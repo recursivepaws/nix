@@ -35,7 +35,6 @@
           python314
           pnpm
           delta
-          xwayland-satellite
           v4l-utils
           guvcview
           ffmpeg-full

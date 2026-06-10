@@ -15,7 +15,7 @@
           nixpkgs.overlays = with inputs; [ niri-flake.overlays.niri ];
 
           environment.systemPackages = with pkgs; [
-            # xwayland-satellite
+            xwayland-satellite
             gnome-text-editor
             gnome-system-monitor
             gnome-control-center
@@ -33,7 +33,14 @@
             "L+ /var/lib/AccountsService/icons/${user.userName} - - - - ${user.profilePicture}"
           ];
 
-          services.displayManager.gdm.enable = true;
+          services.displayManager = {
+            defaultSession = "niri";
+            gdm = {
+              enable = true;
+              debug = true;
+            };
+          };
+
           security.pam.services.gdm.enableGnomeKeyring = true;
           services.gnome.gnome-keyring.enable = true;
 
@@ -90,7 +97,7 @@
             playerctl
             qt5.qtwayland
             qt6.qtwayland
-            libsForQt5.qt5.qtbase
+            qt5.qtbase
             adwaita-qt
             adwaita-qt6
           ];

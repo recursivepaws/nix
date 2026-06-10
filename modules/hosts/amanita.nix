@@ -38,7 +38,6 @@
           uv
           python314
           delta
-          xwayland-satellite
           v4l-utils
           eza
           bat

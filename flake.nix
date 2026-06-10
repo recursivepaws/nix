@@ -39,7 +39,7 @@
     nixpkgs-node.url = "github:NixOS/nixpkgs/b95255df2360a45ddbb03817a68869d5cb01bf96";
     nixpkgs-vale.url = "github:NixOS/nixpkgs/ca16221251951e9c6261a1a2bb4f9389038d3632";
     noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
+      url = "github:noctalia-dev/noctalia/legacy-v4";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     spicetify-nix = {

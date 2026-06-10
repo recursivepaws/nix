@@ -11,6 +11,12 @@
         ...
       }:
       {
+        nixpkgs.overlays = [
+          (final: prev: {
+            final.nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.system}.nodejs_20;
+            final.pnpm = prev.pnpm.override { nodejs = final.nodejs; };
+          })
+        ];
         environment.systemPackages = with pkgs; [
           # Core CLI tools
           git
@@ -80,7 +86,7 @@
       }:
       let
         # The specific version of node pinned in `pnpm-workspace.yaml`
-        nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.system}.nodejs_20;
+        # nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.system}.nodejs_20;
 
         #  Allows the Hightouch backend (which uses Java/JVM-based tooling) to trust custom CAs
         setupJavaCacertsScript = pkgs.writeShellScript "setup-java-cacerts" ''
@@ -203,7 +209,7 @@
 
           packages = with pkgs; [
             nodejs
-            (pnpm.override { nodejs = nodejs; })
+            pnpm
 
             # `open` command
             xdg-utils

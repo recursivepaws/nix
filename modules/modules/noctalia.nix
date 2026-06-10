@@ -12,7 +12,9 @@ let
 in
 {
   flake-file.inputs.noctalia = {
-    url = "github:noctalia-dev/noctalia-shell";
+    # still in alpha
+    # url = "github:noctalia-dev/noctalia-shell";
+    url = "github:noctalia-dev/noctalia/legacy-v4";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -87,7 +89,12 @@ in
         };
 
       homeManager =
-        { pkgs, lib, ... }:
+        {
+          pkgs,
+          lib,
+          config,
+          ...
+        }:
         let
           defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
           isWork = user.userName == "work";
@@ -225,28 +232,22 @@ in
                 workDuration = 30;
                 playSound = true;
               };
-            }
-            // lib.optionalAttrs isWork {
-              github-feed = {
-                username = "recursivepaws";
-                defaultTab = 1;
-              };
             };
           };
 
           home.activation = lib.optionalAttrs isWork {
             noctaliaGithubFeedToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
               token_file="/run/agenix/github.token"
-              settings_file="$HOME/.config/noctalia/plugins/github-feed/settings.json"
+              settings_file="${config.xdg.configHome}/noctalia/plugins/github-feed/settings.json"
 
-              if [ -r "$token_file" ] && [ -f "$settings_file" ]; then
+              if [ -r "$token_file" ]; then
                 token=$(< "$token_file")
-                tmp="''${settings_file}.tmp"
-                ${pkgs.jq}/bin/jq --arg token "$token" '.token = $token' "$settings_file" > "$tmp"
-                mv "$tmp" "$settings_file"
+                run mkdir -p "$(dirname "$settings_file")"
+                ${pkgs.jq}/bin/jq -n --arg token "$token" '{username: "recursivepaws", defaultTab: 1, token: $token}' > "$settings_file"
               fi
             '';
           };
+
         };
     };
 }
