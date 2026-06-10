@@ -15,11 +15,12 @@
 
         nixfmt
         luarocks
-        lua5_1
         stylua
         tree-sitter
         # nodejs_22
         lua-language-server
+        lua5_1
+        lua51Packages.tree-sitter-cli
       ];
     };
 
