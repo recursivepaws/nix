@@ -1,5 +1,5 @@
 # Exposes flake apps under the name of each host / home for building with nh.
-{ den, lib, ... }:
+{ den, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -14,6 +14,7 @@
         enable = true;
         clean = {
           enable = true;
+          dates = "daily";
           extraArgs = "--keep 10";
         };
       };
