@@ -55,7 +55,7 @@ let
       };
       nativeBuildInputs = with pkgs; [
         cmake
-        extra-cmake-modules
+        kdePackages.extra-cmake-modules
         pkg-config
       ];
       buildInputs = [
