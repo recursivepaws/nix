@@ -18,6 +18,23 @@
 
         hardware.system76.enableAll = true;
 
+        # Default to the quiet battery profile
+        # So that I dont scare my coworkers with their fancy M4 macbooks
+        systemd.services.system76-power-quiet = {
+          description = "Set system76-power to the quiet battery profile";
+          after = [ "system76-power.service" ];
+          wants = [ "system76-power.service" ];
+          wantedBy = [ "multi-user.target" ];
+          serviceConfig = {
+            Type = "oneshot";
+            # Set the quiet profile, then undo its backlight dimming (back to 100%).
+            ExecStart = [
+              "${pkgs.system76-power}/bin/system76-power profile battery"
+              "${pkgs.brightnessctl}/bin/brightnessctl -d acpi_video0 set 100%"
+            ];
+          };
+        };
+
         environment.systemPackages = with pkgs; [
           lm_sensors
           scrcpy

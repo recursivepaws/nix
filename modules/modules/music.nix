@@ -3,7 +3,10 @@
     homeManager =
       { pkgs, config, ... }:
       {
-        home.packages = with pkgs; [ rmpc ];
+        home.packages = with pkgs; [
+          rmpc
+          nicotine-plus
+        ];
         services = {
           mpd = {
             enable = true;

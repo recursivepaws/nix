@@ -89,7 +89,6 @@ in
 
           # Laptop-specific services
           services = lib.mkIf (host.name == "amanita") {
-            power-profiles-daemon.enable = true;
             upower.enable = true;
           };
         };
