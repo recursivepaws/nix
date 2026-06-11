@@ -10,7 +10,13 @@
           {
             enable = true;
             enableDefaultConfig = false;
-            matchBlocks."*".extraOptions.IdentityAgent = opAgent;
+            matchBlocks = {
+              "*".extraOptions.IdentityAgent = opAgent;
+              "github.com".extraOptions = {
+                IdentityFile = "~/.ssh/id_github.pub";
+                IdentitiesOnly = "yes";
+              };
+            };
           };
 
         git = {
@@ -94,6 +100,10 @@
           source ${pkgs.fzf-git-sh}/share/fzf-git-sh/fzf-git.sh
         '';
       };
+
+      home.file.".ssh/id_github.pub".text = ''
+        ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIINY5xZYRlbxjdw4N47VADFRSU3EeSI3Yze97F8cWGLS vera-github
+      '';
 
       home.packages = with pkgs; [
         fzf
