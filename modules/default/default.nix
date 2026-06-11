@@ -19,6 +19,7 @@ in
   # Default aspects
   den.default.includes = with den.aspects; [
     music
+    beets
     spotify
     niri
     noctalia
