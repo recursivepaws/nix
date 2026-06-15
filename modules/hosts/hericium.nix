@@ -103,7 +103,6 @@
 
     provides.to-users.includes = with den.aspects; [
       amd
-      gpu
       ipod
       crypto
       bitwig-studio
