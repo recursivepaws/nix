@@ -10,7 +10,7 @@
         services = {
           mpd = {
             enable = true;
-            musicDirectory = "${config.home.homeDirectory}/Music";
+            musicDirectory = "${config.home.homeDirectory}/Music/beets";
             extraConfig = ''
               audio_output {
                 type    "pipewire"

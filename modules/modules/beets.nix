@@ -46,7 +46,6 @@
               "deezer"
               "spotify"
               "fetchart"
-              "embedart"
               "ftintitle"
               "lastgenre"
               "lyrics"
@@ -85,14 +84,8 @@
               ];
             };
 
-            # Embed a downscaled copy so files don't balloon.
-            embedart = {
-              auto = true;
-              maxwidth = 1200;
-            };
-
             lyrics = {
-              auto = true;
+              auto = false;
               synced = true;
               sources = [
                 "lrclib"
@@ -110,18 +103,18 @@
             # Downsample above-CD-quality to 16-bit/44.1kHz FLAC (one-way).
             # Run via `beet convert --keep-new`, not auto.
             convert = {
-              auto = false;
+              auto = true;
               format = "flac";
               formats.flac = {
                 command = "${pkgs.ffmpeg}/bin/ffmpeg -i $source -y -vn -ar 44100 -sample_fmt s16 -acodec flac -compression_level 8 $dest";
                 extension = "flac";
               };
-              # skip files already at/below CD quality
+              # skip files already at or below CD quality
               no_convert = "samplerate:..44100 bitdepth:..16";
               never_convert_lossy_files = true;
-              embed = true;
+              embed = false;
               # --keep-new backs up originals here
-              dest = "~/Music/beets-high-resolution-backup";
+              # dest = "~/Music/beets-high-resolution-backup";
               delete_originals = false;
               threads = 4;
             };
