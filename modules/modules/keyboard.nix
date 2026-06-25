@@ -30,6 +30,19 @@
           # Keymapp Flashing rules for the Voyager
           SUBSYSTEMS=="usb", ATTRS{idVendor}=="3297", MODE:="0666", SYMLINK+="ignition_dfu"
         '';
+
+        # Swap caps/escape on the built-in laptop keyboard only.
+        # USB keyboards have real vendor:product ids and never match 0001:0001.
+        services.keyd = {
+          enable = true;
+          keyboards.internal = {
+            ids = [ "0001:0001" ];
+            settings.main = {
+              capslock = "esc";
+              esc = "capslock";
+            };
+          };
+        };
       };
 
     user = {
