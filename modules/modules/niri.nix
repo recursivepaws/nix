@@ -27,21 +27,6 @@
             package = pkgs.niri-stable;
           };
 
-          # Set the profile picture at display manager login screen
-          systemd.tmpfiles.rules = [
-            "f+ /var/lib/AccountsService/users/${user.userName} 0600 root root - [User]\\nIcon=/var/lib/AccountsService/icons/${user.userName}\\n"
-            "L+ /var/lib/AccountsService/icons/${user.userName} - - - - ${user.profilePicture}"
-          ];
-
-          services.displayManager = {
-            defaultSession = "niri";
-            gdm = {
-              enable = true;
-              debug = true;
-            };
-          };
-
-          security.pam.services.gdm.enableGnomeKeyring = true;
           services.gnome.gnome-keyring.enable = true;
 
           # For some reason the Niri flake uses the KDE polkit agent by default

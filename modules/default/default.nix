@@ -23,6 +23,7 @@ in
     spotify
     niri
     noctalia
+    noctalia-greeter
     file-manager
     terminal
     browser
