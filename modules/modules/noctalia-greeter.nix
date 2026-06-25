@@ -5,7 +5,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  den.aspects.noctalia-greeter =
+  den.aspects.noctalia =
     { user, ... }:
     {
       nixos =
@@ -74,8 +74,9 @@
             "L+ /var/lib/AccountsService/icons/${user.userName} - - - - ${user.profilePicture}"
           ];
 
-          # The greeter scans /run/current-system/sw/share/wayland-sessions, which is
-          # not populated by default. Linking it surfaces niri.desktop for discovery.
+          # The greeter scans /run/current-system/sw/share/wayland-sessions
+          # Not populated by default.
+          # Linking it surfaces niri.desktop for discovery.
           environment.pathsToLink = [ "/share/wayland-sessions" ];
 
           security.pam.services.greetd.enableGnomeKeyring = true;
