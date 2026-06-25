@@ -44,13 +44,22 @@
               on_hover = d.mOnHover;
             };
           };
+          # Swap the bundled noctalia logo for the NixOS snowflake.
+          greeterPkg =
+            inputs.noctalia-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs
+              (old: {
+                postInstall = (old.postInstall or "") + ''
+                  install -Dm644 ${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg \
+                    $out/share/noctalia-greeter/assets/noctalia.svg
+                '';
+              });
         in
         {
           imports = [ inputs.noctalia-greeter.nixosModules.default ];
 
           programs.noctalia-greeter = {
             enable = true;
-            package = inputs.noctalia-greeter.packages.${pkgs.stdenv.hostPlatform.system}.default;
+            package = greeterPkg;
             greeter-args = "--session Niri";
             settings = {
               appearance.scheme = "Synced";
