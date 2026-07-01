@@ -2,6 +2,7 @@
 {
   den.aspects.amanita = {
     den.aspects.work.includes = [ den.provides.primary-user ];
+    includes = [ den.aspects.audio-fix ];
 
     nixos =
       { pkgs, ... }:
