@@ -96,7 +96,7 @@
               ];
               high_resolution = true;
               # reject low-res thumbnails
-              minwidth = 1000;
+              minwidth = 500;
               sources = [
                 "filesystem"
                 "coverart"
