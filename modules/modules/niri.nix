@@ -6,10 +6,10 @@
   };
 
   den.aspects.niri =
-    { user, ... }:
+    { user, host, ... }:
     {
       nixos =
-        { pkgs, ... }:
+        { pkgs, lib, ... }:
         {
           imports = with inputs; [ niri-flake.nixosModules.niri ];
           nixpkgs.overlays = with inputs; [ niri-flake.overlays.niri ];
@@ -199,7 +199,13 @@
                     clip-to-geometry = true;
                   }
                 ];
-                debug.honor-xdg-activation-with-invalid-serial = [ ];
+                debug = {
+                  honor-xdg-activation-with-invalid-serial = [ ];
+
+                  # TODO: disable this when not docked to the external monitor to save battery.
+                  render-drm-device = lib.mkIf (host.name == "amanita") "/dev/dri/by-path/pci-0000:01:00.0-render";
+                };
+
                 binds =
                   with config.lib.niri.actions;
                   let
