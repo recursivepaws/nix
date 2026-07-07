@@ -124,6 +124,8 @@
                 #   # focus-follows-mouse = true;
                 # };
                 layout = {
+                  empty-workspace-above-first = true;
+
                   border = {
                     enable = true;
                     width = 4;
