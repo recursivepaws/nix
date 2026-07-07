@@ -627,7 +627,24 @@
         "nixpkgs-vale": "nixpkgs-vale",
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",
+        "skills": "skills",
         "spicetify-nix": "spicetify-nix"
+      }
+    },
+    "skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783449186,
+        "narHash": "sha256-tbxzvxFI7KA/i1kncHaNFvPuzWZ+Hcab09UwAwqMS4E=",
+        "ref": "refs/heads/main",
+        "rev": "6eabf7ab8d237586ac52886046faddef92463493",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/recursivepaws/skills"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/recursivepaws/skills"
       }
     },
     "spicetify-nix": {

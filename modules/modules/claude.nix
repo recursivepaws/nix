@@ -6,6 +6,11 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Claude skills live in their own (private) repo; consumed as a plain source tree.
+    skills = {
+      url = "git+ssh://git@github.com/recursivepaws/skills";
+      flake = false;
+    };
   };
 
   den.aspects.claude =
@@ -171,13 +176,13 @@
             ]
           );
 
-          home.file = lib.mkIf isWork {
-            ".claude/skills/destination/SKILL.md".text = builtins.readFile ./destination-skill.md;
-            ".claude/skills/hightouch-dev/SKILL.md".text = builtins.readFile ./hightouch-dev/SKILL.md;
-            ".claude/skills/hightouch-dev/references/ticket-memory.md".text =
-              builtins.readFile ./hightouch-dev/references/ticket-memory.md;
-            ".claude/skills/hightouch-dev/references/lap-trust.md".text =
-              builtins.readFile ./hightouch-dev/references/lap-trust.md;
+          # Symlink every skill from the recursivepaws/skills flake input into ~/.claude/skills.
+          # recursive = true links files individually, so installer-managed skills (e.g. pdf)
+          # still coexist here. Adding/editing a skill = push to that repo, then
+          # `nix flake update skills` and rebuild — no change needed in this file.
+          home.file.".claude/skills" = lib.mkIf isWork {
+            source = inputs.skills;
+            recursive = true;
           };
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
