@@ -166,9 +166,6 @@ in
         baobab
         gnome-disk-utility
         vlc
-
-        # TODO: remove in favor of NixVim
-        chezmoi
       ];
     };
 }

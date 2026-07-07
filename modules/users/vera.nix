@@ -12,8 +12,6 @@
         home.packages = with pkgs; [
           handbrake
           avidemux
-          fuzzel
-          chezmoi
           telegram-desktop
           signal-desktop
           discord
