@@ -52,7 +52,43 @@
                 j = "overloadt(meta, j, ${threshhold})";
                 k = "overloadt(alt, k, ${threshhold})";
                 l = "overloadt(control, l, ${threshhold})";
+
+                leftalt = "layer(symbols)";
               };
+
+            settings.symbols = {
+              q = "(";
+              w = ")";
+              e = "{";
+              r = "}";
+              t = "^";
+              a = "[";
+              s = "]";
+              d = "/";
+              f = "\\";
+              g = "&";
+              z = "#";
+              x = "@";
+              c = ":";
+              v = ";";
+              b = "!";
+
+              y = "$";
+              u = "_";
+              i = "-";
+              o = "+";
+              p = "=";
+              h = "|";
+              j = "*";
+              k = "%";
+              l = "'";
+              ";" = "\"";
+              n = "?";
+              m = "~";
+              "," = "`";
+              "." = "<";
+              "/" = ">";
+            };
           };
         };
       };
