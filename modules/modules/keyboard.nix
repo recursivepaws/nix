@@ -37,10 +37,22 @@
           enable = true;
           keyboards.internal = {
             ids = [ "0001:0001" ];
-            settings.main = {
-              capslock = "esc";
-              esc = "capslock";
-            };
+            settings.main =
+              let
+                threshhold = toString 175;
+              in
+              {
+                capslock = "esc";
+                esc = "capslock";
+
+                f = "overloadt(meta, f, ${threshhold})";
+                d = "overloadt(alt, d, ${threshhold})";
+                s = "overloadt(control, s, ${threshhold})";
+
+                j = "overloadt(meta, j, ${threshhold})";
+                k = "overloadt(alt, k, ${threshhold})";
+                l = "overloadt(control, l, ${threshhold})";
+              };
           };
         };
       };
