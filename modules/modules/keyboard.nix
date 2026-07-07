@@ -54,6 +54,7 @@
                 l = "overloadt(control, l, ${threshhold})";
 
                 leftalt = "layer(symbols)";
+                rightalt = "layer(functions)";
               };
 
             settings.symbols = {
@@ -88,6 +89,15 @@
               "," = "`";
               "." = "<";
               "/" = ">";
+            };
+
+            settings.functions = {
+              h = "left";
+              j = "down";
+              k = "up";
+              l = "right";
+              m = "pagedown";
+              "," = "pageup";
             };
           };
         };
