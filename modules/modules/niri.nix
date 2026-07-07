@@ -119,6 +119,10 @@
                 ];
                 # screenshot-path =
                 #   "~/Pictures/Screenshots/Screenshot from %YYYY-%m-%d %H-%M-%S.png";
+                # input = {
+                #   # warp-m
+                #   # focus-follows-mouse = true;
+                # };
                 layout = {
                   border = {
                     enable = true;
@@ -146,6 +150,23 @@
                     inactive = {
                       color = "#161616";
                     };
+                  };
+                  preset-column-widths = [
+                    # { proportion = 1.0 / 4.0; }
+                    { proportion = 1.0 / 3.0; }
+                    { proportion = 1.0 / 2.0; }
+                    { proportion = 2.0 / 3.0; }
+                    # { proportion = 3.0 / 4.0; }
+                    { proportion = 1.0; }
+                  ];
+                  preset-window-heights = [
+                    { proportion = 1.0 / 3.0; }
+                    { proportion = 1.0 / 2.0; }
+                    { proportion = 2.0 / 3.0; }
+                    { proportion = 1.0; }
+                  ];
+                  default-column-width = {
+                    proportion = 0.5;
                   };
                 };
                 layer-rules = [
@@ -227,6 +248,11 @@
                     "Mod+S".action = toggle-column-tabbed-display;
 
                     "Mod+V".action = center-column;
+
+                    "Mod+R".action = switch-preset-column-width;
+                    "Mod+Shift+R".action = switch-preset-column-width-back;
+                    "Mod+Ctrl+R".action = switch-preset-window-height;
+                    "Mod+Ctrl+Shift+R".action = switch-preset-window-height-back;
 
                     "Mod+Shift+V".action = toggle-window-floating;
 
