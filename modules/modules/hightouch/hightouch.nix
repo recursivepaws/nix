@@ -32,6 +32,9 @@
           # Database
           postgresql_15
           tmux
+
+          # Infra
+          terraform
         ];
 
         # Required by tilt
