@@ -15,7 +15,7 @@
         clean = {
           enable = true;
           dates = "daily";
-          extraArgs = "--keep 10";
+          extraArgs = "--keep 10 --keep-since 5d";
         };
       };
     };
