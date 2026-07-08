@@ -28,6 +28,32 @@
     environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
     environment.systemPackages = [ pkgs.libva-utils ];
 
+    # The NVIDIA driver never releases freed buffers, so niri holds ~1 GiB of VRAM instead of ~100 MiB.
+    # INFO: https://github.com/niri-wm/niri/wiki/Nvidia
+    environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
+      builtins.toJSON {
+        rules = [
+          {
+            pattern = {
+              feature = "procname";
+              matches = "niri";
+            };
+            profile = "Limit Free Buffer Pool On Wayland Compositors";
+          }
+        ];
+        profiles = [
+          {
+            name = "Limit Free Buffer Pool On Wayland Compositors";
+            settings = [
+              {
+                key = "GLVidHeapReuseRatio";
+                value = 0;
+              }
+            ];
+          }
+        ];
+      };
+
     # Proprietary NVIDIA in PRIME offload mode so the Intel iGPU drives the display while the dGPU powers up on demand.
     # powerManagement restores VRAM across suspend, which nouveau failed to do when its GSP firmware locked up on resume.
     services.xserver.videoDrivers = [ "nvidia" ];
