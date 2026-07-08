@@ -19,8 +19,20 @@
     includes = [ den.aspects.noctalia-avatar ];
 
     nixos =
-      { pkgs, ... }:
+      { pkgs, lib, ... }:
       let
+        greeterSettings = {
+          appearance.scheme = "Synced";
+          cursor = {
+            theme = "Bibata-Modern-Ice";
+            size = 24;
+            path = "/run/current-system/sw/share/icons";
+          };
+          keyboard = {
+            layout = "us";
+          };
+        };
+        greeterToml = (pkgs.formats.toml { }).generate "greeter.toml" greeterSettings;
         # Same Oxocarbon colorscheme the shell pins in noctalia.nix.
         oxocarbon = builtins.fromJSON (
           builtins.readFile (
@@ -71,18 +83,22 @@
           enable = true;
           package = greeterPkg;
           greeter-args = "--session Niri";
-          settings = {
-            appearance.scheme = "Synced";
-            cursor = {
-              theme = "Bibata-Modern-Ice";
-              size = 24;
-              path = "${pkgs.bibata-cursors}/share/icons:/run/current-system/sw/share/icons";
-            };
-            keyboard = {
-              layout = "us";
+          settings = greeterSettings;
+        };
+
+        # Upstream deploys greeter.toml with a copy-once tmpfiles rule, so edits never reach the live file.
+        # Overwrite it on every boot instead.
+        systemd.tmpfiles.settings."10-noctalia-greeter"."/var/lib/noctalia-greeter/greeter.toml" =
+          lib.mkForce {
+            "C+" = {
+              argument = "${greeterToml}";
+              user = "greeter";
+              group = "greeter";
+              mode = "0644";
             };
           };
-        };
+
+        environment.systemPackages = [ pkgs.bibata-cursors ];
 
         services.accounts-daemon.enable = true;
 
@@ -93,7 +109,10 @@
         # The greeter scans /run/current-system/sw/share/wayland-sessions
         # Not populated by default.
         # Linking it surfaces niri.desktop for discovery.
-        environment.pathsToLink = [ "/share/wayland-sessions" ];
+        environment.pathsToLink = [
+          "/share/wayland-sessions"
+          "/share/icons"
+        ];
 
         security.pam.services.greetd.enableGnomeKeyring = true;
       };
