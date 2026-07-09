@@ -191,7 +191,12 @@ in
                     labelMode = "none";
                   }
                 ];
-                right = map (name: { id = "plugin:" + name; }) plugins;
+                right = map (name: { id = "plugin:" + name; }) plugins ++ [
+                  {
+                    id = "Battery";
+                    displayMode = "icon-always";
+                  }
+                ];
               };
             };
             wallpaper = {
