@@ -14,6 +14,7 @@
         programs.google-chrome = {
           enable = true;
           # commandLineArgs = [ "--load-extension=${bilibili-to-english}" ];
+          commandLineArgs = [ "--enable-features=Vulkan" ];
         };
       };
   };
