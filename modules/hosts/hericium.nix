@@ -110,6 +110,7 @@
       davinci
       keyboard
       varnam
+      gaming
     ];
   };
 }
