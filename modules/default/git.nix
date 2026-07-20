@@ -50,6 +50,7 @@
             stashes = "stash list";
 
             a = "add";
+            b = "branch";
             aa = "add -A";
             c = "commit";
             ca = "commit --amend";
