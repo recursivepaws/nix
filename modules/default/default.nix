@@ -116,6 +116,13 @@ in
               "history"
             ];
           };
+          # fzf-tab: fzf-driven completion menu (needs to load after oh-my-zsh's compinit)
+          interactiveShellInit = lib.mkAfter ''
+            source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
+            zstyle ':completion:*' menu no
+            zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always $realpath'
+            zstyle ':fzf-tab:*' switch-group ',' '.'
+          '';
         };
         starship.enable = true;
         # _1password.enable = true;
