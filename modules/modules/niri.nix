@@ -118,10 +118,10 @@
               ];
               # screenshot-path =
               #   "~/Pictures/Screenshots/Screenshot from %YYYY-%m-%d %H-%M-%S.png";
-              # input = {
-              #   # warp-m
-              #   # focus-follows-mouse = true;
-              # };
+              input = {
+                touchpad.dwt = true;
+                # focus-follows-mouse = true;
+              };
               layout = {
                 empty-workspace-above-first = true;
 

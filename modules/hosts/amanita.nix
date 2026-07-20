@@ -110,6 +110,25 @@
           };
           pipewire.enable = true;
           avahi.enable = true;
+
+          # Stop accidentally activating touchpad while i type
+          udev.extraHwdb =
+            let
+              width = 4100;
+              height = 2460;
+              deadZone = 0.35;
+              lo = size: toString (builtins.floor (size * deadZone / 2));
+              hi = size: toString (builtins.floor (size * (1 - deadZone / 2)));
+              x = "${lo width}:${hi width}";
+              y = "${lo height}:${hi height}";
+            in
+            ''
+              evdev:name:FTCS1000:00 2808:0102 Touchpad:dmi:*
+               EVDEV_ABS_00=${x}
+               EVDEV_ABS_01=${y}
+               EVDEV_ABS_35=${x}
+               EVDEV_ABS_36=${y}
+            '';
         };
         # enabled in the niri flake aspect
         # security = { polkit.enable = true; };
