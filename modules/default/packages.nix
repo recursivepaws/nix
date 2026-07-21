@@ -34,5 +34,5 @@ let
 
 in
 {
-  den.ctx.user.includes = [ packageClass ];
+  den.schema.user.includes = [ packageClass ];
 }

@@ -9,7 +9,7 @@
     homeManager =
       { pkgs, ... }:
       {
-        home.packages = [ inputs.nix-photogimp.packages.${pkgs.system}.default ];
+        home.packages = [ inputs.nix-photogimp.packages.${pkgs.stdenv.hostPlatform.system}.default ];
       };
   };
 }

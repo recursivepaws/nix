@@ -10,9 +10,11 @@
           {
             enable = true;
             enableDefaultConfig = false;
-            matchBlocks = {
-              "*".extraOptions.IdentityAgent = opAgent;
-              "github.com".extraOptions = {
+            settings = {
+              "*" = {
+                IdentityAgent = opAgent;
+              };
+              "github.com" = {
                 IdentityFile = "~/.ssh/id_github.pub";
                 IdentitiesOnly = "yes";
               };

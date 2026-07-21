@@ -24,7 +24,8 @@
           ...
         }:
         let
-          claudePluginsPkg = inputs.claude-plugins-nix.packages.${pkgs.system}.claude-plugins;
+          claudePluginsPkg =
+            inputs.claude-plugins-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-plugins;
           isWork = user.userName == "work";
           plugins = [
             "@anthropics/claude-code-plugins/pr-review-toolkit"
@@ -81,7 +82,7 @@
               # Enable skills installer
               skills-installer = {
                 enable = true;
-                package = inputs.claude-plugins-nix.packages.${pkgs.system}.skills-installer;
+                package = inputs.claude-plugins-nix.packages.${pkgs.stdenv.hostPlatform.system}.skills-installer;
                 clients = [
                   "claude-code"
                   # "cursor"

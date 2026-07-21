@@ -115,6 +115,12 @@
                     "1password --silent"
                   ];
                 }
+                {
+                  command = [
+                    "noctalia"
+                    "--daemon"
+                  ];
+                }
               ];
               # screenshot-path =
               #   "~/Pictures/Screenshots/Screenshot from %YYYY-%m-%d %H-%M-%S.png";

@@ -89,14 +89,15 @@
         # Upstream deploys greeter.toml with a copy-once tmpfiles rule, so edits never reach the live file.
         # Overwrite it on every boot instead.
         systemd.tmpfiles.settings."10-noctalia-greeter"."/var/lib/noctalia-greeter/greeter.toml" =
-          lib.mkForce {
-            "C+" = {
-              argument = "${greeterToml}";
-              user = "greeter";
-              group = "greeter";
-              mode = "0644";
+          lib.mkForce
+            {
+              "C+" = {
+                argument = "${greeterToml}";
+                user = "greeter";
+                group = "greeter";
+                mode = "0644";
+              };
             };
-          };
 
         environment.systemPackages = [ pkgs.bibata-cursors ];
 

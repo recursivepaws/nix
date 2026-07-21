@@ -6,7 +6,7 @@
     homeManager =
       { pkgs, ... }:
       let
-        vale = inputs.nixpkgs-vale.legacyPackages.${pkgs.system}.vale;
+        vale = inputs.nixpkgs-vale.legacyPackages.${pkgs.stdenv.hostPlatform.system}.vale;
       in
       {
         home.packages = [ vale ];
