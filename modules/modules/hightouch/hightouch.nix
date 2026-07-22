@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/b95255df2360a45ddbb03817a68869d5cb01bf96";
+  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/346dd96ad74dc4457a9db9de4f4f57dab2e5731d";
 
   den.aspects.hightouch = {
     nixos =
@@ -13,7 +13,7 @@
       {
         nixpkgs.overlays = [
           (final: prev: {
-            final.nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nodejs_20;
+            final.nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nodejs_24;
             final.pnpm = prev.pnpm.override { nodejs = final.nodejs; };
           })
         ];
