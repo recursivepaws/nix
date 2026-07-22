@@ -1,13 +1,7 @@
 { inputs, ... }:
-let
-  nodeOverlay = final: prev: {
-    nodejs = inputs.nixpkgs-node.legacyPackages.${prev.stdenv.hostPlatform.system}.nodejs_24;
-    pnpm = prev.pnpm.override { nodejs = final.nodejs; };
-  };
-in
 {
   # 24.18.0
-  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/d5a515bcf770f06a7604f8c31b3e7e2ef1c89388";
+  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/a47c123a609287a012dfc44d281de2dd4ed13394";
 
   den.aspects.hightouch = {
     nixos =
@@ -18,7 +12,6 @@ in
         ...
       }:
       {
-        nixpkgs.overlays = [ nodeOverlay ];
         environment.systemPackages = with pkgs; [
           # Core CLI tools
           git
@@ -90,8 +83,12 @@ in
         ...
       }:
       let
-        # The specific version of node pinned in `pnpm-workspace.yaml`
-        # nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nodejs_20;
+        # The specific version of node pinned in `pnpm-workspace.yaml`.
+        # Pulled directly from the pinned nixpkgs-node input rather than via an
+        # overlay so the main package set (and its binary cache hits) is untouched.
+        nodePkgs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system};
+        nodejs = nodePkgs.nodejs_24;
+        pnpm = nodePkgs.pnpm.override { nodejs-slim = nodePkgs.nodejs-slim_24; };
 
         #  Allows the Hightouch backend (which uses Java/JVM-based tooling) to trust custom CAs
         setupJavaCacertsScript = pkgs.writeShellScript "setup-java-cacerts" ''
@@ -197,8 +194,6 @@ in
         '';
       in
       {
-        nixpkgs.overlays = [ nodeOverlay ];
-
         home = {
           sessionVariables = {
             JAVA_HOME = "$HOME/.java-home";
@@ -214,10 +209,11 @@ in
             open = "xdg-open";
           };
 
-          packages = with pkgs; [
+          packages = [
             nodejs
             pnpm
-
+          ]
+          ++ (with pkgs; [
             # `open` command
             xdg-utils
 
@@ -234,7 +230,7 @@ in
             # python312
             python312Packages.setuptools # python-setuptools
             # libomp # OpenMP for LightGBM
-          ];
+          ]);
         };
 
         programs.zsh.initContent = ''
