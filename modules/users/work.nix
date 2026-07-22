@@ -11,7 +11,6 @@
       {
         home.packages = with pkgs; [
           seahorse
-          zoom-us
         ];
       };
 

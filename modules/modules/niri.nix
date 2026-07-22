@@ -117,8 +117,9 @@
                 }
                 {
                   command = [
-                    "noctalia"
-                    "--daemon"
+                    "bash"
+                    "-c"
+                    "noctalia-shell -d"
                   ];
                 }
               ];

@@ -1,6 +1,9 @@
 {
   den.hosts.x86_64-linux = {
-    hericium.users.vera = { };
+    hericium.users = {
+      vera = { };
+      work = { };
+    };
     amanita.users = {
       vera = { };
       work = { };
