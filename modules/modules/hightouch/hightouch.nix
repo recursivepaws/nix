@@ -1,6 +1,7 @@
 { inputs, ... }:
 {
-  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/346dd96ad74dc4457a9db9de4f4f57dab2e5731d";
+  # 24.18.0
+  flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/d5a515bcf770f06a7604f8c31b3e7e2ef1c89388";
 
   den.aspects.hightouch = {
     nixos =

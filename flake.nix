@@ -36,7 +36,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
-    nixpkgs-node.url = "github:NixOS/nixpkgs/346dd96ad74dc4457a9db9de4f4f57dab2e5731d";
+    nixpkgs-node.url = "github:NixOS/nixpkgs/d5a515bcf770f06a7604f8c31b3e7e2ef1c89388";
     nixpkgs-vale.url = "github:NixOS/nixpkgs/ca16221251951e9c6261a1a2bb4f9389038d3632";
     noctalia = {
       url = "github:noctalia-dev/noctalia/legacy-v4";
