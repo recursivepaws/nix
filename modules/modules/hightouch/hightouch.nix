@@ -1,4 +1,10 @@
 { inputs, ... }:
+let
+  nodeOverlay = final: prev: {
+    nodejs = inputs.nixpkgs-node.legacyPackages.${prev.stdenv.hostPlatform.system}.nodejs_24;
+    pnpm = prev.pnpm.override { nodejs = final.nodejs; };
+  };
+in
 {
   # 24.18.0
   flake-file.inputs.nixpkgs-node.url = "github:NixOS/nixpkgs/d5a515bcf770f06a7604f8c31b3e7e2ef1c89388";
@@ -12,12 +18,7 @@
         ...
       }:
       {
-        nixpkgs.overlays = [
-          (final: prev: {
-            final.nodejs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nodejs_24;
-            final.pnpm = prev.pnpm.override { nodejs = final.nodejs; };
-          })
-        ];
+        nixpkgs.overlays = [ nodeOverlay ];
         environment.systemPackages = with pkgs; [
           # Core CLI tools
           git
@@ -196,6 +197,8 @@
         '';
       in
       {
+        nixpkgs.overlays = [ nodeOverlay ];
+
         home = {
           sessionVariables = {
             JAVA_HOME = "$HOME/.java-home";
