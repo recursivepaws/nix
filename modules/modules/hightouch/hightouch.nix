@@ -108,7 +108,7 @@
         # and restarts Chrome so it picks up the new trust anchor.
         # Only runs when the cert fingerprint has actually changed — avoids
         # needlessly killing Chrome on every caddy container start.
-        caddyTrustScript = pkgs.writeShellScript "caddy-trust" ''
+        caddyTrustScript = pkgs.writeShellScriptBin "caddy-trust" ''
           set -euo pipefail
 
           FINGERPRINT_FILE="$HOME/.local/share/caddy-trust/cert.sha256"
@@ -189,7 +189,7 @@
           | while read -r _line; do
               echo "caddy-trust-watcher: caddy started, waiting for it to initialize"
               sleep 5
-              ${caddyTrustScript} || echo "caddy-trust-watcher: trust script failed, continuing"
+              ${lib.getExe caddyTrustScript} || echo "caddy-trust-watcher: trust script failed, continuing"
             done
         '';
       in
@@ -212,6 +212,7 @@
           packages = [
             nodejs
             pnpm
+            caddyTrustScript
           ]
           ++ (with pkgs; [
             # `open` command
