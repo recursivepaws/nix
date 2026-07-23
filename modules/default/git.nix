@@ -28,6 +28,9 @@
             "**/.claude/settings.local.json"
           ];
           settings = {
+            safe = {
+              directory = [ "/etc/nixos" ];
+            };
             gpg = {
               format = "ssh";
             };
