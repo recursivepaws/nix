@@ -147,16 +147,24 @@
           fi
 
           echo "caddy-trust: cert changed, re-trusting"
+          # Chrome reads the sqlite NSS db (cert9.db) under sql:. On a fresh
+          # user this directory may not exist yet (Chrome has never run), so
+          # create and initialize an empty db before touching it.
+          NSSDB="$HOME/.pki/nssdb"
+          mkdir -p "$NSSDB"
+          if [ ! -f "$NSSDB/cert9.db" ]; then
+            ${pkgs.nssTools}/bin/certutil -N -d "sql:$NSSDB" --empty-password
+          fi
           # Remove stale entry first so repeated volume wipes don't accumulate
           # duplicate "Caddy Local Authority" certs in the NSS database.
           ${pkgs.nssTools}/bin/certutil -D \
             -n "Caddy Local Authority" \
-            -d "$HOME/.pki/nssdb" 2>/dev/null || true
+            -d "sql:$NSSDB" 2>/dev/null || true
           ${pkgs.nssTools}/bin/certutil -A \
             -n "Caddy Local Authority" \
             -t "CT,," \
             -i "$CERT_TMP" \
-            -d "$HOME/.pki/nssdb"
+            -d "sql:$NSSDB"
           rm "$CERT_TMP"
 
           echo "$NEW_FINGERPRINT" > "$FINGERPRINT_FILE"
