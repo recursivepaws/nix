@@ -35,6 +35,10 @@ in
     { pkgs, ... }:
     {
       system.stateVersion = stateVersion;
+
+      # Wipe /tmp on every boot so stale files can't accumulate.
+      boot.tmp.cleanOnBoot = true;
+
       # Set your time zone.
       time.timeZone = "America/New_York";
 

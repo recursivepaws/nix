@@ -118,7 +118,7 @@ in
           "privacy-indicator"
           "catwalk"
           "screen-toolkit"
-          "battery"
+          # "battery"
         ]
         ++ lib.optionals isWork [
           "kubectl-ctx"
@@ -244,9 +244,9 @@ in
               workDuration = 30;
               playSound = true;
             };
-            battery = {
-              displayMode = "icon-always";
-            };
+            # battery = {
+            #   displayMode = "icon-always";
+            # };
           };
         };
 
