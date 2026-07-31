@@ -15,7 +15,8 @@
         clean = {
           enable = true;
           dates = "daily";
-          extraArgs = "--keep 10 --keep-since 5d";
+          # TODO: (https://github.com/nix-community/nh/issues/722): on nh 4.4.0 the clean
+          extraArgs = "--keep 10 --keep-since 5d --no-gcroots";
         };
       };
     };
