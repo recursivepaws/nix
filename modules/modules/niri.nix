@@ -125,6 +125,10 @@
               ];
               # screenshot-path =
               #   "~/Pictures/Screenshots/Screenshot from %YYYY-%m-%d %H-%M-%S.png";
+              cursor = {
+                hide-when-typing = true;
+                hide-after-inactive-ms = 1000;
+              };
               input = {
                 touchpad.dwt = true;
                 focus-follows-mouse = {
