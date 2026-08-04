@@ -28,6 +28,7 @@ in
     browser
     claude
     gimp
+    restream
   ];
 
   # Allow unfree packages
