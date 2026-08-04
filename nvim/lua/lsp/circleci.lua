@@ -1,0 +1,10 @@
+-- local mason_bin = require("utils.lsp").mason_bin
+--
+-- vim.lsp.config("circleci", {
+--   cmd = { mason_bin .. "circleci-yaml-language-server", "--stdio" },
+--   filetypes = {
+--     "yaml",
+--   },
+-- })
+--
+-- vim.lsp.enable("circlci")
