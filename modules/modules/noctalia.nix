@@ -118,7 +118,6 @@ in
           "privacy-indicator"
           "catwalk"
           "screen-toolkit"
-          # "battery"
         ]
         ++ lib.optionals isWork [
           "kubectl-ctx"
@@ -192,7 +191,13 @@ in
                     labelMode = "none";
                   }
                 ];
-                right = map (name: { id = "plugin:" + name; }) plugins;
+                right = map (name: { id = "plugin:" + name; }) plugins ++ [
+                  {
+                    id = "Battery";
+                    displayMode = "icon-always";
+                    hideIfNotDetected = true;
+                  }
+                ];
               };
             };
             wallpaper = {
@@ -244,9 +249,6 @@ in
               workDuration = 30;
               playSound = true;
             };
-            # battery = {
-            #   displayMode = "icon-always";
-            # };
           };
         };
 
