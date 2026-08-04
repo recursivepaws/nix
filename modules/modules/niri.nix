@@ -189,6 +189,8 @@
                     { app-id = "^org\\.telegram\\.desktop$"; }
                     { app-id = "^com\\.ktechpit\\.whatsie$"; }
                     { app-id = "^discord$"; }
+                    { app-id = "^vesktop$"; }
+                    { app-id = "^vencord$"; }
                     { app-id = "^signal$"; }
                     { app-id = "^1password$"; }
                   ];

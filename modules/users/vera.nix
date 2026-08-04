@@ -14,7 +14,9 @@
           avidemux
           telegram-desktop
           signal-desktop
-          discord
+          # discord
+          vesktop
+          discordchatexporter-desktop
           seahorse
           immich-go
           anki

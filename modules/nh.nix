@@ -10,13 +10,14 @@
   den.default.nixos =
     { ... }:
     {
+      # TODO: unfuck this
       programs.nh = {
-        enable = true;
+        enable = false;
         clean = {
-          enable = true;
-          dates = "daily";
-          # TODO: (https://github.com/nix-community/nh/issues/722): on nh 4.4.0 the clean
-          extraArgs = "--keep 10 --keep-since 5d --no-gcroots";
+          enable = false;
+          # dates = "daily";
+          # # TODO: (https://github.com/nix-community/nh/issues/722): on nh 4.4.0 the clean
+          # extraArgs = "--keep 10 --keep-since 5d --no-gcroots";
         };
       };
     };
