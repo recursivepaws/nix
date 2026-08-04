@@ -66,6 +66,13 @@ end ]]
 -- end, { desc = "Quickfix" })
 --
 --
+lead_map("xt", function()
+	if vim.diagnostic.is_enabled() then
+		vim.diagnostic.enable(false)
+	else
+		vim.diagnostic.enable(true)
+	end
+end, { desc = "Toggle diagnostics" })
 
 lead_map("x[", function()
 	vim.diagnostic.jump({ count = -1, float = true })
