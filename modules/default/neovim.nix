@@ -43,7 +43,6 @@
       # Store paths of nix-built plugins, loaded by lazy specs via `dir`
       xdg.configFile."nvim/lua/nix-paths.lua".text = ''
         return {
-          ["codesnap.nvim"] = "${pkgs.vimPlugins.codesnap-nvim}",
           ["imprint.nvim"] = "${imprint-nvim}",
           ["playwright-browsers"] = "${playwright-browsers}",
         }

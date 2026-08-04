@@ -10,6 +10,14 @@ return {
 		vim.cmd.packadd("nvim.tohtml")
 		vim.env.PLAYWRIGHT_BROWSERS_PATH = require("nix-paths")["playwright-browsers"]
 		vim.env.PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true"
-		require("imprint").setup({})
+		local imprint = require("imprint")
+		local dir = vim.fn.expand("~/Pictures/Code")
+		vim.fn.mkdir(dir, "p")
+
+		imprint.setup({
+			output_dir = dir,
+			copy_to_clipboard = true,
+			required_title_by_default = false,
+		})
 	end,
 }
