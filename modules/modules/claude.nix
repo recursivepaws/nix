@@ -41,6 +41,11 @@
             "@anthropics/claude-plugins-official/typescript-lsp"
           ]
           ++ lib.optionals (!isWork) [ ];
+          # Run npx from $HOME so project configs can't interfere.
+          npxFromHome = pkgs.writeShellScript "npx-from-home" ''
+            cd "$HOME"
+            exec ${pkgs.nodejs}/bin/npx "$@"
+          '';
         in
         {
           imports = with inputs; [
@@ -123,7 +128,7 @@
             { }
             // lib.optionalAttrs isWork {
               circleci = {
-                command = "${pkgs.nodejs}/bin/npx";
+                command = "${npxFromHome}";
                 args = [
                   "-y"
                   "@circleci/mcp-server-circleci@latest"
@@ -139,7 +144,7 @@
                 };
               };
               datadog = {
-                command = "${pkgs.nodejs}/bin/npx";
+                command = "${npxFromHome}";
                 args = [
                   "-y"
                   "@winor30/mcp-server-datadog"
@@ -150,7 +155,7 @@
                 };
               };
               slack = {
-                command = "${pkgs.nodejs}/bin/npx";
+                command = "${npxFromHome}";
                 args = [
                   "-y"
                   "slack-mcp-server@latest"
