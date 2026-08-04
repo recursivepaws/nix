@@ -127,7 +127,17 @@
               #   "~/Pictures/Screenshots/Screenshot from %YYYY-%m-%d %H-%M-%S.png";
               input = {
                 touchpad.dwt = true;
-                # focus-follows-mouse = true;
+                focus-follows-mouse = {
+                  enable = true;
+                  # max-scroll-amount = "10%";
+                };
+                warp-mouse-to-focus = {
+                  enable = true;
+                  mode = "center-xy";
+                };
+                mouse = {
+                  accel-speed = 0.1;
+                };
               };
               layout = {
                 empty-workspace-above-first = true;
