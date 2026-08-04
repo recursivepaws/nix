@@ -1,3 +1,7 @@
+local map = require("utils").map
+map("v", "<leader>cc", "<cmd>Imprint<cr>", { desc = "Screenshot" })
+map("n", "<leader>cc", "<cmd>Imprint<cr>", { desc = "Screenshot" })
+
 return {
 	"glyccogen/imprint.nvim",
 	dir = require("nix-paths")["imprint.nvim"],
