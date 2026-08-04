@@ -34,14 +34,13 @@
             "@anthropics/claude-plugins-official/code-simplifier"
             "@anthropics/claude-plugins-official/skill-creator"
             "@anthropics/claude-plugins-official/lua-lsp"
+            "@anthropics/claude-plugins-official/rust-analyzer-lsp"
           ]
           ++ lib.optionals isWork [
             "@anthropics/claude-plugins-official/linear"
             "@anthropics/claude-plugins-official/typescript-lsp"
           ]
-          ++ lib.optionals (!isWork) [
-            "@anthropics/claude-plugins-official/rust-analyzer-lsp"
-          ];
+          ++ lib.optionals (!isWork) [ ];
         in
         {
           imports = with inputs; [
