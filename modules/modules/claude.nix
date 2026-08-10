@@ -167,6 +167,16 @@
                   SLACK_MCP_XOXD_TOKEN = "\${SLACK_MCP_XOXD_TOKEN}";
                 };
               };
+              hightouch-internal = {
+                command = "${npxFromHome}";
+                args = [
+                  "-y"
+                  "@hightouchio/internal-mcp@latest"
+                ];
+                env = {
+                  HIGHTOUCH_API_KEY = "\${HIGHTOUCH_API_KEY}";
+                };
+              };
             }
             // lib.optionalAttrs (!isWork) {
               # TODO: vera-only servers here
