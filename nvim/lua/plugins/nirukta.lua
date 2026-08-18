@@ -16,9 +16,15 @@ return {
   name = "tree-sitter-nirukta",
   enabled = available,
   lazy = false,
-  build = "tree-sitter generate"
-    .. " && cc -shared -fPIC -O2 -I src src/parser.c -o parser/nirukta.so",
   config = function()
+    -- Lazy's build hook only fires on install or update, which left a stale parser behind after every grammar change.
+    -- This nix-built script checks mtimes on every start instead and rebuilds parser/nirukta.so when the grammar is newer.
+    local rebuild = require("nix-paths")["nirukta-ts-build"]
+    local out = vim.fn.system({ rebuild, GRAMMAR })
+    if vim.v.shell_error ~= 0 then
+      vim.notify("nirukta: tree-sitter parser rebuild failed:\n" .. out, vim.log.levels.ERROR)
+    end
+
     dofile(GLUE)
 
     -- same carbonfox colors the old syntax/nirukta.vim setup used, scoped

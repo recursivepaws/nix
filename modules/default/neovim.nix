@@ -31,6 +31,27 @@
         ln -s ${pkgs.python3.withPackages (ps: [ ps.playwright ])}/bin/python $out/bin/python
         touch $out/.deps_installed
       '';
+
+      # Rebuilds the nirukta tree-sitter parser when the grammar source is newer than the compiled .so, run on every nvim start by the nirukta lazy spec.
+      # The toolchain is baked in because tree-sitter generate shells out to node and the nirukta devshell's nvim wrapper bypasses extraPackages.
+      nirukta-ts-build = pkgs.writeShellApplication {
+        name = "nirukta-ts-build";
+        runtimeInputs = with pkgs; [
+          tree-sitter
+          nodejs
+          gcc
+        ];
+        text = ''
+          cd "$1"
+          if [ grammar.js -nt src/parser.c ]; then
+            tree-sitter generate
+          fi
+          if [ ! -e parser/nirukta.so ] || [ src/parser.c -nt parser/nirukta.so ]; then
+            mkdir -p parser
+            cc -shared -fPIC -O2 -I src src/parser.c -o parser/nirukta.so
+          fi
+        '';
+      };
     in
     {
       xdg.enable = lib.mkDefault true;
@@ -45,6 +66,7 @@
         return {
           ["imprint.nvim"] = "${imprint-nvim}",
           ["playwright-browsers"] = "${playwright-browsers}",
+          ["nirukta-ts-build"] = "${nirukta-ts-build}/bin/nirukta-ts-build",
         }
       '';
 
