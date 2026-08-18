@@ -64,8 +64,12 @@
           # We match on source IP rather than interface name because Docker Compose
           # networks use dynamically-named bridges (br-<network-id>), not docker0.
           # 172.16.0.0/12 covers the full RFC 1918 range Docker assigns to its networks.
+          # Ports: 10350 = Tilt UI; 3000 = app, 5000 = api — the tilt:local model
+          # runs app/api as host processes, so Caddy (a container) must reach them
+          # here or app./api.local.hightouch.dev return 503 "no upstreams available".
+          # Add 8000 (destinations) / 3001 (agent-runtime) if run on the host.
           extraInputRules = ''
-            ip saddr 172.16.0.0/12 tcp dport 10350 accept
+            ip saddr 172.16.0.0/12 tcp dport { 3000, 5000, 10350 } accept
           '';
         };
 
