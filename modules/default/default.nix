@@ -29,6 +29,7 @@ in
     claude
     gimp
     restream
+    # software-repos
   ];
 
   # Allow unfree packages
