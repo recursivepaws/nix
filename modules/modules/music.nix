@@ -6,6 +6,7 @@
         home.packages = with pkgs; [
           rmpc
           nicotine-plus
+          pavucontrol
         ];
         services = {
           mpd = {
