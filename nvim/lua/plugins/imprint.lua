@@ -1,6 +1,6 @@
 local map = require("utils").map
-map("v", "<leader>cc", "<cmd>Imprint<cr>", { desc = "Screenshot" })
-map("n", "<leader>cc", "<cmd>Imprint<cr>", { desc = "Screenshot" })
+map("v", "<leader>cc", "<cmd>Imprint -o<cr>", { desc = "Screenshot" })
+map("n", "<leader>cc", "<cmd>Imprint -o<cr>", { desc = "Screenshot" })
 
 return {
 	"glyccogen/imprint.nvim",
@@ -23,5 +23,15 @@ return {
 			copy_to_clipboard = true,
 			required_title_by_default = false,
 		})
+
+		-- Imprint --open goes through vim.ui.open, route its output
+		-- to the noctalia screen-toolkit annotate overlay instead of xdg-open
+		local open = vim.ui.open
+		vim.ui.open = function(path, opt)
+			if type(path) == "string" and vim.startswith(path, dir .. "/") then
+				return vim.system({ "noctalia-shell", "ipc", "call", "plugin:screen-toolkit", "annotateFile", path }), nil
+			end
+			return open(path, opt)
+		end
 	end,
 }

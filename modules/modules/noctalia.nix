@@ -252,7 +252,23 @@ in
           };
         };
 
-        home.activation = lib.optionalAttrs isWork {
+        home.activation = {
+          # screen-toolkit has no IPC to annotate an existing image, so patch an
+          # annotateFile(path) command plus fit-to-screen scaling into the installed plugin (written for v1.3.3)
+          noctaliaScreenToolkitAnnotateFile = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+            plugin_dir="${config.xdg.configHome}/noctalia/plugins/screen-toolkit"
+            annotate_patch=${./noctalia-screen-toolkit-annotate-file.patch}
+
+            if [ -f "$plugin_dir/Main.qml" ] && ! grep -q annotateFileProc "$plugin_dir/Main.qml"; then
+              if ${pkgs.patch}/bin/patch -p1 -d "$plugin_dir" --silent --dry-run < "$annotate_patch" > /dev/null 2>&1; then
+                run ${pkgs.patch}/bin/patch -p1 -d "$plugin_dir" --silent < "$annotate_patch"
+              else
+                echo "warning: screen-toolkit annotate-file patch no longer applies, skipping" >&2
+              fi
+            fi
+          '';
+        }
+        // lib.optionalAttrs isWork {
           noctaliaGithubFeedToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
             token_file="/run/agenix/github.token"
             settings_file="${config.xdg.configHome}/noctalia/plugins/github-feed/settings.json"
