@@ -133,7 +133,7 @@
                 touchpad.dwt = true;
                 focus-follows-mouse = {
                   enable = true;
-                  # max-scroll-amount = "10%";
+                  max-scroll-amount = "50%";
                 };
                 warp-mouse-to-focus = {
                   enable = true;
