@@ -50,6 +50,10 @@
       url = "github:noctalia-dev/noctalia-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ponytail = {
+      url = "github:DietrichGebert/ponytail";
+      flake = false;
+    };
     skills = {
       url = "git+ssh://git@github.com/recursivepaws/skills";
       flake = false;

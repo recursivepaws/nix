@@ -16,6 +16,12 @@
       url = "github:JuliusBrussee/caveman";
       flake = false;
     };
+    # Lazy-senior-dev skill (YAGNI, stdlib first). Registry lacks this plugin,
+    # so the skill is symlinked from the repo like caveman.
+    ponytail = {
+      url = "github:DietrichGebert/ponytail";
+      flake = false;
+    };
   };
 
   den.aspects.claude =
@@ -242,9 +248,13 @@
 
           home.file.".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
 
+          home.file.".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
+
           # Global user memory: loaded into every Claude Code session.
           home.file.".claude/CLAUDE.md".text = ''
             Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
+            Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
+            When in /etc/nixos/, always load the nix skill.
           '';
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.

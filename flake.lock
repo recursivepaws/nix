@@ -623,6 +623,22 @@
         "type": "github"
       }
     },
+    "ponytail": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786139041,
+        "narHash": "sha256-bGdXvzhWPwGdz3T2Yh2h6lf+3PBRFAfdBxP5pESmCHI=",
+        "owner": "DietrichGebert",
+        "repo": "ponytail",
+        "rev": "2ed6c52c9d7e5e56942508591085fd45dea277d3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "DietrichGebert",
+        "repo": "ponytail",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -644,6 +660,7 @@
         "nixpkgs-vale": "nixpkgs-vale",
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",
+        "ponytail": "ponytail",
         "skills": "skills",
         "spicetify-nix": "spicetify-nix"
       }
