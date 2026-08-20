@@ -23,6 +23,22 @@
         "type": "github"
       }
     },
+    "caveman": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787128341,
+        "narHash": "sha256-Qimxr18+IVH1C7dyd3uHlVCpHBqdY9AWopx5kr0zcuE=",
+        "owner": "JuliusBrussee",
+        "repo": "caveman",
+        "rev": "99a9aa2f5a45097fc3563febea7d0baf64407441",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JuliusBrussee",
+        "repo": "caveman",
+        "type": "github"
+      }
+    },
     "claude-plugins-nix": {
       "inputs": {
         "claude-plugins-src": "claude-plugins-src",
@@ -610,6 +626,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "caveman": "caveman",
         "claude-plugins-nix": "claude-plugins-nix",
         "den": "den",
         "direnv-instant": "direnv-instant",

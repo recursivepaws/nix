@@ -8,6 +8,10 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    caveman = {
+      url = "github:JuliusBrussee/caveman";
+      flake = false;
+    };
     claude-plugins-nix.url = "github:mreimbold/claude-plugins-nix";
     den.url = "github:vic/den";
     direnv-instant.url = "github:Mic92/direnv-instant";

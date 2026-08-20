@@ -11,6 +11,11 @@
       url = "git+ssh://git@github.com/recursivepaws/skills";
       flake = false;
     };
+    # Token-optimization skill for Claude Code (terse responses, byte-exact code).
+    caveman = {
+      url = "github:JuliusBrussee/caveman";
+      flake = false;
+    };
   };
 
   den.aspects.claude =
@@ -46,6 +51,32 @@
             cd "$HOME"
             exec ${pkgs.nodejs}/bin/npx "$@"
           '';
+          cavemanGoBin =
+            name: hash:
+            pkgs.fetchurl {
+              url = "https://github.com/JuliusBrussee/caveman/releases/download/bin-v1.1.0/${name}_linux_amd64";
+              inherit hash;
+              executable = true;
+            };
+          cavemanCliSrc = pkgs.runCommand "caveman-cli-1.2.1" { } ''
+            mkdir -p $out
+            tar -xzf ${
+              pkgs.fetchurl {
+                url = "https://registry.npmjs.org/@caveman-ai/cli/-/cli-1.2.1.tgz";
+                hash = "sha256-JMcEXRe0hQPUpMsTNcOkrORtYrvUn2R4O3wgRnQ5X/s=";
+              }
+            } -C $out --strip-components=1
+          '';
+          caveman = pkgs.writeShellScriptBin "caveman" ''
+            export CAVEMAN_PROXY_BIN=${cavemanGoBin "caveman-proxy" "sha256-gMcz1bHL/jtNBLYkdYa+mZVbjsWjhmbOQP8bdhFp6OE="}
+            export CAVEMAN_ENGINE_BIN=${cavemanGoBin "caveman-engine" "sha256-GXB3LO1yhUi4Wv0KEmmV2mkIP1vY1G1JccSZjQ6ciJI="}
+            export CAVEMAN_MCP_BIN=${cavemanGoBin "caveman-mcp" "sha256-YrMafhSduy1RmUWZOpiLUhvNtt97w4p9Bhhz+SBSemU="}
+            export CAVEMEM_BIN=${cavemanGoBin "cavemem" "sha256-zq+WeAIvvaX5BDZMKem8Xpl9BblRxj5HgdNednHtM1g="}
+            export CAVEMAN_BROWSE_BIN=${cavemanGoBin "caveman-browse" "sha256-pCaHzj/YYnJsyTHWOyZgUJU+I3NoOf6AARILFlMVmBM="}
+            export CAVEMAN_SHRINK_BIN=${cavemanGoBin "caveman-shrink" "sha256-OIVk23kByQs4PZdD/Z3pOm/8JPebrZfN9vZUmxj48DY="}
+            export CAVEMAN_TELEMETRY="''${CAVEMAN_TELEMETRY:-0}"
+            exec ${pkgs.nodejs}/bin/node ${cavemanCliSrc}/dist/index.js "$@"
+          '';
         in
         {
           imports = with inputs; [
@@ -66,11 +97,17 @@
             in
             lib.mkOrder 900 ''
               _claude_pre_hooks=(${agenixHook})
+              # `caveman wrap` is session-only: it starts the local proxy if needed and
+              # injects ANTHROPIC_BASE_URL into the child, persisting nothing. CAVEMAN=0 bypasses it.
               claude() {
                 for _hook in "''${_claude_pre_hooks[@]}"; do
                   source "$_hook"
                 done
+                # if [ "''${CAVEMAN:-1}" = "0" ]; then
                 command claude "$@"
+                # else
+                #   ${caveman}/bin/caveman wrap claude "$@"
+                # fi
               }
             '';
 
@@ -183,7 +220,10 @@
             };
 
           # These are required for the `typescript-lsp` plugin
-          home.packages = lib.optionals isWork (
+          home.packages = [
+            caveman
+          ]
+          ++ lib.optionals isWork (
             with pkgs;
             [
               typescript-language-server
@@ -199,6 +239,13 @@
             source = inputs.skills;
             recursive = true;
           };
+
+          home.file.".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
+
+          # Global user memory: loaded into every Claude Code session.
+          home.file.".claude/CLAUDE.md".text = ''
+            Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
+          '';
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
           # Override the activation script to fix this (pending upstream PR).
