@@ -1,4 +1,7 @@
+{ inputs, ... }:
 {
+  flake-file.inputs.nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
   den.aspects.ampulex.nixos =
     {
       config,
@@ -10,6 +13,7 @@
     {
       imports = [
         (modulesPath + "/installer/scan/not-detected.nix")
+        inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
       ];
 
       boot.initrd.availableKernelModules = [
