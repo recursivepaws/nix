@@ -89,6 +89,9 @@
           niri = {
             settings = {
               prefer-no-csd = true;
+              outputs = lib.mkIf (host.name == "ampulex") {
+                "eDP-1".scale = 1.5;
+              };
               environment = {
                 QT_IM_MODULE = "fcitx"; # Qt5 apps
                 XMODIFIERS = "@im=fcitx"; # XWayland apps (and GTK3/4 via text-input-v3)
