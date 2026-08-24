@@ -1,7 +1,7 @@
 { den, ... }:
 {
   den.aspects.ampulex = {
-    den.aspects.work.includes = [ den.provides.primary-user ];
+    den.aspects.vera.includes = [ den.provides.primary-user ];
     includes = [ den.aspects.audio-fix ];
 
     nixos =
@@ -97,7 +97,13 @@
       };
 
     provides.to-users.includes = with den.aspects; [
+      amd
+      crypto
+      davinci
       keyboard
+      varnam
+      keyboard
+      gaming
     ];
   };
 }
