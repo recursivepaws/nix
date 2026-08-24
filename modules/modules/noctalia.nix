@@ -93,7 +93,7 @@ in
         };
 
         # Laptop-specific services
-        services = lib.mkIf (host.name == "amanita") {
+        services = lib.mkIf (host.name == "amanita" || host.name == "ampulex") {
           upower.enable = true;
         };
       };
