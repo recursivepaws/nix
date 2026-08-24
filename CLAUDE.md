@@ -1,6 +1,6 @@
 # NixOS Configuration
 
-Personal NixOS config for two machines (`amanita`, `hericium`) using the
+Personal NixOS config for three machines (`amanita`, `hericium`, `ampulex`) using the
 [Den](https://github.com/vic/den) flake framework on top of NixOS + home-manager.
 
 ## Rebuilding
@@ -10,6 +10,9 @@ Personal NixOS config for two machines (`amanita`, `hericium`) using the
 nix run .#amanita -- switch
 
 # Validate syntax without building
+# NOTE: full check fails off-hericium — its boot.initrd.secrets references
+# /ssd-keyfile, which only exists on that machine. Eval per-host instead:
+#   nix eval .#nixosConfigurations.amanita.config.system.build.toplevel.drvPath
 nix flake check --no-build
 
 # Regenerate flake.nix (auto-generated — never edit it directly)
@@ -34,10 +37,11 @@ modules/
     hosts.nix       # den.hosts declarations (which users live on which hosts)
     amanita.nix     # amanita-specific NixOS config
     hericium.nix    # hericium-specific NixOS config
+    ampulex.nix     # ampulex-specific NixOS config
   users/
-    work.nix        # work user (amanita only — Hightouch dev environment)
-    vera.nix        # vera user (hericium)
-  modules/          # Reusable aspects (one file or directory per concern)
+    work.nix        # work user — Hightouch dev environment
+    vera.nix        # vera user — personal
+  aspects/          # Reusable aspects (one file or directory per concern)
     hightouch/      # Hightouch dev environment (Docker, Tilt, certs, etc.)
     claude.nix      # Claude Code, MCP servers, plugins, skills
     browser.nix     # Google Chrome via programs.google-chrome
@@ -79,25 +83,28 @@ Key rules:
 
 | Host | Arch | Users | Role |
 |------|------|-------|------|
-| `amanita` | x86_64-linux | `work` | Primary workstation (System76), Hightouch dev |
-| `hericium` | x86_64-linux | `vera` | Secondary machine |
+| `amanita` | x86_64-linux | `vera`, `work` (primary) | Primary workstation (System76), Hightouch dev |
+| `hericium` | x86_64-linux | `vera` (primary), `work` | Desktop (AMD GPU, audio production, gaming) |
+| `ampulex` | x86_64-linux | `vera` (primary) | Framework laptop (AMD AI 300) |
 
-Declared in `modules/hosts/hosts.nix`.
+Declared in `modules/hosts/hosts.nix`. Config shared by all hosts (dev toolchain
+packages, openssh, pipewire, 1password, session vars) lives in `den.default.nixos`
+in `modules/default/default.nix` — host files hold only host-specific config.
 
 ## Users
 
-- **`work`** — Hightouch development user on `amanita`. Gets `hightouch` aspect via
-  `amanita.provides.to-users.includes`. In groups: `docker`, `wheel`, `networkmanager`, etc.
-- **`vera`** — Personal user on `hericium`.
+- **`work`** — Hightouch development user. Gets `hightouch` aspect via its own
+  `includes` in `modules/users/work.nix`. In groups: `docker`, `wheel`, `networkmanager`, etc.
+- **`vera`** — Personal user.
 
 ## Key aspects
 
 | Aspect | File | What it does |
 |--------|------|-------------|
-| `hightouch` | `modules/modules/hightouch/hightouch.nix` | Docker, Tilt, Tailscale, Node.js, Caddy cert trust watcher |
-| `claude` | `modules/modules/claude.nix` | Claude Code, MCP servers, plugins, skills, agent env wrapper |
-| `browser` | `modules/modules/browser.nix` | `programs.google-chrome` |
-| `niri` | `modules/modules/niri.nix` | Niri compositor, GDM, polkit |
+| `hightouch` | `modules/aspects/hightouch/hightouch.nix` | Docker, Tilt, Tailscale, Node.js, Caddy cert trust watcher |
+| `claude` | `modules/aspects/claude.nix` | Claude Code, MCP servers, plugins, skills, agent env wrapper |
+| `browser` | `modules/aspects/browser.nix` | `programs.google-chrome` |
+| `niri` | `modules/aspects/niri.nix` | Niri compositor, GDM, polkit |
 | `amanita` | `modules/hosts/amanita.nix` | Host-specific packages, boot, hardware, programs |
 
 ## MCP tools available
@@ -145,13 +152,13 @@ home.packages = with pkgs; [ my-package ];
 
 ### Adding a new aspect
 
-1. Create `modules/modules/my-aspect.nix` (or directory with `default.nix`)
+1. Create `modules/aspects/my-aspect.nix` (or directory with `default.nix`)
 2. It will be auto-imported via `import-tree` — no manual registration needed
 3. Reference it via `den.aspects.my-aspect` in other aspects or in `den.default.includes`
 
 ### Adding a new MCP server (work user only)
 
-Edit `modules/modules/claude.nix` — add to `mcp-servers.settings.servers` inside the
+Edit `modules/aspects/claude.nix` — add to `mcp-servers.settings.servers` inside the
 `lib.optionalAttrs isWork { ... }` block.
 
 ### Referencing a secret

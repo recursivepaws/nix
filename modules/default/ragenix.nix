@@ -31,6 +31,9 @@
 
       services.pcscd.enable = true;
 
+      # Group that grants read access to the agenix secrets below
+      users.groups.secrets = { };
+
       age.ageBin = "${ageBin}";
       age.identityPaths = [
         "/etc/ssh/ssh_host_ed25519_key"

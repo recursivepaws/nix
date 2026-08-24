@@ -28,13 +28,13 @@ in
     browser
     claude
     gimp
-    restream
+    keyboard
     # software-repos
   ];
 
   # Allow unfree packages
   den.default.nixos =
-    { pkgs, ... }:
+    { pkgs, host, ... }:
     {
       system.stateVersion = stateVersion;
 
@@ -91,7 +91,53 @@ in
         fd
         clang
         htop
+
+        # Dev toolchain + media tools shared by all hosts
+        # TODO: fix nvim building without these
+        gcc
+        gnumake
+        # TODO: end
+        cargo
+        go
+        uv
+        python314
+        mold
+        sccache
+        clang-tools
+        delta
+        gawk
+        bc
+        wget
+        lm_sensors
+        scrcpy
+        xprop
+        v4l-utils
+        guvcview
+        ffmpeg-full
+        SDL2
+        yasm
+        nasm
       ];
+
+      environment.sessionVariables = {
+        NIXOS_OZONE_WL = "1";
+        GTK_USE_PORTAL = "1";
+      };
+      environment.pathsToLink = [
+        "/share/applications"
+        "/share/xdg-desktop-portal"
+        "/share/gtksourceview-4"
+      ];
+
+      services = {
+        openssh = {
+          enable = true;
+          settings = {
+            PermitRootLogin = "no";
+          };
+        };
+        pipewire.enable = true;
+      };
 
       # Prevent OOM freezes
       services.earlyoom = {
@@ -108,6 +154,13 @@ in
       };
 
       programs = {
+        coolercontrol.enable = true;
+        fzf.fuzzyCompletion = true;
+        _1password.enable = true;
+        _1password-gui = {
+          enable = true;
+          polkitPolicyOwners = builtins.attrNames host.users;
+        };
         nix-ld.enable = true;
         lazygit.enable = true;
         localsend.enable = true;

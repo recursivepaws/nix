@@ -14,12 +14,6 @@
         ];
       };
 
-    provides.to-hosts.nixos =
-      { pkgs, ... }:
-      {
-        users.groups.secrets = { };
-      };
-
     user = {
       extraGroups = [
         "video"
