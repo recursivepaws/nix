@@ -8,5 +8,8 @@
       vera = { };
       work = { };
     };
+    ampulex.users = {
+      vera = { };
+    };
   };
 }

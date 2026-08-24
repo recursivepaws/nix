@@ -41,6 +41,10 @@ in
       # Wipe /tmp on every boot so stale files can't accumulate.
       boot.tmp.cleanOnBoot = true;
 
+      # Back up pre-existing dotfiles instead of aborting the whole
+      # home-manager activation when one collides with a managed file.
+      home-manager.backupFileExtension = "hm-backup";
+
       # Set your time zone.
       time.timeZone = "America/New_York";
 
