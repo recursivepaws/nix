@@ -1,41 +1,60 @@
 {
-  den.aspects.ampulex.nixos = {config, lib, pkgs, modulesPath, ...}: {
-  imports =
-    [ (modulesPath + "/installer/scan/not-detected.nix")
-    ];
+  den.aspects.ampulex.nixos =
+    {
+      config,
+      lib,
+      pkgs,
+      modulesPath,
+      ...
+    }:
+    {
+      imports = [
+        (modulesPath + "/installer/scan/not-detected.nix")
+      ];
 
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
-  boot.extraModulePackages = [ ];
-   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/ca53fb37-947b-45a9-88a6-73d34a088871";
-      fsType = "ext4";
+      boot.initrd.availableKernelModules = [
+        "nvme"
+        "xhci_pci"
+        "thunderbolt"
+        "usb_storage"
+        "sd_mod"
+      ];
+      boot.initrd.kernelModules = [ ];
+      boot.kernelModules = [ "kvm-amd" ];
+      boot.extraModulePackages = [ ];
+      fileSystems."/" = {
+        device = "/dev/disk/by-uuid/ca53fb37-947b-45a9-88a6-73d34a088871";
+        fsType = "ext4";
+      };
+
+      fileSystems."/boot" = {
+        device = "/dev/disk/by-uuid/EEB9-7392";
+        fsType = "vfat";
+        options = [
+          "fmask=0077"
+          "dmask=0077"
+        ];
+      };
+
+      fileSystems."/home" = {
+        device = "/dev/mapper/luks-2c18397f-da32-4e92-8566-cbb0dbfc2c9b";
+        fsType = "ext4";
+      };
+
+      boot.initrd.luks.devices."luks-2c18397f-da32-4e92-8566-cbb0dbfc2c9b".device =
+        "/dev/disk/by-uuid/2c18397f-da32-4e92-8566-cbb0dbfc2c9b";
+
+      fileSystems."/nix" = {
+        device = "/dev/disk/by-uuid/2bae0806-7d99-4931-98b3-c0d23e76b3d4";
+        fsType = "ext4";
+      };
+
+      swapDevices = [ ];
+
+      nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+      hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/EEB9-7392";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
-
-  fileSystems."/home" =
-    { device = "/dev/mapper/luks-2c18397f-da32-4e92-8566-cbb0dbfc2c9b";
-      fsType = "ext4";
-    };
-
-  boot.initrd.luks.devices."luks-2c18397f-da32-4e92-8566-cbb0dbfc2c9b".device = "/dev/disk/by-uuid/2c18397f-da32-4e92-8566-cbb0dbfc2c9b";
-
-  fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/2bae0806-7d99-4931-98b3-c0d23e76b3d4";
-      fsType = "ext4";
-    };
-
-  swapDevices = [ ];
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware; 
-  };
   den.aspects.amanita.nixos =
     {
       config,
