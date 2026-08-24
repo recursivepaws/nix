@@ -27,6 +27,17 @@
   den.aspects.claude =
     { user, ... }:
     {
+      nixos = {
+        environment.etc."claude-code/managed-settings.json".source = builtins.toFile "managed-settings.json" (
+          builtins.toJSON {
+            permissions.allow = [
+              "Read(~/.claude/tickets/**)"
+              "Edit(~/.claude/tickets/**)"
+            ];
+          }
+        );
+      };
+
       homeManager =
         {
           pkgs,
