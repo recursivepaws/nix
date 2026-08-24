@@ -183,6 +183,7 @@ in
         baobab
         gnome-disk-utility
         vlc
+        popsicle
       ];
     };
 }
