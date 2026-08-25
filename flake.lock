@@ -655,6 +655,27 @@
         "type": "github"
       }
     },
+    "obsidian-extensions": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix_3"
+      },
+      "locked": {
+        "lastModified": 1787635128,
+        "narHash": "sha256-qW6pLH2jL+FqQ2Y2niTUPX/BB1Tkf2ogV8TLtfYuRB8=",
+        "owner": "karaolidis",
+        "repo": "nix-obsidian-extensions",
+        "rev": "f40e9ba3a9f5d5ac70fd49c350681a495aa9a4b4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "karaolidis",
+        "repo": "nix-obsidian-extensions",
+        "type": "github"
+      }
+    },
     "ponytail": {
       "flake": false,
       "locked": {
@@ -693,6 +714,7 @@
         "nixpkgs-vale": "nixpkgs-vale",
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",
+        "obsidian-extensions": "obsidian-extensions",
         "ponytail": "ponytail",
         "skills": "skills",
         "spicetify-nix": "spicetify-nix"
@@ -830,6 +852,27 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "rev": "db947814a175b7ca6ded66e21383d938df01c227",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_3": {
+      "inputs": {
+        "nixpkgs": [
+          "obsidian-extensions",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785360170,
+        "narHash": "sha256-XE1lKgQ3eIO3E7zWryqcRsax+mYXod/5RHBn4YaR9YE=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "d1187f8bc71fb8aab02395869ec3f5c1920f75c0",
         "type": "github"
       },
       "original": {

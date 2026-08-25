@@ -23,6 +23,7 @@ in
     spotify
     niri
     noctalia
+    obsidian
     file-manager
     terminal
     browser
