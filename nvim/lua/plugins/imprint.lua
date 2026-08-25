@@ -5,6 +5,7 @@ map("n", "<leader>cc", "<cmd>Imprint -o<cr>", { desc = "Screenshot" })
 return {
 	"glyccogen/imprint.nvim",
 	dir = require("nix-paths")["imprint.nvim"],
+	pin = true,
 	cmd = "Imprint",
 	dependencies = {
 		"nvim-tree/nvim-web-devicons",
