@@ -1,7 +1,7 @@
 
 vim.lsp.config("wgsl", {
 	cmd = { "wgsl-analyzer" },
-	filetypes = { "wgsl", "vert", "frag" },
+	filetypes = { "wgsl", "glsl" },
 	init_options = {
 		provideFormatter = true,
 	},

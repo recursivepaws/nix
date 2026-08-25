@@ -1,7 +1,7 @@
 
 vim.lsp.config("awkls", {
 	cmd = { "awk-language-server", "start" },
-	filetypes = { "awker" },
+	filetypes = { "awk" },
 	settings = {},
 	workspace_required = false,
 })

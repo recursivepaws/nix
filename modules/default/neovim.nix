@@ -50,6 +50,67 @@
         dontNpmBuild = true;
       };
 
+      # Plugin (queries/lua) merged with nix-built grammar dirs (parser/*.so),
+      # loaded via lazy `dir` so plugin and parsers move in lockstep
+      treesitter = pkgs.symlinkJoin {
+        name = "nvim-treesitter-with-parsers";
+        paths =
+          let
+            ts = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+              p: with p; [
+                bash
+                json
+                lua
+                swift
+                markdown
+                markdown_inline
+                toml
+                yaml
+                kdl
+                sql
+                wgsl
+                glsl
+                xml
+                ssh_config
+                rust
+                regex
+                python
+                perl
+                # Without vim, cmdline and docs might break
+                vim
+                # Required for getting most of the `todo-comments` working
+                comment
+                graphql
+                gitattributes
+                gitcommit
+                gitignore
+                git_config
+                git_rebase
+                dockerfile
+                csv
+                nix
+                astro
+                css
+                scss
+                go
+                html
+                javascript
+                jsdoc
+                php
+                styled
+                tsx
+                typescript
+                typst
+                # snacks.image rendering in docs
+                latex
+                svelte
+                vue
+              ]
+            );
+          in
+          [ ts ] ++ ts.dependencies;
+      };
+
       # Rebuilds the nirukta tree-sitter parser when the grammar source is newer than the compiled .so, run on every nvim start by the nirukta lazy spec.
       # The toolchain is baked in because tree-sitter generate shells out to node and the nirukta devshell's nvim wrapper bypasses extraPackages.
       nirukta-ts-build = pkgs.writeShellApplication {
@@ -85,6 +146,8 @@
           ["imprint.nvim"] = "${imprint-nvim}",
           ["playwright-browsers"] = "${playwright-browsers}",
           ["nirukta-ts-build"] = "${nirukta-ts-build}/bin/nirukta-ts-build",
+          ["nvim-treesitter"] = "${treesitter}",
+          ["lazy.nvim"] = "${pkgs.vimPlugins.lazy-nvim}",
         }
       '';
 
@@ -102,23 +165,14 @@
         initLua = lib.mkBefore (lib.fileContents ../../nvim/init.lua);
 
         extraPackages = with pkgs; [
-
-          # TODO: fix nvim building without these
-          gcc
-          gnumake
-          # TODO: end
-
           nixfmt
           rust-analyzer
           file
           trash-cli
-          luarocks
           stylua
-          tree-sitter
-          # nodejs_22
           lua-language-server
-          lua5_1
-          lua51Packages.tree-sitter-cli
+          sqlite
+          tectonic
 
           # LSPs (was mason)
           basedpyright
@@ -132,7 +186,7 @@
           tinymist
           zls
           vscode-langservers-extracted # html/css/json/eslint servers
-          typescript-go # bin: tsgo; project-local wins via pnpm_or_mason
+          typescript-go # bin: tsgo; project-local wins via pnpm_or_path
           biome
           yaml-language-server
           gh-actions-language-server
@@ -155,9 +209,11 @@
           "PATH"
           ":"
           "${pkgs.ghostscript}/bin"
-        ];
-        plugins = with pkgs.vimPlugins; [
-          lazy-nvim
+          # snacks frecency loads libsqlite3 via ffi, PATH alone not enough
+          "--prefix"
+          "LD_LIBRARY_PATH"
+          ":"
+          "${pkgs.sqlite.out}/lib"
         ];
       };
     };
