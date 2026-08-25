@@ -79,6 +79,8 @@
         viAlias = true;
         vimAlias = true;
         vimdiffAlias = true;
+        withRuby = false;
+        withPython3 = false;
         initLua = lib.mkBefore (lib.fileContents ../../nvim/init.lua);
 
         extraPackages = with pkgs; [
