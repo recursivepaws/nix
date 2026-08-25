@@ -1,7 +1,7 @@
-local pnpm_or_mason = require("utils.lsp").pnpm_or_mason
+local pnpm_or_path = require("utils.lsp").pnpm_or_path
 
 vim.lsp.config("tsgo", {
-	cmd = pnpm_or_mason({ "tsgo", "--lsp", "-stdio" }),
+	cmd = pnpm_or_path({ "tsgo", "--lsp", "-stdio" }),
 	filetypes = {
 		"javascript",
 		"javascriptreact",

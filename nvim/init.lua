@@ -12,6 +12,8 @@ vim.filetype.add({
 	extension = {
 		mdx = "markdown",
 		wgsl = "wgsl",
+		vert = "glsl",
+		frag = "glsl",
 		zshrc = "zsh",
 		bashrc = "sh",
 	},

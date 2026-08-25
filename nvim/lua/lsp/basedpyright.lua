@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("basedpyright", {
-	cmd = { mason_bin .. "basedpyright-langserver", "--stdio" },
+	cmd = { "basedpyright-langserver", "--stdio" },
 	filetypes = {
 		"python",
 	},

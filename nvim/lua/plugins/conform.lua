@@ -1,8 +1,8 @@
-local pnpm_or_mason = require("utils.lsp").pnpm_or_mason
+local pnpm_or_path = require("utils.lsp").pnpm_or_path
 return {
 	"stevearc/conform.nvim",
 	config = function()
-		prettier_cmd = pnpm_or_mason({ "prettier", "--stdin-filepath", "$FILENAME" })
+		prettier_cmd = pnpm_or_path({ "prettier", "--stdin-filepath", "$FILENAME" })
 		require("conform").setup({
 			formatters = {
 				prettier = {

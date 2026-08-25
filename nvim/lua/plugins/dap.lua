@@ -1,5 +1,4 @@
 local map = require("utils").map
-local util = require("utils.lsp")
 local icons = require("utils.icons")
 
 return {
@@ -25,31 +24,9 @@ return {
 	},
 	{
 		"mfussenegger/nvim-dap",
-		dependencies = {
-			"williamboman/mason.nvim",
-			"jay-babu/mason-nvim-dap.nvim",
-		},
 		config = function()
 			local dap = require("dap")
 			local dapui = require("dapui")
-
-			require("mason-nvim-dap").setup({
-				-- Makes a best effort to setup the various debuggers with
-				-- reasonable debug configurations
-				automatic_setup = true,
-
-				-- You can provide additional configuration to the handlers,
-				-- see mason-nvim-dap README for more information
-				handlers = {},
-
-				-- You'll need to check that you have the required things installed
-				-- online, please don't ask me how to install them :)
-				ensure_installed = {
-					-- Update this to ensure that you have the debuggers for the langs you want
-					"delve",
-					"codelldb",
-				},
-			})
 
 			vim.cmd("hi DapBreakpointColor guifg=#fa4848")
 			vim.fn.sign_define(
@@ -66,7 +43,7 @@ return {
 				host = "127.0.0.1",
 				port = 13000,
 				executable = {
-					command = util.mason_bin .. "codelldb",
+					command = "codelldb",
 					args = { "--port", "13000" },
 				},
 			}

@@ -1,8 +1,7 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("awkls", {
-	cmd = { mason_bin .. "awk-language-server", "start" },
-	filetypes = { "awker" },
+	cmd = { "awk-language-server", "start" },
+	filetypes = { "awk" },
 	settings = {},
 	workspace_required = false,
 })

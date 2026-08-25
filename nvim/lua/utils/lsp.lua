@@ -17,8 +17,6 @@ M.toggle_format_on_save = function()
 	vim.notify(string.format("Format on save: %s", M.format_on_save_enabled))
 end
 
-M.mason_bin = vim.fn.expand("$HOME/.local/share/nvim/mason/bin/")
-
 --- Resolve a project-local executable from the workspace root's `node_modules/.bin`.
 --- The git root is used as the anchor since pnpm installs shared tooling there.
 --- @param bin string
@@ -34,22 +32,12 @@ local function node_modules_bin(bin)
 	end
 end
 
---- Build an LSP `cmd` list, preferring the project-local binary over the Mason binary.
+--- Build an LSP `cmd` list, preferring the project-local binary over PATH (nix).
 --- @param args string[] e.g. `{ "biome", "lsp-proxy" }`
 --- @return string[]
-M.pnpm_or_mason = function(args)
-	args[1] = node_modules_bin(args[1]) or (M.mason_bin .. args[1])
+M.pnpm_or_path = function(args)
+	args[1] = node_modules_bin(args[1]) or args[1]
 	return args
-end
-
---- Build an LSP `cmd` list, preferring a native binary over the Mason binary
----@param name
-M.native_or_mason = function(name)
-	if vim.fn.executable(name) == 1 then
-		return { name }
-	else
-		return { M.mason_bin .. name }
-	end
 end
 
 --- @param root_files string[] List of root-marker files to append to.

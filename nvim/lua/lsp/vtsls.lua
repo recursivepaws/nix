@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("vtsls", {
-	cmd = { mason_bin .. "vtsls", "--stdio" },
+	cmd = { "vtsls", "--stdio" },
 	filetypes = {
 		"javascript",
 		"javascriptreact",

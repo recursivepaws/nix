@@ -1,7 +1,7 @@
-local pnpm_or_mason = require("utils.lsp").pnpm_or_mason
+local pnpm_or_path = require("utils.lsp").pnpm_or_path
 
 vim.lsp.config("biome", {
-	cmd = pnpm_or_mason({ "biome", "lsp-proxy" }),
+	cmd = pnpm_or_path({ "biome", "lsp-proxy" }),
 	filetypes = {
 		"javascript",
 		"javascriptreact",

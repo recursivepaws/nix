@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("zls", {
-	cmd = { mason_bin .. "zls" },
+	cmd = { "zls" },
 	filetypes = { "zig" },
 	workspace_required = false,
 })

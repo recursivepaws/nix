@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("sqls", {
-	cmd = { mason_bin .. "sqls" },
+	cmd = { "sqls" },
 	filetypes = {
 		"sql",
 	},

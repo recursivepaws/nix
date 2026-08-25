@@ -3,7 +3,7 @@ local util = require("utils.lsp")
 
 -- --- @class vim.lsp.Config
 vim.lsp.config("eslint", {
-	cmd = { util.mason_bin .. "vscode-eslint-language-server", "--stdio" },
+	cmd = { "vscode-eslint-language-server", "--stdio" },
 	filetypes = {
 		"javascript",
 		"javascriptreact",
