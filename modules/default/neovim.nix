@@ -32,10 +32,10 @@
         touch $out/.deps_installed
       '';
 
-      # npm-only, not in nixpkgs. Upstream has no package-lock.json (bun repo),
-      # so a generated one is vendored next to this file. To bump: update both
-      # hashes, regenerate the lock from the tarball's package.json with
-      # `npm install --package-lock-only --ignore-scripts`.
+      # npm-only, not in nixpkgs (PR #479030 stalled). Upstream ships no
+      # package-lock.json, so borrow the one from that PR's commit, hash-pinned.
+      # If the URL ever dies, regenerate from the tarball's package.json with
+      # `npm install --package-lock-only --ignore-scripts` and vendor it here.
       gh-actions-language-server = pkgs.buildNpmPackage {
         pname = "gh-actions-language-server";
         version = "0.0.3";
@@ -44,9 +44,14 @@
           hash = "sha256-vTRClb1oyqH1u4Rvqu9xoCNcWeMBn9aIZ6Vj1sZYcrY=";
         };
         postPatch = ''
-          cp ${./gh-actions-language-server.package-lock.json} package-lock.json
+          cp ${
+            pkgs.fetchurl {
+              url = "https://raw.githubusercontent.com/NixOS/nixpkgs/10e4b07a6b0bc97c69eb47db2a6fe869161ea05f/pkgs/by-name/gh/gh-actions-language-server/package-lock.json";
+              hash = "sha256-1K5wPw237piARGhF447+1tdqIRSOBmui4LtjlSILlpM=";
+            }
+          } package-lock.json
         '';
-        npmDepsHash = "sha256-5vx3+WtRRB1k0KJRKWee74wMOiwMit8u9l1TpVuHZjE=";
+        npmDepsHash = "sha256-mu4ZmokeQzQMRzDobMzXkdAlOTNm/ahHYERi1n+By3c=";
         dontNpmBuild = true;
       };
 
