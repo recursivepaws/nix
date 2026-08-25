@@ -91,6 +91,9 @@
           # TODO: end
 
           nixfmt
+          rust-analyzer
+          file
+          trash-cli
           luarocks
           stylua
           tree-sitter
