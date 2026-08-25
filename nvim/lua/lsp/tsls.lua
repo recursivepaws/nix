@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("tsls", {
-	cmd = { mason_bin .. "typescript-language-server", "--stdio" },
+	cmd = { "typescript-language-server", "--stdio" },
 	filetypes = {
 		"typescript",
 		"typescriptreact",

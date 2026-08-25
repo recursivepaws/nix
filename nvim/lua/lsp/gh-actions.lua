@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("gh-actions", {
-	cmd = { mason_bin .. "gh-actions-language-server", "--stdio" },
+	cmd = { "gh-actions-language-server", "--stdio" },
 	filetypes = { "yaml" },
 	-- `root_dir` ensures that the LSP does not attach to all yaml files
 	root_dir = function(bufnr, on_dir)

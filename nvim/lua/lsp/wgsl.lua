@@ -1,7 +1,6 @@
-local mason_bin = require("utils.lsp").mason_bin
 
 vim.lsp.config("wgsl", {
-	cmd = { mason_bin .. "wgsl-analyzer" },
+	cmd = { "wgsl-analyzer" },
 	filetypes = { "wgsl", "vert", "frag" },
 	init_options = {
 		provideFormatter = true,

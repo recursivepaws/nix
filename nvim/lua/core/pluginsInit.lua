@@ -1,6 +1,7 @@
-local u = require("utils.meovv")
 require("lazy").setup("plugins", {
-	lockfile = u.get_install_dir() .. "/lazy-lock.json",
+	-- ~/.config/nvim is a read-only nix store link; write the lock into the
+	-- config repo working tree so changes land in git
+	lockfile = "/etc/nixos/nvim/lazy-lock.json",
 	ui = {
 		--border = user_config.border,
 		size = { width = 0.7, height = 0.7 },

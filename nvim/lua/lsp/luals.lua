@@ -1,7 +1,6 @@
-local native_or_mason = require("utils.lsp").native_or_mason
 
 vim.lsp.config("luals", {
-	cmd = native_or_mason("lua-language-server"),
+	cmd = { "lua-language-server" },
 	filetypes = { "lua" },
 	root_markers = { ".luarc.json", ".luarc.jsonc" },
 	settings = {
