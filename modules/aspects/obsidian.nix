@@ -11,6 +11,9 @@
       nixpkgs.overlays = with inputs; [
         obsidian-extensions.overlays.default
       ];
+      programs.git.ignores = [
+        ".obsidian/"
+      ];
       programs.obsidian = {
         enable = true;
         vaults = {
