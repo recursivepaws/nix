@@ -17,7 +17,8 @@ M.toggle_format_on_save = function()
 	vim.notify(string.format("Format on save: %s", M.format_on_save_enabled))
 end
 
-M.mason_bin = vim.fn.expand("$HOME/.local/share/nvim/mason/bin/")
+-- Tools come from nix (extraPackages) on nvim's PATH; empty prefix = bare name
+M.mason_bin = ""
 
 --- Resolve a project-local executable from the workspace root's `node_modules/.bin`.
 --- The git root is used as the anchor since pnpm installs shared tooling there.
