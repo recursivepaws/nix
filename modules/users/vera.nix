@@ -14,8 +14,9 @@
           avidemux
           telegram-desktop
           signal-desktop
+          # NOTE: moving to vesktop.nix
           # discord
-          vesktop
+          # vesktop
           discordchatexporter-desktop
           seahorse
           immich-go
