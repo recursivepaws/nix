@@ -1,6 +1,6 @@
 require("lazy").setup("plugins", {
-	-- ~/.config/nvim is a read-only nix store link; write the lock into the
-	-- config repo working tree so changes land in git
+	-- ~/.config/nvim is a read-only nix store link.
+	-- Writing the lock into the repo working tree keeps changes in git.
 	lockfile = "/etc/nixos/nvim/lazy-lock.json",
 	rocks = { enabled = false },
 	ui = {

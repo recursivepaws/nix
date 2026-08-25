@@ -32,10 +32,8 @@
         touch $out/.deps_installed
       '';
 
-      # npm-only, not in nixpkgs (PR #479030 stalled). Upstream ships no
-      # package-lock.json, so borrow the one from that PR's commit, hash-pinned.
-      # If the URL ever dies, regenerate from the tarball's package.json with
-      # `npm install --package-lock-only --ignore-scripts` and vendor it here.
+      # npm-only; the package-lock.json is fetched hash-pinned from stalled nixpkgs PR 479030.
+      # If that URL dies, regenerate the lock with `npm install --package-lock-only` and vendor it.
       gh-actions-language-server = pkgs.buildNpmPackage {
         pname = "gh-actions-language-server";
         version = "0.0.3";
@@ -55,8 +53,7 @@
         dontNpmBuild = true;
       };
 
-      # Plugin (queries/lua) merged with nix-built grammar dirs (parser/*.so),
-      # loaded via lazy `dir` so plugin and parsers move in lockstep
+      # Merges the plugin with the nix-built grammars so queries and parsers move in lockstep.
       treesitter = pkgs.symlinkJoin {
         name = "nvim-treesitter-with-parsers";
         paths =
@@ -185,13 +182,16 @@
           wgsl-analyzer
           bash-language-server
           awk-language-server
-          dockerfile-language-server # bin: docker-langserver
+          # bin: docker-langserver
+          dockerfile-language-server
           tombi
           nil
           tinymist
           zls
-          vscode-langservers-extracted # html/css/json/eslint servers
-          typescript-go # bin: tsgo; project-local wins via pnpm_or_path
+          # html/css/json/eslint servers
+          vscode-langservers-extracted
+          # bin: tsgo; project-local wins via pnpm_or_path
+          typescript-go
           biome
           yaml-language-server
           gh-actions-language-server
@@ -203,12 +203,13 @@
 
           # DAP (was mason-nvim-dap)
           delve
-          vscode-extensions.vadimcn.vscode-lldb.adapter # bin: codelldb
+          # bin: codelldb
+          vscode-extensions.vadimcn.vscode-lldb.adapter
 
         ];
 
-        # snacks.image PDF render wants ghostscript's `gs`, but git-spice in the
-        # user profile shadows it; extraPackages only suffix PATH, so prefix
+        # snacks.image needs ghostscript's gs, but git-spice shadows it on the profile PATH.
+        # extraPackages only suffix PATH, so prefix instead.
         extraWrapperArgs = [
           "--prefix"
           "PATH"
