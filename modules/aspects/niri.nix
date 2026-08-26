@@ -347,6 +347,8 @@
                   "XF86AudioRaiseVolume".action = ns "volume increase";
                   "XF86AudioLowerVolume".action = ns "volume decrease";
                   "XF86AudioMute".action = ns "volume muteOutput";
+                  "XF86MonBrightnessUp".action = ns "brightness increase";
+                  "XF86MonBrightnessDown".action = ns "brightness decrease";
                 };
             };
           };
