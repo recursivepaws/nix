@@ -17,9 +17,9 @@
       programs.obsidian = {
         enable = true;
         vaults = {
-          # notes = {
-          #   target = "Documents/notes";
-          # };
+          notes = {
+            target = "Documents/notes";
+          };
           tickets = {
             target = ".claude/tickets";
           };
