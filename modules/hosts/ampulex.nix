@@ -38,8 +38,8 @@
 
         # HandleLidSwitch=lock is no-op here; logind only drives idle-suspend.
         services.logind.settings.Login = {
-          HandleLidSwitch = "ignore";
-          IdleAction = "suspend";
+          HandleLidSwitch = "suspend";
+          IdleAction = "lock";
           IdleActionSec = "5min";
         };
 
