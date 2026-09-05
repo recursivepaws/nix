@@ -31,6 +31,8 @@
             defaultViewMode = "preview";
           };
           communityPlugins = with pkgs.obsidianPlugins; [
+            google-contacts
+            vcf-contacts
             obsidian-git
             obsidian-tasks-plugin
             dataview

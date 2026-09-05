@@ -42,6 +42,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
     nixpkgs-node.url = "github:NixOS/nixpkgs/a47c123a609287a012dfc44d281de2dd4ed13394";
+    nixpkgs-removed-pkgs.url = "github:NixOS/nixpkgs/f205b5574fd0cb7da5b702a2da51507b7f4fdd1b";
     nixpkgs-vale.url = "github:NixOS/nixpkgs/ca16221251951e9c6261a1a2bb4f9389038d3632";
     noctalia = {
       url = "github:noctalia-dev/noctalia/legacy-v4";
