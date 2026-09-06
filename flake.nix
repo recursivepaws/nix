@@ -40,6 +40,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-management-skill = {
+      url = "github:michalzubkowicz/nixos-management-skill";
+      flake = false;
+    };
     nixpkgs.url = "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz";
     nixpkgs-node.url = "github:NixOS/nixpkgs/a47c123a609287a012dfc44d281de2dd4ed13394";
     nixpkgs-removed-pkgs.url = "github:NixOS/nixpkgs/f205b5574fd0cb7da5b702a2da51507b7f4fdd1b";
@@ -58,6 +62,10 @@
     };
     ponytail = {
       url = "github:DietrichGebert/ponytail";
+      flake = false;
+    };
+    python-skills = {
+      url = "github:wdm0006/python-skills";
       flake = false;
     };
     skills = {

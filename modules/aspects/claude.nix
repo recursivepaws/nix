@@ -22,6 +22,16 @@
       url = "github:DietrichGebert/ponytail";
       flake = false;
     };
+    # Python dev skills (project setup, code quality, testing, security audit).
+    python-skills = {
+      url = "github:wdm0006/python-skills";
+      flake = false;
+    };
+    # NixOS management skill: rebuild/flake/module best practices, anti-patterns.
+    nixos-management-skill = {
+      url = "github:michalzubkowicz/nixos-management-skill";
+      flake = false;
+    };
   };
 
   den.aspects.claude =
@@ -61,8 +71,7 @@
           ++ lib.optionals isWork [
             "@anthropics/claude-plugins-official/linear"
             "@anthropics/claude-plugins-official/typescript-lsp"
-          ]
-          ++ lib.optionals (!isWork) [ ];
+          ];
           # Run npx from $HOME so project configs can't interfere.
           npxFromHome = pkgs.writeShellScript "npx-from-home" ''
             cd "$HOME"
@@ -114,17 +123,13 @@
             in
             lib.mkOrder 900 ''
               _claude_pre_hooks=(${agenixHook})
-              # `caveman wrap` is session-only: it starts the local proxy if needed and
-              # injects ANTHROPIC_BASE_URL into the child, persisting nothing. CAVEMAN=0 bypasses it.
+              # caveman-wrap auto-invocation is currently disabled; `claude` runs directly.
+              # The `caveman` CLI is still installed for manual use: `caveman wrap claude`.
               claude() {
                 for _hook in "''${_claude_pre_hooks[@]}"; do
                   source "$_hook"
                 done
-                # if [ "''${CAVEMAN:-1}" = "0" ]; then
                 command claude "$@"
-                # else
-                #   ${caveman}/bin/caveman wrap claude "$@"
-                # fi
               }
             '';
 
@@ -143,10 +148,8 @@
                 package = inputs.claude-plugins-nix.packages.${pkgs.stdenv.hostPlatform.system}.skills-installer;
                 clients = [
                   "claude-code"
-                  # "cursor"
                 ];
                 globalSkills = [
-                  # "@anthropics/skills/frontend-design"
                   "@anthropics/skills/pdf"
                 ];
               };
@@ -179,8 +182,8 @@
           };
 
           mcp-servers.settings.servers =
-            { }
-            // lib.optionalAttrs isWork {
+            # TODO: vera-only servers here
+            lib.optionalAttrs isWork {
               circleci = {
                 command = "${npxFromHome}";
                 args = [
@@ -231,9 +234,6 @@
                   HIGHTOUCH_API_KEY = "\${HIGHTOUCH_API_KEY}";
                 };
               };
-            }
-            // lib.optionalAttrs (!isWork) {
-              # TODO: vera-only servers here
             };
 
           # These are required for the `typescript-lsp` plugin
@@ -252,21 +252,36 @@
           # recursive = true links files individually, so installer-managed skills (e.g. pdf)
           # still coexist here. Adding/editing a skill = push to that repo, then
           # `nix flake update skills` and rebuild — no change needed in this file.
-          home.file.".claude/skills" = lib.mkIf isWork {
-            source = inputs.skills;
-            recursive = true;
-          };
+          home.file =
+            {
+              ".claude/skills" = lib.mkIf isWork {
+                source = inputs.skills;
+                recursive = true;
+              };
 
-          home.file.".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
+              ".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
+              ".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
+              ".claude/skills/nixos-managing".source = "${inputs.nixos-management-skill}/nixos-managing";
 
-          home.file.".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
-
-          # Global user memory: loaded into every Claude Code session.
-          home.file.".claude/CLAUDE.md".text = ''
-            Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
-            Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
-            When in /etc/nixos/, always load the nix skill.
-          '';
+              # Global user memory: loaded into every Claude Code session.
+              ".claude/CLAUDE.md".text = ''
+                Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
+                Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
+                When in /etc/nixos/, always load the nixos-managing skill.
+              '';
+            }
+            // lib.listToAttrs (
+              map
+                (skill: lib.nameValuePair ".claude/skills/${skill}" {
+                  source = "${inputs.python-skills}/skills/python/${skill}";
+                })
+                [
+                  "project-setup"
+                  "code-quality"
+                  "testing-strategy"
+                  "security-audit"
+                ]
+            );
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
           # Override the activation script to fix this (pending upstream PR).
