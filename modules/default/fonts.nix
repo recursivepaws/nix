@@ -3,7 +3,7 @@
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [ lohit-fonts.devanagari ];
-      # Download and install Jaini font
+      # Download and install Tiro Devanagari Sanskrit font
 
       fonts = {
         enableDefaultPackages = true;
@@ -16,16 +16,16 @@
               caskaydia-mono
             ];
             standardFonts = with pkgs; [
-              (pkgs.runCommand "jaini-font"
+              (pkgs.runCommand "tiro-devanagari-sanskrit-font"
                 {
                   src = pkgs.fetchurl {
-                    url = "https://github.com/google/fonts/raw/main/ofl/jaini/Jaini-Regular.ttf";
-                    sha256 = "sha256-ZyJOYMr6JykcSwPNkHymHsZ4uln8F0OvidpEcupQ1cc=";
+                    url = "https://github.com/google/fonts/raw/main/ofl/tirodevanagarisanskrit/TiroDevanagariSanskrit-Regular.ttf";
+                    sha256 = "sha256-da6HPl4/nDD7lio9KDufXnvFvKV4IqKqkmdTspexUMo=";
                   };
                 }
                 ''
                   mkdir -p $out/share/fonts/truetype
-                  cp $src $out/share/fonts/truetype/Jaini-Regular.ttf
+                  cp $src $out/share/fonts/truetype/TiroDevanagariSanskrit-Regular.ttf
                 ''
               )
               junicode
@@ -53,7 +53,7 @@
                   <string>sa</string>
                 </test>
                 <edit name="family" mode="prepend">
-                  <string>Jaini</string>
+                  <string>Tiro Devanagari Sanskrit</string>
                 </edit>
               </match>
               <match target="pattern">
@@ -61,7 +61,7 @@
                   <string>hi</string>
                 </test>
                 <edit name="family" mode="prepend">
-                  <string>Jaini</string>
+                  <string>Tiro Devanagari Sanskrit</string>
                 </edit>
               </match>
             </fontconfig>
