@@ -13,10 +13,6 @@
           efiSupport = false;
           device = "/dev/nvme0n1";
         };
-        boot.loader.systemd-boot.enable = false;
-        boot.loader.efi.canTouchEfiVariables = true;
-        boot.loader.efi.efiSysMountPoint = "/boot";
-
         hardware.system76.enableAll = true;
 
         # Default to the quiet battery profile

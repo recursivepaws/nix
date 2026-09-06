@@ -7,9 +7,6 @@ let
   stateVersion = "25.11";
 in
 {
-  #den.default.nixos.system.stateVersion = "25.11";
-  # den.default.homeManager.home.stateVersion = "25.11";
-
   # enable hm by default
   den.schema.user.classes = lib.mkDefault [ "homeManager" ];
 
@@ -42,6 +39,10 @@ in
       # Wipe /tmp on every boot so stale files can't accumulate.
       boot.tmp.cleanOnBoot = true;
 
+      # Shared across all hosts; host-specific boot.loader.grub settings live per-host.
+      boot.loader.efi.canTouchEfiVariables = true;
+      boot.loader.efi.efiSysMountPoint = "/boot";
+
       # Back up pre-existing dotfiles instead of aborting the whole
       # home-manager activation when one collides with a managed file.
       home-manager.backupFileExtension = "hm-backup";
@@ -63,19 +64,6 @@ in
       # Select internationalisation properties.
       i18n.defaultLocale = "en_US.UTF-8";
 
-      # Do i need this?
-      # i18n.extraLocaleSettings = {
-      #   LC_ADDRESS = "en_US.UTF-8";
-      #   LC_IDENTIFICATION = "en_US.UTF-8";
-      #   LC_MEASUREMENT = "en_US.UTF-8";
-      #   LC_MONETARY = "en_US.UTF-8";
-      #   LC_NAME = "en_US.UTF-8";
-      #   LC_NUMERIC = "en_US.UTF-8";
-      #   LC_PAPER = "en_US.UTF-8";
-      #   LC_TELEPHONE = "en_US.UTF-8";
-      #   LC_TIME = "en_US.UTF-8";
-      # };
-
       nixpkgs.config.allowUnfree = true;
 
       # Essential system packages
@@ -94,10 +82,8 @@ in
         htop
 
         # Dev toolchain + media tools shared by all hosts
-        # TODO: fix nvim building without these
-        gcc
+        gcc # TODO: fix nvim building without these (gcc, gnumake)
         gnumake
-        # TODO: end
         cargo
         go
         uv
@@ -189,13 +175,6 @@ in
           '';
         };
         starship.enable = true;
-        # _1password.enable = true;
-        # _1password-gui = {
-        #   enable = true;
-        #   polkitPolicyOwners = [
-        #     user.userName
-        #   ];
-        # };
         dconf.enable = true;
       };
 

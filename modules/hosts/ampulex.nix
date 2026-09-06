@@ -26,10 +26,6 @@
           efiSupport = true;
           device = "nodev";
         };
-        boot.loader.systemd-boot.enable = false;
-        boot.loader.efi.canTouchEfiVariables = true;
-        boot.loader.efi.efiSysMountPoint = "/boot";
-
         programs.chromium.enable = true;
 
         services.fwupd.enable = true;

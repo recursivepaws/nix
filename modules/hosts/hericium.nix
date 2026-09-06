@@ -11,9 +11,6 @@
           efiSupport = false;
           device = "/dev/nvme0n1";
         };
-        boot.loader.efi.canTouchEfiVariables = true;
-        boot.loader.efi.efiSysMountPoint = "/boot";
-
         environment.systemPackages = with pkgs; [
           nodejs_22
           pnpm
