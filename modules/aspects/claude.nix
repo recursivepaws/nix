@@ -159,6 +159,20 @@
             claude-code = {
               enable = true;
               enableMcpIntegration = true;
+              # Nirukta LSP for .sutra/.sloka; server lives in the nirukta repo checkout.
+              lspServers.nirukta = {
+                command = "uv";
+                args = [
+                  "run"
+                  "--project"
+                  "${config.home.homeDirectory}/Software/nirukta"
+                  "nirukta-lsp"
+                ];
+                extensionToLanguage = {
+                  ".sutra" = "nirukta";
+                  ".sloka" = "nirukta";
+                };
+              };
             };
           };
 
