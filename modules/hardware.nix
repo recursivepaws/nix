@@ -166,11 +166,14 @@
       fileSystems."/home" = {
         device = "/dev/disk/by-uuid/e2821909-3c68-4b9d-9836-bcf3f6ded2a7";
         fsType = "ext4";
+        # bind source for /nix — must be mounted in stage 1
+        neededForBoot = true;
       };
 
       fileSystems."/nix" = {
-        device = "/dev/disk/by-uuid/e38a5854-1fda-4a51-a6cf-5b3b25d362c3";
-        fsType = "ext4";
+        device = "/home/nix";
+        fsType = "none";
+        options = [ "bind" ];
       };
 
       boot.initrd.luks.devices = {
