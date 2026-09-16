@@ -38,14 +38,16 @@
     { user, ... }:
     {
       nixos = {
-        environment.etc."claude-code/managed-settings.json".source = builtins.toFile "managed-settings.json" (
-          builtins.toJSON {
-            permissions.allow = [
-              "Read(~/.claude/tickets/**)"
-              "Edit(~/.claude/tickets/**)"
-            ];
-          }
-        );
+        environment.etc."claude-code/managed-settings.json".source =
+          builtins.toFile "managed-settings.json"
+            (
+              builtins.toJSON {
+                permissions.allow = [
+                  "Read(~/.claude/tickets/**)"
+                  "Edit(~/.claude/tickets/**)"
+                ];
+              }
+            );
       };
 
       homeManager =
@@ -160,9 +162,18 @@
               enable = true;
               enableMcpIntegration = true;
               # Nirukta LSP for .sutra/.sloka; server lives in the nirukta repo checkout.
+              # Routed through that repo's #headless devshell: the venv's manylinux
+              # wheels dlopen libstdc++/libGL at import time, so the server only
+              # starts with the devshell's LD_LIBRARY_PATH. #headless rather than the
+              # default shell because the latter's shellHook writes uv sync output and
+              # an opengl.py traceback to stdout, corrupting the JSON-RPC stream.
               lspServers.nirukta = {
-                command = "uv";
+                command = "nix";
                 args = [
+                  "develop"
+                  "path:${config.home.homeDirectory}/Software/nirukta#headless"
+                  "-c"
+                  "uv"
                   "run"
                   "--project"
                   "${config.home.homeDirectory}/Software/nirukta"
@@ -266,36 +277,38 @@
           # recursive = true links files individually, so installer-managed skills (e.g. pdf)
           # still coexist here. Adding/editing a skill = push to that repo, then
           # `nix flake update skills` and rebuild — no change needed in this file.
-          home.file =
-            {
-              ".claude/skills" = lib.mkIf isWork {
-                source = inputs.skills;
-                recursive = true;
-              };
+          home.file = {
+            ".claude/skills" = {
+              source = inputs.skills;
+              recursive = true;
+            };
 
-              ".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
-              ".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
-              ".claude/skills/nixos-managing".source = "${inputs.nixos-management-skill}/nixos-managing";
+            ".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
+            ".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
+            ".claude/skills/nixos-managing".source = "${inputs.nixos-management-skill}/nixos-managing";
 
-              # Global user memory: loaded into every Claude Code session.
-              ".claude/CLAUDE.md".text = ''
-                Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
-                Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
-                When in /etc/nixos/, always load the nixos-managing skill.
-              '';
-            }
-            // lib.listToAttrs (
-              map
-                (skill: lib.nameValuePair ".claude/skills/${skill}" {
+            # Global user memory: loaded into every Claude Code session.
+            ".claude/CLAUDE.md".text = ''
+              Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
+              Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
+              When in /etc/nixos/, always load the nixos-managing skill.
+            '';
+          }
+          // lib.listToAttrs (
+            map
+              (
+                skill:
+                lib.nameValuePair ".claude/skills/${skill}" {
                   source = "${inputs.python-skills}/skills/python/${skill}";
-                })
-                [
-                  "project-setup"
-                  "code-quality"
-                  "testing-strategy"
-                  "security-audit"
-                ]
-            );
+                }
+              )
+              [
+                "project-setup"
+                "code-quality"
+                "testing-strategy"
+                "security-audit"
+              ]
+          );
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
           # Override the activation script to fix this (pending upstream PR).
