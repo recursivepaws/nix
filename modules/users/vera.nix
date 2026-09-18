@@ -22,6 +22,9 @@
           anki
           r2modman
           blender
+          intiface-central
+          deluge
+          foliate
         ];
       };
 
