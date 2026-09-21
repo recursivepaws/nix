@@ -10,8 +10,8 @@
         networking.hostName = "amanita";
         boot.loader.grub = {
           enable = true;
-          efiSupport = false;
-          device = "/dev/nvme0n1";
+          efiSupport = true;
+          device = "nodev";
         };
         hardware.system76.enableAll = true;
 
