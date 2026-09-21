@@ -217,6 +217,7 @@ in
         gnome-disk-utility
         vlc
         popsicle
+        gparted
       ];
     };
 }

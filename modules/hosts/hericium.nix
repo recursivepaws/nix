@@ -14,7 +14,6 @@
         environment.systemPackages = with pkgs; [
           nodejs_22
           pnpm
-          gparted
         ];
 
         programs.obs-studio = {
