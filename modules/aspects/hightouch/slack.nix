@@ -58,7 +58,11 @@
         slackHook = pkgs.writeShellScript "claude-hook-slack" ''
           if command -v extract-slack-tokens >/dev/null 2>&1; then
             eval "$(extract-slack-tokens)"
-            echo "info: extracted slack tokens"
+            if [[ -n "''${SLACK_MCP_XOXC_TOKEN:-}" && -n "''${SLACK_MCP_XOXD_TOKEN:-}" ]]; then
+              echo "info: extracted slack tokens"
+            else
+              echo "warning: extract-slack-tokens ran but produced no tokens; slack mcp might not work"
+            fi
           else
             echo "warning: extract-slack-tokens is unavailable; slack mcp might not work"
           fi
