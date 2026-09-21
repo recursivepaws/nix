@@ -9,6 +9,7 @@
             sqlite
             openssl
             binutils
+            libsecret
           ];
           text = ''
             cookies_db="$HOME/.config/Slack/Cookies"
@@ -25,10 +26,16 @@
             if [[ -n "$value" ]]; then
               xoxd="$value"
             elif [[ -n "$enc_hex" ]]; then
-              # PBKDF2-HMAC-SHA1("peanuts","saltysalt",1,16)
-              # 1 iteration => key = HMAC-SHA1(key="peanuts", data="saltysalt\x00\x00\x00\x01")[0:16]
+              # Cookie prefix picks the password: v10 uses "peanuts", v11 reads it
+              # from the OS keyring. HMAC-SHA1(pw, salt) is PBKDF2-SHA1 at 1 iteration.
+              prefix=$(printf '%b' "$(printf '%s' "''${enc_hex:0:6}" | sed 's/../\\x&/g')")
+              if [[ "$prefix" == v11 ]]; then
+                pw=$(secret-tool lookup application Slack)
+              else
+                pw=peanuts
+              fi
               key_hex=$(printf 'saltysalt\x00\x00\x00\x01' |
-                openssl dgst -sha1 -hmac 'peanuts' -binary |
+                openssl dgst -sha1 -hmac "$pw" -binary |
                 od -A n -t x1 | tr -d ' \n' |
                 cut -c1-32)
 
