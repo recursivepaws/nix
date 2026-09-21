@@ -5,7 +5,7 @@
       work = { };
     };
     amanita.users = {
-      vera = { };
+      # vera = { };
       work = { };
     };
     ampulex.users = {
