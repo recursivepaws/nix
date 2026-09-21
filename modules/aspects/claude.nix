@@ -43,8 +43,8 @@
             (
               builtins.toJSON {
                 permissions.allow = [
-                  "Read(~/.claude/tickets/**)"
-                  "Edit(~/.claude/tickets/**)"
+                  "Read(//home/*/.claude/tickets/**)"
+                  "Edit(//home/*/.claude/tickets/**)"
                 ];
               }
             );
