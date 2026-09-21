@@ -44,7 +44,6 @@
               builtins.toJSON {
                 permissions.allow = [
                   "Read(~/.claude/tickets/**)"
-                  "Write(~/.claude/tickets/**)"
                   "Edit(~/.claude/tickets/**)"
                 ];
               }
