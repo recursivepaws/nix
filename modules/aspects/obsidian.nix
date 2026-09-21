@@ -21,7 +21,7 @@
             target = "Documents/notes";
           };
           tickets = {
-            target = ".claude/tickets";
+            target = "Software/tickets";
           };
         };
         defaultSettings = {
