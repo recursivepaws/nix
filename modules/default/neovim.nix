@@ -54,64 +54,72 @@
       };
 
       # Merges the plugin with the nix-built grammars so queries and parsers move in lockstep.
-      treesitter = pkgs.symlinkJoin {
-        name = "nvim-treesitter-with-parsers";
-        paths =
-          let
-            ts = pkgs.vimPlugins.nvim-treesitter.withPlugins (
-              p: with p; [
-                bash
-                json
-                lua
-                swift
-                markdown
-                markdown_inline
-                toml
-                yaml
-                kdl
-                sql
-                wgsl
-                glsl
-                xml
-                ssh_config
-                rust
-                regex
-                python
-                perl
-                # Without vim, cmdline and docs might break
-                vim
-                # Required for getting most of the `todo-comments` working
-                comment
-                graphql
-                gitattributes
-                gitcommit
-                gitignore
-                git_config
-                git_rebase
-                dockerfile
-                csv
-                nix
-                astro
-                css
-                scss
-                go
-                html
-                javascript
-                jsdoc
-                php
-                styled
-                tsx
-                typescript
-                typst
-                # snacks.image rendering in docs
-                latex
-                svelte
-                vue
-              ]
-            );
-          in
-          [ ts ] ++ ts.dependencies;
-      };
+      treesitter =
+        let
+          ts = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+            p: with p; [
+              bash
+              json
+              lua
+              swift
+              markdown
+              markdown_inline
+              toml
+              yaml
+              kdl
+              sql
+              wgsl
+              glsl
+              xml
+              ssh_config
+              rust
+              regex
+              python
+              perl
+              # Without vim, cmdline and docs might break
+              vim
+              # Required for getting most of the `todo-comments` working
+              comment
+              graphql
+              gitattributes
+              gitcommit
+              gitignore
+              git_config
+              git_rebase
+              dockerfile
+              csv
+              nix
+              astro
+              css
+              scss
+              go
+              html
+              javascript
+              jsdoc
+              php
+              styled
+              tsx
+              typescript
+              typst
+              # snacks.image rendering in docs
+              latex
+              svelte
+              vue
+            ]
+          );
+        in
+        pkgs.symlinkJoin {
+          name = "nvim-treesitter-with-parsers";
+          paths = [ ts ] ++ ts.dependencies;
+          # Shared query dirs (ecma, jsx, html_tags, ...) have no grammar, so the
+          # grammar plugins never link them and "; inherits:" lines resolve to nothing.
+          postBuild = ''
+            for q in ${ts}/runtime/queries/*; do
+              n=$out/queries/$(basename "$q")
+              [ -e "$n" ] || ln -s "$q" "$n"
+            done
+          '';
+        };
 
       # Rebuilds the nirukta tree-sitter parser when the grammar source is newer than the compiled .so, run on every nvim start by the nirukta lazy spec.
       # The toolchain is baked in because tree-sitter generate shells out to node and the nirukta devshell's nvim wrapper bypasses extraPackages.
