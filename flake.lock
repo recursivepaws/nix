@@ -775,11 +775,11 @@
     "skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1789751455,
-        "narHash": "sha256-wV9WC8jvwMxG4QGz3TPP7CJlug5lxTUFVu7Ik59qpew=",
+        "lastModified": 1790007489,
+        "narHash": "sha256-NaWjhDUMgq9hqjLSPiDgrCwDMUlyPdWYXljixpJPmGM=",
         "ref": "refs/heads/main",
-        "rev": "8adfa073dc78942e7f2606d72c4668532af23dc6",
-        "revCount": 19,
+        "rev": "0179e3078a6c23fd2b943e96dd9eb3bb2a4ccfc5",
+        "revCount": 20,
         "type": "git",
         "url": "ssh://git@github.com/recursivepaws/skills"
       },
