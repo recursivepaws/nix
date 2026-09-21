@@ -101,14 +101,16 @@
       fileSystems."/home" = {
         device = "/dev/disk/by-uuid/9c0eeeff-5e69-4bbb-b04d-5c78e77b4405";
         fsType = "ext4";
+        neededForBoot = true;
       };
 
       boot.initrd.luks.devices."luks-969ef9cc-02b9-44d2-908e-d333ac2e4c5f".device =
         "/dev/disk/by-uuid/969ef9cc-02b9-44d2-908e-d333ac2e4c5f";
 
       fileSystems."/nix" = {
-        device = "/dev/disk/by-uuid/48aadf9c-872b-408b-9c96-aceb5863ec58";
-        fsType = "ext4";
+        device = "/home/nix";
+        fsType = "none";
+        options = [ "bind" ];
       };
 
       swapDevices = [ ];
