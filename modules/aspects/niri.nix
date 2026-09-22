@@ -108,13 +108,6 @@
                   command = [
                     "bash"
                     "-c"
-                    "wl-paste --watch cliphist store &"
-                  ];
-                }
-                {
-                  command = [
-                    "bash"
-                    "-c"
                     "1password --silent"
                   ];
                 }
@@ -122,7 +115,7 @@
                   command = [
                     "bash"
                     "-c"
-                    "noctalia-shell -d"
+                    "noctalia -d"
                   ];
                 }
               ];
@@ -196,7 +189,7 @@
               };
               layer-rules = [
                 {
-                  matches = [ { namespace = "^noctalia-notifications$"; } ];
+                  matches = [ { namespace = "^noctalia-notification$"; } ];
                   block-out-from = "screencast";
                 }
               ];
@@ -258,20 +251,20 @@
                 with config.lib.niri.actions;
                 let
                   sh = spawn "sh" "-c";
-                  ns = x: sh ("noctalia-shell ipc call " + x);
+                  ns = x: sh ("noctalia msg " + x);
                 in
                 {
                   "Mod+Shift+slash".action = show-hotkey-overlay;
 
                   "Mod+Q".action = spawn "kitty";
-                  "Mod+P".action = ns "sessionMenu toggle";
-                  "Mod+X".action = ns "launcher toggle";
+                  "Mod+P".action = ns "panel-toggle session";
+                  "Mod+X".action = ns "panel-toggle launcher";
                   "Mod+Shift+X".action = quit;
                   "Mod+F".action = maximize-column;
                   "Mod+Shift+F".action = fullscreen-window;
                   "Mod+C".action = close-window;
                   "Mod+E".action = spawn "nautilus";
-                  "Mod+Ctrl+S".action = ns "plugin:screen-toolkit annotate";
+                  "Mod+Ctrl+S".action = ns "screenshot-annotate";
                   "Mod+S".action = toggle-column-tabbed-display;
 
                   "Mod+V".action = center-column;
@@ -344,11 +337,11 @@
                   "XF86AudioPlay".action = sh "playerctl play-pause";
                   "XF86AudioNext".action = sh "playerctl next";
                   "XF86AudioPrev".action = sh "playerctl previous";
-                  "XF86AudioRaiseVolume".action = ns "volume increase";
-                  "XF86AudioLowerVolume".action = ns "volume decrease";
-                  "XF86AudioMute".action = ns "volume muteOutput";
-                  "XF86MonBrightnessUp".action = ns "brightness increase";
-                  "XF86MonBrightnessDown".action = ns "brightness decrease";
+                  "XF86AudioRaiseVolume".action = ns "volume-up";
+                  "XF86AudioLowerVolume".action = ns "volume-down";
+                  "XF86AudioMute".action = ns "volume-mute";
+                  "XF86MonBrightnessUp".action = ns "brightness-up";
+                  "XF86MonBrightnessDown".action = ns "brightness-down";
                 };
             };
           };

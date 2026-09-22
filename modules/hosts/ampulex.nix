@@ -15,8 +15,8 @@
           wayland_display=$(cd "/run/user/$uid" 2>/dev/null && ls wayland-*.lock 2>/dev/null | head -1 | sed 's/\.lock$//')
           [ -n "$wayland_display" ] || exit 0
           export XDG_RUNTIME_DIR="/run/user/$uid" WAYLAND_DISPLAY="$wayland_display"
-          /run/current-system/sw/bin/noctalia-shell ipc call lockScreen lock
-          /run/current-system/sw/bin/noctalia-shell ipc call monitors off
+          /run/current-system/sw/bin/noctalia msg session lock
+          /run/current-system/sw/bin/noctalia msg dpms-off
         '';
       in
       {
