@@ -61,9 +61,40 @@
     homeManager =
       {
         pkgs,
+        lib,
+        config,
         user,
         ...
       }:
+      let
+        isWork = user.userName == "work";
+        plugins = [
+          "noctalia/timer"
+          "noctalia/kaomoji"
+          "thepunkoff/pomodoro"
+          "nightwatch75/todo"
+          "dotnetrob/cat"
+        ]
+        ++ lib.optionals isWork [
+          "rylos/tailnet"
+          "davemhammer/k8s-status"
+          "8bury/mini-docker"
+          "shangshui0302/github-kanban"
+        ];
+        # kaomoji is launcher-only, everything else has a bar widget entry
+        pluginWidgets = [
+          "noctalia/timer:bar"
+          "thepunkoff/pomodoro:widget"
+          "nightwatch75/todo:todo"
+          "dotnetrob/cat:cat"
+        ]
+        ++ lib.optionals isWork [
+          "rylos/tailnet:bar"
+          "davemhammer/k8s-status:status"
+          "8bury/mini-docker:mini-docker"
+          "shangshui0302/github-kanban:github"
+        ];
+      in
       {
         imports = [ inputs.noctalia.homeModules.default ];
 
@@ -150,11 +181,15 @@
                 "tray"
               ];
               center = [ "workspaces" ];
-              end = [
+              end = pluginWidgets ++ [
                 "privacy"
                 "battery"
               ];
             };
+
+            plugins.enabled = plugins;
+
+            plugin_settings."thepunkoff/pomodoro"."work-duration" = 30;
 
             widget = {
               control-center = {
@@ -195,6 +230,19 @@
               };
             };
           };
+        };
+
+        # github-kanban shells out to gh, which needs persistent auth
+        home.activation = lib.optionalAttrs isWork {
+          ghHostsToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+            token_file="/run/agenix/github.token"
+            hosts_file="${config.xdg.configHome}/gh/hosts.yml"
+            if [ -r "$token_file" ]; then
+              run mkdir -p "$(dirname "$hosts_file")"
+              printf 'github.com:\n    oauth_token: %s\n    user: recursivepaws\n    git_protocol: https\n' \
+                "$(< "$token_file")" > "$hosts_file"
+            fi
+          '';
         };
       };
   };
