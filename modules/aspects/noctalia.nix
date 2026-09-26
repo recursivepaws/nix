@@ -1,22 +1,7 @@
 { inputs, ... }:
-let
-  disable-screenrec-hardware = final: prev: {
-    wl-screenrec = prev.wl-screenrec.overrideAttrs (old: {
-      nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ final.makeWrapper ];
-      postInstall = (old.postInstall or "") + ''
-        wrapProgram $out/bin/wl-screenrec \
-          --add-flags "--no-hw"
-      '';
-    });
-  };
-in
 {
-  flake-file.inputs.noctalia = {
-    # still in alpha
-    # url = "github:noctalia-dev/noctalia-shell";
-    url = "github:noctalia-dev/noctalia/legacy-v4";
-    inputs.nixpkgs.follows = "nixpkgs";
-  };
+  # nixpkgs follows would change hashes and miss cachix
+  flake-file.inputs.noctalia.url = "github:noctalia-dev/noctalia";
 
   den.aspects.noctalia = {
     nixos =
@@ -27,39 +12,14 @@ in
         ...
       }:
       {
-        # My lame w6400 does not support hardware encoding
-        nixpkgs.overlays = lib.mkIf (host.name == "hericium") [ disable-screenrec-hardware ];
-
         environment.systemPackages = with pkgs; [
           inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
           # sync wallpapers from r2
           rclone
-
-          # start deps for clipper
-          cliphist
-          wl-clipboard
-          # end deps for clipper
-
-          # start deps for screen-toolkit
-          grim
-          slurp
-          wl-clipboard
-          tesseract
-          imagemagick
-          zbar
-          curl
-          translate-shell
-
-          wl-screenrec
-          # wf-recorder
-
-          ffmpeg
-          gifski
-          jq
-          # end deps for screen-toolkit
         ];
 
+        # used by the official screen-recorder plugin
         programs.gpu-screen-recorder.enable = true;
 
         # Wallpapers live in a central location shared by all users
@@ -107,213 +67,180 @@ in
         ...
       }:
       let
-        defaultSource = "https://github.com/noctalia-dev/noctalia-plugins";
         isWork = user.userName == "work";
         plugins = [
-          "timer"
-          "pomodoro"
-          "todo"
-          "unicode-picker"
-          "clipper"
-          "privacy-indicator"
-          "catwalk"
-          "screen-toolkit"
+          "noctalia/timer"
+          "noctalia/kaomoji"
+          "thepunkoff/pomodoro"
+          "nightwatch75/todo"
+          "dotnetrob/cat"
         ]
         ++ lib.optionals isWork [
-          "kubectl-ctx"
-          "tailscale"
-          "mini-docker"
-          "github-feed"
+          "rylos/tailnet"
+          "davemhammer/k8s-status"
+          "8bury/mini-docker"
+          "shangshui0302/github-kanban"
+        ];
+        # kaomoji is launcher-only, everything else has a bar widget entry
+        pluginWidgets = [
+          "noctalia/timer:bar"
+          "thepunkoff/pomodoro:widget"
+          "nightwatch75/todo:todo"
+          "dotnetrob/cat:cat"
+        ]
+        ++ lib.optionals isWork [
+          "rylos/tailnet:bar"
+          "davemhammer/k8s-status:status"
+          "8bury/mini-docker:mini-docker"
+          "shangshui0302/github-kanban:github"
         ];
       in
       {
         imports = [ inputs.noctalia.homeModules.default ];
 
-        xdg.configFile."noctalia/colorschemes/Oxocarbon/Oxocarbon.json".source = pkgs.fetchurl {
-          url = "https://raw.githubusercontent.com/noctalia-dev/noctalia-colorschemes/79829c121516de5ffcb5ab62f6dc178c8534a34a/Oxocarbon/Oxocarbon.json";
-          hash = "sha256-/MyJJcQhxFSf8oku6DZmbqA2SZmoQru8e/IMo9vSZ7c=";
-        };
-
-        programs.noctalia-shell = {
+        programs.noctalia = {
           enable = true;
+          package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
           systemd.enable = false;
+
+          # Same JSON format v4 called a color scheme
+          customPalettes.Oxocarbon = pkgs.fetchurl {
+            url = "https://raw.githubusercontent.com/noctalia-dev/noctalia-colorschemes/79829c121516de5ffcb5ab62f6dc178c8534a34a/Oxocarbon/Oxocarbon.json";
+            hash = "sha256-/MyJJcQhxFSf8oku6DZmbqA2SZmoQru8e/IMo9vSZ7c=";
+          };
+
           settings = {
-            bar = {
-              density = "spacious";
-              position = "top";
-              showCapsule = true;
-              widgets = {
-                left = [
-                  {
-                    id = "ControlCenter";
-                    useDistroLogo = true;
-                  }
-                  {
-                    id = "microphone";
-                    displayMode = "alwaysShow";
-                  }
-                  {
-                    id = "Volume";
-                    displayMode = "alwaysShow";
-                  }
-                  {
-                    id = "Clock";
-                    formatHorizontal = "ddd MMM dd [ hh:mm AP ]";
-                    useMonospacedFont = true;
-                    usePrimaryColor = true;
-                  }
-                  {
-                    id = "NotificationHistory";
-                    showUnreadBadge = true;
-                  }
-                  {
-                    id = "SystemMonitor";
-                    compactMode = true;
-                    showCpuTemp = true;
-                    showCpuUsage = true;
-                    showDiskUsage = true;
-                    showLoadAverage = true;
-                    showMemoryAsPercent = true;
-                    showMemoryUsage = true;
-                    showNetworkStats = true;
-                    useMonospaceFont = true;
-                  }
-                  {
-                    id = "Tray";
-                    hidePassive = true;
-                    drawerEnabled = true;
-                  }
-                ];
-                center = [
-                  {
-                    hideUnoccupied = false;
-                    id = "Workspace";
-                    labelMode = "none";
-                  }
-                ];
-                right = map (name: { id = "plugin:" + name; }) plugins ++ [
-                  {
-                    id = "Battery";
-                    displayMode = "icon-always";
-                    hideIfNotDetected = true;
-                  }
-                ];
-              };
+            shell = {
+              avatar_path = user.profilePicture;
+              corner_radius_scale = 0.2;
+              time_format = "{:%-I:%M %p}";
+              session.actions = [
+                {
+                  action = "lock";
+                  shortcut = "1";
+                }
+                {
+                  action = "suspend";
+                  shortcut = "2";
+                }
+                {
+                  action = "reboot";
+                  shortcut = "3";
+                }
+                {
+                  action = "logout";
+                  shortcut = "4";
+                }
+                {
+                  action = "shutdown";
+                  shortcut = "5";
+                }
+                {
+                  action = "command";
+                  label = "Reboot to UEFI";
+                  command = "systemctl reboot --firmware-setup";
+                  shortcut = "6";
+                }
+              ];
             };
+
+            theme = {
+              mode = "dark";
+              source = "custom";
+              custom_palette = "Oxocarbon";
+            };
+
             wallpaper = {
               directory = "/var/lib/wallpapers";
-              automationEnabled = true;
-              wallPaperChangeMode = "random";
-              # Change wallpaper every two hours
-              randomIntervalSec = 60 * 60 * 2;
-              transitionType = [ "pixelate" ];
+              transition = [ "honeycomb" ];
+              automation = {
+                enabled = true;
+                # Change wallpaper every two hours
+                interval_seconds = 60 * 60 * 2;
+                order = "random";
+              };
             };
-            colorSchemes.predefinedScheme = "Oxocarbon";
-            sessionMenu.powerOptions = [
-              {
-                action = "lock";
-                enabled = true;
-                keybind = "1";
-              }
-              {
-                action = "suspend";
-                enabled = true;
-                keybind = "2";
-              }
-              {
-                action = "hibernate";
-                enabled = false;
-                # keybind = "3";
-              }
-              {
-                action = "reboot";
-                enabled = true;
-                keybind = "3";
-              }
-              {
-                action = "logout";
-                enabled = true;
-                keybind = "4";
-              }
-              {
-                action = "shutdown";
-                enabled = true;
-                keybind = "5";
-              }
-              {
-                action = "rebootToUefi";
-                enabled = true;
-                keybind = "6";
-              }
-            ];
-            general = {
-              avatarImage = user.profilePicture;
-              radiusRatio = 0.2;
+
+            location.address = "New York, NY";
+
+            bar.main = {
+              position = "top";
+              capsule = true;
+              start = [
+                "control-center"
+                "mic"
+                "volume"
+                "clock"
+                "notifications"
+                "sysmon-cpu"
+                "sysmon-cputemp"
+                "sysmon-ram"
+                "sysmon-disk"
+                "sysmon-rx"
+                "sysmon-tx"
+                "tray"
+              ];
+              center = [ "workspaces" ];
+              end = pluginWidgets ++ [
+                "privacy"
+                "battery"
+              ];
             };
-            location = {
-              monthBeforeDay = false;
-              name = "New York, NY";
-              use12hourFormat = true;
-              useFahrenheit = true;
-            };
-            appLauncher = {
-              enableClipboardHistory = true;
-            };
-          };
-          plugins = {
-            sources = [
-              {
-                enabled = true;
-                name = "Official Noctalia Plugins";
-                url = defaultSource;
-              }
-            ];
-            states =
-              let
-                mkPlugin = name: {
-                  name = name;
-                  value = {
-                    enabled = true;
-                    sourceUrl = defaultSource;
-                  };
-                };
-              in
-              builtins.listToAttrs (map mkPlugin plugins);
-            version = 1;
-          };
-          pluginSettings = {
-            pomodoro = {
-              workDuration = 30;
-              playSound = true;
+
+            plugins.enabled = plugins;
+
+            plugin_settings."thepunkoff/pomodoro"."work-duration" = 30;
+
+            widget = {
+              control-center = {
+                custom_image = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                custom_image_colorize = true;
+              };
+              mic = {
+                type = "volume";
+                device = "input";
+              };
+              clock.format = "{:%a %b %d [ %I:%M %p ]}";
+              tray.drawer = true;
+              workspaces.show_labels = false;
+              battery.show_label = false;
+              sysmon-cpu = {
+                type = "sysmon";
+                stat = "cpu_usage";
+              };
+              sysmon-cputemp = {
+                type = "sysmon";
+                stat = "cpu_temp";
+              };
+              sysmon-ram = {
+                type = "sysmon";
+                stat = "ram_pct";
+              };
+              sysmon-disk = {
+                type = "sysmon";
+                stat = "disk_used_pct";
+              };
+              sysmon-rx = {
+                type = "sysmon";
+                stat = "net_rx";
+              };
+              sysmon-tx = {
+                type = "sysmon";
+                stat = "net_tx";
+              };
             };
           };
         };
 
-        home.activation = {
-          # screen-toolkit has no IPC to annotate an existing image, so patch an
-          # annotateFile(path) command plus fit-to-screen scaling into the installed plugin (written for v1.3.3)
-          noctaliaScreenToolkitAnnotateFile = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-            plugin_dir="${config.xdg.configHome}/noctalia/plugins/screen-toolkit"
-            annotate_patch=${./noctalia-screen-toolkit-annotate-file.patch}
-
-            if [ -f "$plugin_dir/Main.qml" ] && ! grep -q annotateFileProc "$plugin_dir/Main.qml"; then
-              if ${pkgs.patch}/bin/patch -p1 -d "$plugin_dir" --silent --dry-run < "$annotate_patch" > /dev/null 2>&1; then
-                run ${pkgs.patch}/bin/patch -p1 -d "$plugin_dir" --silent < "$annotate_patch"
-              else
-                echo "warning: screen-toolkit annotate-file patch no longer applies, skipping" >&2
-              fi
-            fi
-          '';
-        }
-        // lib.optionalAttrs isWork {
-          noctaliaGithubFeedToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+        # github-kanban shells out to gh, which needs persistent auth
+        home.activation = lib.optionalAttrs isWork {
+          ghHostsToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
             token_file="/run/agenix/github.token"
-            settings_file="${config.xdg.configHome}/noctalia/plugins/github-feed/settings.json"
-
+            hosts_file="${config.xdg.configHome}/gh/hosts.yml"
             if [ -r "$token_file" ]; then
-              token=$(< "$token_file")
-              run mkdir -p "$(dirname "$settings_file")"
-              ${pkgs.jq}/bin/jq -n --arg token "$token" '{username: "recursivepaws", defaultTab: 1, token: $token}' > "$settings_file"
+              run mkdir -p "$(dirname "$hosts_file")"
+              printf 'github.com:\n    oauth_token: %s\n    user: recursivepaws\n    git_protocol: https\n' \
+                "$(< "$token_file")" > "$hosts_file"
             fi
           '';
         };

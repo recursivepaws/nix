@@ -25,12 +25,11 @@ return {
 			required_title_by_default = false,
 		})
 
-		-- Imprint --open goes through vim.ui.open, route its output
-		-- to the noctalia screen-toolkit annotate overlay instead of xdg-open
+		-- route Imprint's vim.ui.open to noctalia annotate
 		local open = vim.ui.open
 		vim.ui.open = function(path, opt)
 			if type(path) == "string" and vim.startswith(path, dir .. "/") then
-				return vim.system({ "noctalia-shell", "ipc", "call", "plugin:screen-toolkit", "annotateFile", path }), nil
+				return vim.system({ "noctalia", "msg", "annotate", path }), nil
 			end
 			return open(path, opt)
 		end
