@@ -1,7 +1,4 @@
-{ inputs, ... }:
 {
-  flake-file.inputs.nixpkgs-removed-pkgs.url = "github:NixOS/nixpkgs/f205b5574fd0cb7da5b702a2da51507b7f4fdd1b";
-
   den.default.homeManager =
     {
       pkgs,
@@ -9,10 +6,6 @@
       lib,
       ...
     }:
-    let
-      # nightfox-gtk-theme and gtk-engine-murrine were removed from nixpkgs (unmaintained GTK2).
-      oldPkgs = inputs.nixpkgs-removed-pkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system};
-    in
     let
       localDirs = [
         "Documents"
@@ -37,10 +30,20 @@
         enable = true;
         theme = {
           name = "Nightfox-Dark-Carbonfox";
+          # nightfox-gtk-theme was dropped from nixpkgs for depending on
+          # gtk-engine-murrine (GTK2, unmaintained). Only the GTK2 variant needs
+          # murrine, and nothing here runs GTK2, so build upstream directly.
           package = pkgs.stdenvNoCC.mkDerivation {
-            inherit (oldPkgs.nightfox-gtk-theme) pname version src;
+            pname = "nightfox-gtk-theme";
+            version = "0-unstable-2025-10-23";
 
-            propagatedUserEnvPkgs = [ oldPkgs.gtk-engine-murrine ];
+            src = pkgs.fetchFromGitHub {
+              owner = "Fausto-Korpsvart";
+              repo = "Nightfox-GTK-Theme";
+              rev = "f0212f2aa0d3d6cc0b313020d2d0122f313eafc9";
+              hash = "sha256-KZR5vuMQnLa7AK77YB11BqgqwQHVVFfIe/rXzcocbwk=";
+            };
+
             nativeBuildInputs = [ pkgs.sassc ];
             buildInputs = [ pkgs.gnome-themes-extra ];
 
