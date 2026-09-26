@@ -47,12 +47,6 @@
     provides.to-users.includes = with den.aspects; [
       amd
       ipod
-      crypto
-      bitwig-studio
-      windows-vst
-      davinci
-      varnam
-      gaming
     ];
   };
 }

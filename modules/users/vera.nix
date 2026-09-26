@@ -4,7 +4,15 @@
     includes = [
       den.provides.define-user
       (den.provides.user-shell "zsh")
-    ];
+    ]
+    ++ (with den.aspects; [
+      bitwig-studio
+      windows-vst
+      davinci
+      varnam
+      gaming
+      crypto
+    ]);
 
     homeManager =
       { pkgs, ... }:

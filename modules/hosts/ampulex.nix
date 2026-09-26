@@ -80,10 +80,6 @@
 
     provides.to-users.includes = with den.aspects; [
       amd
-      crypto
-      davinci
-      varnam
-      gaming
     ];
   };
 }
