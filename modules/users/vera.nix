@@ -8,6 +8,7 @@
     ++ (with den.aspects; [
       bitwig-studio
       windows-vst
+      native-vst-plugins
       davinci
       varnam
       gaming
