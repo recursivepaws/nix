@@ -25,6 +25,28 @@
       ];
       boot.initrd.kernelModules = [ ];
       boot.kernelModules = [ "kvm-amd" ];
+
+      # Strix Point display mitigations. nixos-hardware applies these to the 16-inch
+      # AI 300 sibling but not the 13-inch, whose module only disables PSR (0x10).
+      # 0x610 is Framework's own published Strix Point value: PSR (0x10) + PSR
+      # Selective Update (0x200) + Panel Replay (0x400). All three engage on static
+      # content, which is when the flicker shows up. 0x410 left PSR-SU enabled.
+      # abmlevel=0 disables Adaptive Backlight Management, which modulates backlight
+      # from frame content and pumps brightness on an idle screen — the driver
+      # default (-1) leaves it on.
+      # sg_display=0 stops scanout out of system RAM, which this host leans on
+      # heavily with a 512 MiB VRAM carveout driving a 2880x1920 panel.
+      # mkAfter keeps these last on the cmdline, so they win over the 0x10 above.
+      boot.kernelParams = lib.mkAfter [
+        "amdgpu.dcdebugmask=0x610"
+        "amdgpu.abmlevel=0"
+        "amdgpu.sg_display=0"
+      ];
+
+      # The shared amd aspect turns on overdrive with ppfeaturemask=0xffffffff for
+      # hericium's dGPU. nixpkgs documents that value as unstable and flicker-prone,
+      # and this host is an APU with no use for overclocking.
+      hardware.amdgpu.overdrive.enable = lib.mkForce false;
       boot.extraModulePackages = [ ];
       fileSystems."/" = {
         device = "/dev/disk/by-uuid/ca53fb37-947b-45a9-88a6-73d34a088871";
@@ -43,14 +65,16 @@
       fileSystems."/home" = {
         device = "/dev/mapper/luks-2c18397f-da32-4e92-8566-cbb0dbfc2c9b";
         fsType = "ext4";
+        neededForBoot = true;
       };
 
       boot.initrd.luks.devices."luks-2c18397f-da32-4e92-8566-cbb0dbfc2c9b".device =
         "/dev/disk/by-uuid/2c18397f-da32-4e92-8566-cbb0dbfc2c9b";
 
       fileSystems."/nix" = {
-        device = "/dev/disk/by-uuid/2bae0806-7d99-4931-98b3-c0d23e76b3d4";
-        fsType = "ext4";
+        device = "/home/nix";
+        fsType = "none";
+        options = [ "bind" ];
       };
 
       swapDevices = [ ];
