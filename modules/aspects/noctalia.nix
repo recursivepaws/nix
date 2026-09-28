@@ -82,9 +82,10 @@
           "shangshui0302/github-kanban"
         ];
         # kaomoji is launcher-only; cat lives in capsule group g2, not the end lane
-        pluginWidgets = [
+        endWidgets = [
           "noctalia/timer:bar"
           "thepunkoff/pomodoro:widget"
+          "clipboard"
           "nightwatch75/todo:todo"
         ]
         ++ lib.optionals isWork [
@@ -184,7 +185,7 @@
                 "group:g2"
                 "group:g3"
               ];
-              end = pluginWidgets ++ [
+              end = endWidgets ++ [
                 "privacy"
                 "battery"
               ];
