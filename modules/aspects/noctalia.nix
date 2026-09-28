@@ -114,10 +114,14 @@
               avatar_path = user.profilePicture;
               corner_radius_scale = 0.2;
               time_format = "{:%-I:%M %p}";
+              # Session polkit agent; niri.nix leaves the slot free for it
+              polkit_agent = true;
               screenshot = {
                 # region captures go straight to the annotation editor
                 annotate = true;
-                directory = "~/Pictures/Screenshots";
+                # absolute: noctalia expands "~" and writes the result back as a
+                # runtime override, which would then shadow this value
+                directory = "${config.home.homeDirectory}/Pictures/Screenshots";
                 # ".png" is appended; saves from the annotator also get "-annotated"
                 filename_pattern = "%Y-%m-%d-%H-%M-%S";
               };
