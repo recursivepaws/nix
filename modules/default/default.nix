@@ -67,6 +67,13 @@ in
         "recursive-nix"
       ];
 
+      nix.gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 30d";
+      };
+      nix.optimise.automatic = true;
+
       # Select internationalisation properties.
       i18n.defaultLocale = "en_US.UTF-8";
 
@@ -127,6 +134,8 @@ in
           enable = true;
           settings = {
             PermitRootLogin = "no";
+            PasswordAuthentication = false;
+            KbdInteractiveAuthentication = false;
           };
         };
         pipewire.enable = true;

@@ -2,7 +2,6 @@
 {
   den.aspects.ampulex = {
     den.aspects.vera.includes = [ den.provides.primary-user ];
-    includes = [ den.aspects.audio-fix ];
 
     nixos =
       { pkgs, ... }:
@@ -37,33 +36,6 @@
           HandleLidSwitch = "suspend";
           IdleAction = "lock";
           IdleActionSec = "5min";
-        };
-
-        # Locks on lid close, skipped when docked.
-        # Polls LidClosed (not busctl monitor), no root needed.
-        systemd.services.lid-close-lock-watch = {
-          description = "Lock when the lid closes";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "systemd-logind.service" ];
-          serviceConfig = {
-            Restart = "always";
-            User = "vera";
-            ExecStart = pkgs.writeShellScript "lid-close-lock-watch" ''
-              set -euo pipefail
-              prev=false
-              while true; do
-                cur=$(${pkgs.systemd}/bin/busctl get-property org.freedesktop.login1 \
-                  /org/freedesktop/login1 org.freedesktop.login1.Manager LidClosed | cut -d' ' -f2)
-                if [ "$cur" = true ] && [ "$prev" = false ]; then
-                  docked=$(${pkgs.systemd}/bin/busctl get-property org.freedesktop.login1 \
-                    /org/freedesktop/login1 org.freedesktop.login1.Manager Docked | cut -d' ' -f2)
-                  [ "$docked" = true ] || ${lockSession}
-                fi
-                prev=$cur
-                sleep 1
-              done
-            '';
-          };
         };
 
         # Safety net: lock before any suspend, even idle-timeout suspend with lid open.
