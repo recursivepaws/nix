@@ -81,12 +81,11 @@
           "8bury/mini-docker"
           "shangshui0302/github-kanban"
         ];
-        # kaomoji is launcher-only, everything else has a bar widget entry
+        # kaomoji is launcher-only; cat lives in capsule group g2, not the end lane
         pluginWidgets = [
           "noctalia/timer:bar"
           "thepunkoff/pomodoro:widget"
           "nightwatch75/todo:todo"
-          "dotnetrob/cat:cat"
         ]
         ++ lib.optionals isWork [
           "rylos/tailnet:bar"
@@ -168,22 +167,46 @@
               capsule = true;
               start = [
                 "control-center"
-                "mic"
-                "volume"
+                "workspaces"
                 "clock"
                 "notifications"
-                "sysmon-cpu"
-                "sysmon-cputemp"
-                "sysmon-ram"
-                "sysmon-disk"
-                "sysmon-rx"
-                "sysmon-tx"
                 "tray"
               ];
-              center = [ "workspaces" ];
+              center = [
+                "group:g1"
+                "group:g2"
+                "group:g3"
+              ];
               end = pluginWidgets ++ [
                 "privacy"
                 "battery"
+              ];
+              capsule_group = [
+                {
+                  id = "g1";
+                  members = [
+                    "mic"
+                    "volume"
+                  ];
+                }
+                {
+                  id = "g2";
+                  accordion = true;
+                  members = [
+                    "dotnetrob/cat:cat"
+                    "sysmon-cpu"
+                    "sysmon-cputemp"
+                    "sysmon-ram"
+                    "sysmon-disk"
+                  ];
+                }
+                {
+                  id = "g3";
+                  members = [
+                    "sysmon-rx"
+                    "sysmon-tx"
+                  ];
+                }
               ];
             };
 
