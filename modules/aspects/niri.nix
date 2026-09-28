@@ -210,9 +210,6 @@
                   matches = [
                     { app-id = "^Pinentry-gtk$"; }
                     { app-id = "^xdg-desktop-portal-gtk"; }
-                    {
-                      app-id = "^hyprpolkitagent$";
-                    }
                   ];
                   open-floating = true;
                 }
