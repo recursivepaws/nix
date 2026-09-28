@@ -264,7 +264,8 @@
                   "Mod+Shift+F".action = fullscreen-window;
                   "Mod+C".action = close-window;
                   "Mod+E".action = spawn "nautilus";
-                  "Mod+Ctrl+S".action = ns "screenshot-annotate";
+                  "Mod+Ctrl+S".action = ns "screenshot-region";
+                  "Print".action = ns "screenshot-annotate";
                   "Mod+S".action = toggle-column-tabbed-display;
 
                   "Mod+V".action = center-column;

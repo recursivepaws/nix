@@ -113,6 +113,13 @@
               avatar_path = user.profilePicture;
               corner_radius_scale = 0.2;
               time_format = "{:%-I:%M %p}";
+              screenshot = {
+                # region captures go straight to the annotation editor
+                annotate = true;
+                directory = "~/Pictures/Screenshots";
+                # ".png" is appended; saves from the annotator also get "-annotated"
+                filename_pattern = "%Y-%m-%d-%H-%M-%S";
+              };
               session.actions = [
                 {
                   action = "lock";
