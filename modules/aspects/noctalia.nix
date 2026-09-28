@@ -112,7 +112,7 @@
           settings = {
             shell = {
               avatar_path = user.profilePicture;
-              corner_radius_scale = 0.2;
+              corner_radius_scale = 1.0;
               time_format = "{:%-I:%M %p}";
               # Session polkit agent; niri.nix leaves the slot free for it
               polkit_agent = true;
