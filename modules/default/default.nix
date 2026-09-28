@@ -39,6 +39,12 @@ in
       # Wipe /tmp on every boot so stale files can't accumulate.
       boot.tmp.cleanOnBoot = true;
 
+      # /etc/nixos read/write for all users; d: default ACL makes new files
+      # inherit it, so ownership stops mattering after user switches.
+      systemd.tmpfiles.rules = [
+        "A+ /etc/nixos - - - - g:users:rwX,d:g:users:rwX"
+      ];
+
       # Shared across all hosts; host-specific boot.loader.grub settings live per-host.
       boot.loader.efi.canTouchEfiVariables = true;
       boot.loader.efi.efiSysMountPoint = "/boot";
