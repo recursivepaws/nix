@@ -219,7 +219,6 @@
           };
 
           mcp-servers.settings.servers =
-            # TODO: vera-only servers here
             lib.optionalAttrs isWork {
               circleci = {
                 command = "${npxFromHome}";
@@ -271,6 +270,11 @@
                   HIGHTOUCH_API_KEY = "\${HIGHTOUCH_API_KEY}";
                 };
               };
+            }
+            // {
+              vercel = {
+                url = "https://mcp.vercel.com";
+              };
             };
 
           # These are required for the `typescript-lsp` plugin
@@ -304,22 +308,24 @@
           }
           # Skill name = last path segment.
           // lib.listToAttrs (
-            map (
-              source:
-              lib.nameValuePair ".claude/skills/${baseNameOf (builtins.unsafeDiscardStringContext source)}" {
-                inherit source;
-              }
-            ) [
-              "${inputs.caveman}/skills/caveman"
-              "${inputs.ponytail}/skills/ponytail"
-              "${inputs.nixos-management-skill}/nixos-managing"
-              "${inputs.apollo-skills}/skills/rust-best-practices"
-              "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api"
-              "${inputs.python-skills}/skills/python/project-setup"
-              "${inputs.python-skills}/skills/python/code-quality"
-              "${inputs.python-skills}/skills/python/testing-strategy"
-              "${inputs.python-skills}/skills/python/security-audit"
-            ]
+            map
+              (
+                source:
+                lib.nameValuePair ".claude/skills/${baseNameOf (builtins.unsafeDiscardStringContext source)}" {
+                  inherit source;
+                }
+              )
+              [
+                "${inputs.caveman}/skills/caveman"
+                "${inputs.ponytail}/skills/ponytail"
+                "${inputs.nixos-management-skill}/nixos-managing"
+                "${inputs.apollo-skills}/skills/rust-best-practices"
+                "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api"
+                "${inputs.python-skills}/skills/python/project-setup"
+                "${inputs.python-skills}/skills/python/code-quality"
+                "${inputs.python-skills}/skills/python/testing-strategy"
+                "${inputs.python-skills}/skills/python/security-audit"
+              ]
           );
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
