@@ -179,6 +179,11 @@
 
             calendar = {
               enabled = true;
+              refresh_minutes = 5;
+              reminders = {
+                enabled = true;
+                default_lead_minutes = 10;
+              };
               # OAuth is one-time per account via Settings > Calendar > Accounts >
               # Save and Connect; refresh tokens land in gnome-keyring, not in config
               account = {
