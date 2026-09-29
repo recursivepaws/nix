@@ -161,16 +161,21 @@
               custom_palette = "Oxocarbon";
             };
 
-            wallpaper = {
-              directory = "/var/lib/wallpapers";
-              transition = [ "honeycomb" ];
-              automation = {
-                enabled = true;
-                # Change wallpaper every two hours
-                interval_seconds = 60 * 60 * 2;
-                order = "random";
-              };
-            };
+            # work gets plain black via niri layout.background-color
+            wallpaper =
+              if isWork then
+                { enabled = false; }
+              else
+                {
+                  directory = "/var/lib/wallpapers";
+                  transition = [ "honeycomb" ];
+                  automation = {
+                    enabled = true;
+                    # Change wallpaper every two hours
+                    interval_seconds = 60 * 60 * 2;
+                    order = "random";
+                  };
+                };
 
             location.address = "New York, NY";
 

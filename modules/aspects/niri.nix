@@ -61,6 +61,7 @@
         config,
         lib,
         host,
+        user,
         ...
       }:
       {
@@ -127,6 +128,8 @@
                 };
               };
               layout = {
+                # work runs no wallpaper; noctalia.nix disables it
+                background-color = lib.mkIf (user.userName == "work") "#000000";
                 empty-workspace-above-first = true;
 
                 border = {
