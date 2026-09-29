@@ -23,6 +23,22 @@
         "type": "github"
       }
     },
+    "apollo-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790613437,
+        "narHash": "sha256-Ryby5mTXGFLcHilxAARr5ZjE2ltRrhziamKta5oOm4A=",
+        "owner": "apollographql",
+        "repo": "skills",
+        "rev": "322da824b2845f42e21b30465c5ea71f3196b849",
+        "type": "github"
+      },
+      "original": {
+        "owner": "apollographql",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "caveman": {
       "flake": false,
       "locked": {
@@ -731,6 +747,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "apollo-skills": "apollo-skills",
         "caveman": "caveman",
         "claude-plugins-nix": "claude-plugins-nix",
         "den": "den",

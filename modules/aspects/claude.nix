@@ -32,6 +32,11 @@
       url = "github:michalzubkowicz/nixos-management-skill";
       flake = false;
     };
+    # Rust best-practices skill from Apollo's skills collection.
+    apollo-skills = {
+      url = "github:apollographql/skills";
+      flake = false;
+    };
     # Reverse-engineer web APIs from HAR captures into Python clients.
     # Pinned: skill was removed from the repo's main branch after this commit.
     reverse-api-engineer = {
@@ -290,12 +295,6 @@
               recursive = true;
             };
 
-            ".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
-            ".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
-            ".claude/skills/nixos-managing".source = "${inputs.nixos-management-skill}/nixos-managing";
-            ".claude/skills/reverse-engineering-api".source =
-              "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api";
-
             # Global user memory: loaded into every Claude Code session.
             ".claude/CLAUDE.md".text = ''
               Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
@@ -303,20 +302,24 @@
               When in /etc/nixos/, always load the nixos-managing skill.
             '';
           }
+          # Skill name = last path segment.
           // lib.listToAttrs (
-            map
-              (
-                skill:
-                lib.nameValuePair ".claude/skills/${skill}" {
-                  source = "${inputs.python-skills}/skills/python/${skill}";
-                }
-              )
-              [
-                "project-setup"
-                "code-quality"
-                "testing-strategy"
-                "security-audit"
-              ]
+            map (
+              source:
+              lib.nameValuePair ".claude/skills/${baseNameOf (builtins.unsafeDiscardStringContext source)}" {
+                inherit source;
+              }
+            ) [
+              "${inputs.caveman}/skills/caveman"
+              "${inputs.ponytail}/skills/ponytail"
+              "${inputs.nixos-management-skill}/nixos-managing"
+              "${inputs.apollo-skills}/skills/rust-best-practices"
+              "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api"
+              "${inputs.python-skills}/skills/python/project-setup"
+              "${inputs.python-skills}/skills/python/code-quality"
+              "${inputs.python-skills}/skills/python/testing-strategy"
+              "${inputs.python-skills}/skills/python/security-audit"
+            ]
           );
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
