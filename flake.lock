@@ -609,11 +609,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1789785513,
-        "narHash": "sha256-BMbikTjbh5H7ac/OjwGoJrlooh4dgNqhs51ABM83M7g=",
-        "rev": "20b1ddd1aa5ace70c9468305030aa4f9ef79671b",
+        "lastModified": 1790323409,
+        "narHash": "sha256-m4DGo58Fza5ImOegtWOeE18nhpSO1IGzsVA6Lpsb4zw=",
+        "rev": "e94cb152ed51bd6e24eb4a41f1460252beb52cd2",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1076192.20b1ddd1aa5a/nixexprs.tar.zst"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1079315.e94cb152ed51/nixexprs.tar.zst"
       },
       "original": {
         "type": "tarball",
@@ -625,11 +625,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1790028198,
-        "narHash": "sha256-JKSjpqxdYNgUCbJChm+3rkz5lentMk/bEcZgk7Byqj0=",
+        "lastModified": 1790691318,
+        "narHash": "sha256-tafFEpBW/ffCk5I664k3kP+p1DyeLu0D9kfSYFFRuV4=",
         "owner": "noctalia-dev",
         "repo": "noctalia",
-        "rev": "e7acd065406bdac81b631e1a336611bfcfaca711",
+        "rev": "368755604302360009d9b94c6da5fc6162477733",
         "type": "github"
       },
       "original": {
@@ -711,6 +711,23 @@
         "type": "github"
       }
     },
+    "reverse-api-engineer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768498027,
+        "narHash": "sha256-z4bdUavWTprZ4kj0TDKQaiqTrp+SxZQwnUgBSw+y1IE=",
+        "owner": "kalil0321",
+        "repo": "reverse-api-engineer",
+        "rev": "0f37681741faf2670310048c92a00d5bfb1de822",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kalil0321",
+        "repo": "reverse-api-engineer",
+        "rev": "0f37681741faf2670310048c92a00d5bfb1de822",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -737,6 +754,7 @@
         "obsidian-extensions": "obsidian-extensions",
         "ponytail": "ponytail",
         "python-skills": "python-skills",
+        "reverse-api-engineer": "reverse-api-engineer",
         "skills": "skills",
         "spicetify-nix": "spicetify-nix"
       }

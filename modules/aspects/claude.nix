@@ -32,6 +32,12 @@
       url = "github:michalzubkowicz/nixos-management-skill";
       flake = false;
     };
+    # Reverse-engineer web APIs from HAR captures into Python clients.
+    # Pinned: skill was removed from the repo's main branch after this commit.
+    reverse-api-engineer = {
+      url = "github:kalil0321/reverse-api-engineer/0f37681741faf2670310048c92a00d5bfb1de822";
+      flake = false;
+    };
   };
 
   den.aspects.claude =
@@ -193,6 +199,7 @@
             memory.enable = true;
             sequential-thinking.enable = true;
             nixos.enable = true;
+            playwright.enable = true;
             filesystem = {
               enable = true;
               args = [ "${config.home.homeDirectory}/Software" ];
@@ -286,6 +293,8 @@
             ".claude/skills/caveman".source = "${inputs.caveman}/skills/caveman";
             ".claude/skills/ponytail".source = "${inputs.ponytail}/skills/ponytail";
             ".claude/skills/nixos-managing".source = "${inputs.nixos-management-skill}/nixos-managing";
+            ".claude/skills/reverse-engineering-api".source =
+              "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api";
 
             # Global user memory: loaded into every Claude Code session.
             ".claude/CLAUDE.md".text = ''
