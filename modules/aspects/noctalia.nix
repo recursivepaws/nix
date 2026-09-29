@@ -177,6 +177,24 @@
 
             location.address = "New York, NY";
 
+            calendar = {
+              enabled = true;
+              # OAuth is one-time per account via Settings > Calendar > Accounts >
+              # Save and Connect; refresh tokens land in gnome-keyring, not in config
+              account = {
+                personal = {
+                  type = "google";
+                  name = "Personal";
+                };
+              }
+              // lib.optionalAttrs isWork {
+                work = {
+                  type = "google";
+                  name = "Work";
+                };
+              };
+            };
+
             bar.main = {
               position = "top";
               capsule = true;
