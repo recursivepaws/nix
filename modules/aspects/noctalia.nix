@@ -77,7 +77,6 @@
         ]
         ++ lib.optionals isWork [
           "rylos/tailnet"
-          "davemhammer/k8s-status"
           "8bury/mini-docker"
           "shangshui0302/github-kanban"
         ];
@@ -90,7 +89,6 @@
         ]
         ++ lib.optionals isWork [
           "rylos/tailnet:bar"
-          "davemhammer/k8s-status:status"
           "8bury/mini-docker:mini-docker"
           "shangshui0302/github-kanban:github"
         ];
