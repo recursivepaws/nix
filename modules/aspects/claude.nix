@@ -74,6 +74,11 @@
           isWork = user.userName == "work";
           plugins = [
             "@anthropics/claude-code-plugins/pr-review-toolkit"
+            "@anthropics/claude-code-plugins/frontend-design"
+            # Design skills: impeccable.style, designwithintent.ai, ui-ux-pro-max
+            "@pbakaus/impeccable/impeccable"
+            "@ghaida/intent/intent"
+            "@nextlevelbuilder/ui-ux-pro-max-skill/ui-ux-pro-max"
             "@anthropics/claude-code-plugins/commit-commands"
             "@anthropics/claude-code-plugins/code-review"
             "@anthropics/claude-plugins-official/code-simplifier"
@@ -274,6 +279,9 @@
             // {
               vercel = {
                 url = "https://mcp.vercel.com";
+              };
+              sanity = {
+                url = "https://mcp.sanity.io";
               };
             };
 
