@@ -120,6 +120,27 @@ in
         # cannot drift onto different prefixes.
         defaultPrefix = "$HOME/.local/share/rekordbox-wine";
 
+        # The installer is a PUBLIC download — no account, no cookie, no JS.
+        # rekordbox.com/en/download/ links exactly one x64 build and only ever
+        # the current release, so this URL rots when AlphaTheta ships the next
+        # point release; bumping it is version + hash, and the failure is a loud
+        # 404 rather than a silent fallback.
+        #
+        # stripRoot = false because the zip's single entry is the .exe itself,
+        # not a directory, so there is no root to strip.
+        #
+        # Only the INPUT is pinned here. The install stays imperative on purpose:
+        # rekordbox updates itself from inside the prefix, its NSIS installer
+        # writes registry keys (not just files) into system.reg/user.reg, and it
+        # writes into its own install dir at runtime — none of which survives
+        # being pinned read-only in the store.
+        rekordboxVersion = "7.2.19";
+        rekordboxInstaller = pkgs.fetchzip {
+          url = "https://cdn.rekordbox.com/files/20260914104659/Install_rekordbox_x64_7_2_19.zip";
+          hash = "sha256-RVBHoZ4Z2D6brg4gyDy9TYZoV4PXcs2LtCQUIjH0AWs=";
+          stripRoot = false;
+        };
+
         # Prefix bootstrap is inherently imperative (wineboot writes a mutable
         # tree), so this is idempotent rather than declarative: it creates the
         # prefix once, then runs whatever rekordbox.exe it finds.
@@ -179,9 +200,20 @@ in
 
             # Not exec: that would replace the shell and skip the EXIT trap,
             # leaking the xwayland-satellite we may have started above.
+            # --install with no argument uses the pinned installer; pass a path
+            # to override, which is the escape hatch for trying another build
+            # without editing Nix.
             if [ "''${1:-}" = "--install" ]; then
-              [ -n "''${2:-}" ] || { echo "usage: rekordbox --install <Install_rekordbox_x64_*.exe>" >&2; exit 2; }
-              wine "$2"
+              if [ -n "''${2:-}" ]; then
+                exe="$2"
+                echo "installing from $exe"
+              else
+                exe=$(find ${rekordboxInstaller} -maxdepth 2 -name '*.exe' | head -1)
+                [ -n "$exe" ] || { echo "no .exe in ${rekordboxInstaller}" >&2; exit 1; }
+                echo "installing rekordbox ${rekordboxVersion} from the pinned installer"
+                echo "(NSIS shows a language dialog even with /S — click through it)"
+              fi
+              wine "$exe"
               exit $?
             fi
 
