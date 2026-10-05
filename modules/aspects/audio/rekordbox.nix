@@ -269,9 +269,17 @@ in
             # where no compositor can touch them. Verified: login completes and
             # the library loads.
             #
-            # Override the size with RB_DESKTOP=WIDTHxHEIGHT if you want it to
-            # match a different output.
-            wine explorer "/desktop=rekordbox,''${RB_DESKTOP:-2560x1400}" "$app" "$@"
+            # Override the size with RB_DESKTOP=WIDTHxHEIGHT, or set
+            # RB_DESKTOP=off to run natively — useful for testing whether a
+            # compositor-side fix (e.g. a niri window-rule making rekordbox
+            # float) removes the need for this.
+            if [ "''${RB_DESKTOP:-}" = "off" ]; then
+              echo "RB_DESKTOP=off: running without a Wine virtual desktop." >&2
+              echo "  JUCE popups may be dismissed by the compositor; see comment above." >&2
+              wine "$app" "$@"
+            else
+              wine explorer "/desktop=rekordbox,''${RB_DESKTOP:-2560x1400}" "$app" "$@"
+            fi
           '';
         };
 
