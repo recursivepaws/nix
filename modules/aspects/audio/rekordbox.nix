@@ -116,6 +116,10 @@ in
       let
         wine = pkgs.wine-rekordbox;
 
+        # One source of truth, so the launcher and the diagnostic wrapper below
+        # cannot drift onto different prefixes.
+        defaultPrefix = "$HOME/.local/share/rekordbox-wine";
+
         # Prefix bootstrap is inherently imperative (wineboot writes a mutable
         # tree), so this is idempotent rather than declarative: it creates the
         # prefix once, then runs whatever rekordbox.exe it finds.
@@ -133,7 +137,7 @@ in
             pkgs.xwayland-satellite
           ];
           text = ''
-            export WINEPREFIX="''${WINEPREFIX:-$HOME/.local/share/rekordbox-wine}"
+            export WINEPREFIX="''${WINEPREFIX:-${defaultPrefix}}"
             export WINEARCH=win64
 
             # X11 is required, not preferred: patch 0005 fixes winex11.drv, and
@@ -193,6 +197,26 @@ in
           '';
         };
 
+        # Namespaced on purpose. The patched Wine must NOT go into home.packages
+        # as plain `wine`: home-manager's profile (~/.nix-profile/bin, PATH
+        # position 8) precedes /run/current-system/sw/bin (position 13), so it
+        # would shadow the wine-staging that windows-vst.nix installs for
+        # yabridge — and yabridge is version-sensitive enough that
+        # custom-wine.nix keeps a 9.21 fallback for it. Regressing a working VST
+        # setup for an unproven one is a bad trade.
+        #
+        # This still needs to be reachable, though: nothing here is proven on the
+        # FLX4, so expect to want `rekordbox-wine winecfg`, `rekordbox-wine
+        # regedit`, and `rekordbox-wine wineboot -k` to kill a wedged prefix.
+        rekordbox-wine = pkgs.writeShellApplication {
+          name = "rekordbox-wine";
+          runtimeInputs = [ wine ];
+          text = ''
+            export WINEPREFIX="''${WINEPREFIX:-${defaultPrefix}}"
+            exec wine "$@"
+          '';
+        };
+
         # One exclusive hw: open can orphan the device for the rest of the
         # session (WirePlumber ALSA error-handler bug). This is the fix.
         rekordbox-reset-audio = pkgs.writeShellApplication {
@@ -209,8 +233,8 @@ in
         nixpkgs.overlays = [ overlay ];
 
         home.packages = [
-          wine
           rekordbox
+          rekordbox-wine
           rekordbox-reset-audio
         ];
       };
