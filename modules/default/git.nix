@@ -68,6 +68,7 @@
             d = "diff";
             f = "fetch";
             fo = "fetch origin";
+            fp = "fetch --prune";
             fu = "fetch upstream";
 
             ll = "log-list";
