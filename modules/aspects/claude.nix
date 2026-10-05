@@ -37,6 +37,10 @@
       url = "github:apollographql/skills";
       flake = false;
     };
+    humanizer = {
+      url = "github:blader/humanizer";
+      flake = false;
+    };
     # Reverse-engineer web APIs from HAR captures into Python clients.
     # Pinned: skill was removed from the repo's main branch after this commit.
     reverse-api-engineer = {
@@ -306,6 +310,8 @@
               source = inputs.skills;
               recursive = true;
             };
+
+            ".claude/skills/humanizer".source = inputs.humanizer;
 
             # Global user memory: loaded into every Claude Code session.
             ".claude/CLAUDE.md".text = ''

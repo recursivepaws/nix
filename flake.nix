@@ -28,6 +28,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    humanizer = {
+      url = "github:blader/humanizer";
+      flake = false;
+    };
     import-tree.url = "github:vic/import-tree";
     mcp-servers-nix = {
       url = "github:natsukium/mcp-servers-nix";
