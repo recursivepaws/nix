@@ -1,0 +1,218 @@
+{ den, ... }:
+let
+  # Wine fixes rekordbox 7 needs, from MrNorm/rekordbox-wine. Vendored rather
+  # than fetched: upstream is one author, and we want this reproducible if the
+  # repo moves. 0001-0010 are theirs verbatim; 0011 is their
+  # bin/build-wineusb-hcd.sh splice of rbw-usbhcd.c into wineusb.c, rendered as
+  # an ordinary patch so the build applies a plain series.
+  patchDir = ./patches/rekordbox;
+
+  # Each patched component carries a marker string. A component that silently
+  # built unpatched loads fine and simply behaves as though stock — the failure
+  # mode upstream says it has paid for repeatedly — so assert on them.
+  markers = {
+    "x86_64-windows/dxgi.dll" = "RBW-PATCH";
+    "x86_64-windows/mmdevapi.dll" = "RBW-MMDEV";
+    "x86_64-windows/setupapi.dll" = "PhysicalDeviceObjectName";
+    "x86_64-windows/mountmgr.sys" = "RBW-VOLNODE";
+    "x86_64-windows/wineusb.sys" = "RBW-USBHCD";
+    "x86_64-unix/winealsa.so" = "RBW-EVENT3";
+    "x86_64-unix/winex11.so" = "RBW-POPUP";
+    "x86_64-unix/mountmgr.so" = "RBW-REMOVABLE";
+    "x86_64-unix/wineusb.so" = "RBW-USBHCD";
+  };
+
+  overlay = final: prev: {
+    # Deliberately a separate attribute, NOT an override of the wine-staging
+    # that windows-vst.nix installs system-wide: yabridge is pinned to its own
+    # Wine and must not move.
+    #
+    # Base is unstableFull (vanilla Wine, the wow64 build) because the patch
+    # series is authored against pristine winehq source, not a staged tree.
+    # nixpkgs is on 11.14; the series targets 11.16 exactly and upstream is
+    # explicit that it will not apply to anything else.
+    wine-rekordbox = prev.wineWow64Packages.unstableFull.overrideAttrs (old: {
+      pname = "wine-rekordbox";
+      version = "11.16";
+
+      src = prev.fetchurl {
+        url = "https://dl.winehq.org/wine/source/11.x/wine-11.16.tar.xz";
+        hash = "sha256-xm4gkDQ9zXJ/f3/S+H7gv7CxGHkMHXRat7ikw6QZfy8=";
+      };
+
+      patches = (old.patches or [ ]) ++ [
+        "${patchDir}/0001-dxgi-implement-WaitForVBlank.patch"
+        "${patchDir}/0002-mmdevapi-exclusive-event-streams.patch"
+        "${patchDir}/0003-winealsa-exclusive-audio.patch"
+        "${patchDir}/0004-winealsa-midi.patch"
+        "${patchDir}/0005-winex11-popup-not-managed.patch"
+        "${patchDir}/0006-mountmgr-removable-unknown-media.patch"
+        "${patchDir}/0007-mountmgr-storage-descriptor-truth.patch"
+        "${patchDir}/0008-setupapi-physical-device-object-name.patch"
+        "${patchDir}/0009-mountmgr-volume-devnodes.patch"
+        "${patchDir}/0010-wineusb-hcd-unixlib.patch"
+        "${patchDir}/0011-wineusb-hcd-pe-splice.patch"
+      ];
+
+      postInstall = (old.postInstall or "") + ''
+        echo "verifying patch markers..."
+        ${prev.lib.concatStringsSep "\n" (
+          prev.lib.mapAttrsToList (path: marker: ''
+            f="$out/lib/wine/${path}"
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f" >&2; exit 1
+            fi
+            if ! ${prev.binutils}/bin/strings -a "$f" | grep -q -- '${marker}'; then
+              echo "VERIFY FAILED: ${path} has no '${marker}' — built unpatched?" >&2; exit 1
+            fi
+            echo "  ok ${path} (${marker})"
+          '') markers
+        )}
+      '';
+
+      meta = (old.meta or { }) // {
+        description = "Wine 11.16 with the rekordbox 7 patch series (DDJ controller audio, MIDI, USB export)";
+      };
+    });
+  };
+in
+{
+  den.aspects.rekordbox = {
+    nixos =
+      { pkgs, ... }:
+      {
+        nixpkgs.overlays = [ overlay ];
+
+        # Mandatory, not optional: without ntsync wineserver burns 43-65% CPU
+        # and the UI lags. In our kernel already, just not loaded by default.
+        boot.kernelModules = [ "ntsync" ];
+
+        # rekordbox finds a controller through the Windows HID stack, which Wine
+        # backs with /dev/hidraw* — root-only by default, so under Wine the
+        # controller is invisible and its MIDI port never opens. Vendor-wide
+        # (2b73), so this covers the FLX4 as well as the DDJ-400.
+        #
+        # The 60- prefix is load-bearing: systemd acts on the uaccess tag in
+        # 73-seat-late.rules, so a rule numbered above 73 tags too late and no
+        # ACL is ever granted. Upstream hit this exact bug writing it as 99-.
+        #
+        # So this CANNOT use services.udev.extraRules — that option hardcodes
+        # destination = /etc/udev/rules.d/99-local.rules, which is the broken
+        # case. Ship a correctly-named rules file as a package instead, the same
+        # way dj.nix pulls in Mixxx's own rules.
+        services.udev.packages = [
+          (pkgs.writeTextFile {
+            name = "pioneer-ddj-udev-rules";
+            destination = "/lib/udev/rules.d/60-pioneer-ddj.rules";
+            text = ''
+              KERNEL=="hidraw*", ATTRS{idVendor}=="2b73", MODE="0660", GROUP="audio", TAG+="uaccess"
+            '';
+          })
+        ];
+      };
+
+    homeManager =
+      { pkgs, ... }:
+      let
+        wine = pkgs.wine-rekordbox;
+
+        # Prefix bootstrap is inherently imperative (wineboot writes a mutable
+        # tree), so this is idempotent rather than declarative: it creates the
+        # prefix once, then runs whatever rekordbox.exe it finds.
+        #
+        # Upstream's launcher forces WINEDLLOVERRIDES=dxgi=n and copies a
+        # patched dxgi.dll into the prefix. That is an Arch workaround for
+        # overlaying onto an unpatched system Wine — our builtin dxgi is already
+        # patched, so the builtin is what we want.
+        rekordbox = pkgs.writeShellApplication {
+          name = "rekordbox";
+          runtimeInputs = [
+            wine
+            pkgs.winetricks
+            pkgs.findutils
+            pkgs.xwayland-satellite
+          ];
+          text = ''
+            export WINEPREFIX="''${WINEPREFIX:-$HOME/.local/share/rekordbox-wine}"
+            export WINEARCH=win64
+
+            # X11 is required, not preferred: patch 0005 fixes winex11.drv, and
+            # winewayland.drv wins whenever DISPLAY is unset. niri 25.08 has no
+            # built-in XWayland and this config does not spawn the satellite at
+            # startup, so start one here if the session has no X display.
+            satellite_pid=""
+            if [ -z "''${DISPLAY:-}" ]; then
+              n=""
+              for c in 1 2 3 4 5; do
+                if [ ! -e "/tmp/.X11-unix/X$c" ]; then n="$c"; break; fi
+              done
+              [ -n "$n" ] || { echo "no free X display in :1-:5" >&2; exit 1; }
+              echo "no DISPLAY; starting xwayland-satellite on :$n"
+              xwayland-satellite ":$n" &
+              satellite_pid=$!
+              # shellcheck disable=SC2064
+              trap "kill $satellite_pid 2>/dev/null || true" EXIT
+              export DISPLAY=":$n"
+              for _ in $(seq 1 50); do
+                [ -e "/tmp/.X11-unix/X$n" ] && break
+                sleep 0.1
+              done
+              [ -e "/tmp/.X11-unix/X$n" ] || { echo "xwayland-satellite did not come up" >&2; exit 1; }
+            fi
+
+            if [ ! -d "$WINEPREFIX" ]; then
+              echo "creating prefix at $WINEPREFIX"
+              # mscoree/mshtml disabled for the boot itself, or Wine raises a
+              # download dialog that blocks forever with no wine-mono/gecko.
+              WINEDLLOVERRIDES="mscoree,mshtml=d" wineboot -u
+              wineserver --wait
+              winetricks -q corefonts win11
+            fi
+
+            # rekordbox uses WASAPI exclusive mode on the controller. With
+            # winepulse the sample-rate list comes up empty, so pin ALSA.
+            wine reg add 'HKCU\Software\Wine\Drivers' /v Audio /t REG_SZ /d alsa /f
+
+            # Not exec: that would replace the shell and skip the EXIT trap,
+            # leaking the xwayland-satellite we may have started above.
+            if [ "''${1:-}" = "--install" ]; then
+              [ -n "''${2:-}" ] || { echo "usage: rekordbox --install <Install_rekordbox_x64_*.exe>" >&2; exit 2; }
+              wine "$2"
+              exit $?
+            fi
+
+            app=$(find "$WINEPREFIX/drive_c/Program Files/rekordbox" \
+                    -maxdepth 2 -name 'rekordbox.exe' 2>/dev/null | sort -V | tail -1)
+            if [ -z "$app" ]; then
+              echo "no rekordbox.exe under $WINEPREFIX" >&2
+              echo "install it with: rekordbox --install <installer.exe>" >&2
+              echo "(the installer is a ~660 MB login-gated download from rekordbox.com)" >&2
+              exit 2
+            fi
+            wine "$app" "$@"
+          '';
+        };
+
+        # One exclusive hw: open can orphan the device for the rest of the
+        # session (WirePlumber ALSA error-handler bug). This is the fix.
+        rekordbox-reset-audio = pkgs.writeShellApplication {
+          name = "rekordbox-reset-audio";
+          text = ''
+            systemctl --user restart wireplumber
+            echo "wireplumber restarted"
+          '';
+        };
+      in
+      {
+        # home-manager has useGlobalPkgs = false here, so it builds its own
+        # pkgs and needs the overlay independently of the NixOS one.
+        nixpkgs.overlays = [ overlay ];
+
+        home.packages = [
+          wine
+          rekordbox
+          rekordbox-reset-audio
+        ];
+      };
+  };
+}
