@@ -249,7 +249,29 @@ in
               echo "warning: pinned ${rekordboxVersion} is not installed; falling back to" >&2
               echo "         $(basename "$(dirname "$app")") — which is untested here." >&2
             fi
-            wine "$app" "$@"
+
+            # VIRTUAL DESKTOP IS REQUIRED ON niri — not a preference.
+            #
+            # rekordbox 7 is JUCE 8, and JUCE surrounds every popup (including
+            # the login window) with four 14px drop-shadow windows. If the
+            # compositor repositions ANY of them, JUCE sees the geometry change
+            # and tears the whole popup down milliseconds after mapping it.
+            # Measured here: the login window appeared and vanished instantly,
+            # and X showed the four shadows at 14x590 / 682x14 around it.
+            #
+            # Upstream hit this on KWin and wrote patch 0005 to stop Wine
+            # handing WS_POPUP|WS_SYSMENU windows to the WM. That is not enough
+            # for a *tiling* compositor, which repositions everything it manages
+            # by definition.
+            #
+            # /desktop puts every Wine window inside ONE X window, so niri
+            # manages that single window and Wine handles popups internally
+            # where no compositor can touch them. Verified: login completes and
+            # the library loads.
+            #
+            # Override the size with RB_DESKTOP=WIDTHxHEIGHT if you want it to
+            # match a different output.
+            wine explorer "/desktop=rekordbox,''${RB_DESKTOP:-2560x1400}" "$app" "$@"
           '';
         };
 
