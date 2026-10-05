@@ -17,4 +17,5 @@ in
   "agent-env.age".publicKeys = keys;
   "secrets.age".publicKeys = keys;
   "lastfm.age".publicKeys = keys;
+  "cachix-token.age".publicKeys = keys;
 }
