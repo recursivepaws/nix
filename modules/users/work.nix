@@ -5,7 +5,9 @@
       den.provides.define-user
       (den.provides.user-shell "zsh")
     ]
-    ++ (with den.aspects; [ hightouch ]);
+    ++ (with den.aspects; [
+      hightouch
+    ]);
     homeManager =
       { pkgs, ... }:
       {

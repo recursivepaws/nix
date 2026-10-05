@@ -346,22 +346,6 @@
         "type": "github"
       }
     },
-    "mesa-good": {
-      "locked": {
-        "lastModified": 1754501210,
-        "narHash": "sha256-ahTHrGs72TLVcNUR2VHckEx+t6frke0e/Ptk6AaEINk=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "599ddd2b79331c1e6153e1659bdaab65d62c4c82",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "599ddd2b79331c1e6153e1659bdaab65d62c4c82",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "niri-flake": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -757,7 +741,6 @@
         "home-manager": "home-manager_2",
         "import-tree": "import-tree",
         "mcp-servers-nix": "mcp-servers-nix",
-        "mesa-good": "mesa-good",
         "niri-flake": "niri-flake",
         "nix-flatpak": "nix-flatpak",
         "nix-photogimp": "nix-photogimp",
