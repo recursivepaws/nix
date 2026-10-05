@@ -17,8 +17,17 @@
         xdg.mime.defaultApplications = lib.mergeAttrsList [
           {
             "inode/directory" = "org.gnome.Nautilus.desktop";
-            "application/pdf" = "google-chrome.desktop";
+            "x-scheme-handler/opds" = "com.github.johnfactotum.Foliate.desktop";
           }
+          (assoc "application" "com.github.johnfactotum.Foliate.desktop" [
+            "pdf"
+            "epub+zip"
+            "x-mobipocket-ebook"
+            "vnd.amazon.mobi8-ebook"
+            "x-fictionbook+xml"
+            "x-zip-compressed-fb2"
+            "vnd.comicbook+zip"
+          ])
           (assoc "image" "org.gnome.eog.desktop" [
             "png"
             "jpeg"

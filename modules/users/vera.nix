@@ -33,7 +33,6 @@
           blender
           intiface-central
           deluge
-          foliate
         ];
       };
 

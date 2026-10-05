@@ -225,6 +225,7 @@ in
       # Packages I consider essential for all users on all systems
       home.packages = with pkgs; [
         eog
+        foliate
         cameractrls
         cameractrls-gtk4
         wl-clipboard
