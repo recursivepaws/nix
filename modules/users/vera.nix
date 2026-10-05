@@ -7,6 +7,7 @@
     ]
     ++ (with den.aspects; [
       bitwig-studio
+      dj
       windows-vst
       native-vst-plugins
       davinci
