@@ -120,11 +120,26 @@ in
         # cannot drift onto different prefixes.
         defaultPrefix = "$HOME/.local/share/rekordbox-wine";
 
-        # The installer is a PUBLIC download — no account, no cookie, no JS.
-        # rekordbox.com/en/download/ links exactly one x64 build and only ever
-        # the current release, so this URL rots when AlphaTheta ships the next
-        # point release; bumping it is version + hash, and the failure is a loud
-        # 404 rather than a silent fallback.
+        # PINNED TO 7.2.18 DELIBERATELY — do not "update" this to the current
+        # release without re-testing. Measured here 2026-10-05:
+        #
+        #   7.2.19 crashes before showing a window, every time, identically on
+        #   two machines (integrated RDNA 3.5 and discrete Navi 24) AND on stock
+        #   unpatched wine-staging 11.14 as well as our patched 11.16 — so it is
+        #   rekordbox-vs-Wine, not our patches. EXCEPTION_ACCESS_VIOLATION
+        #   reading 0x0 at rekordbox.exe+0x2aae1a3: a factory call leaves an
+        #   out-param NULL and the caller makes a virtual call through it
+        #   without checking. Ruled out as causes: GPU, Wine version/flavour,
+        #   corefonts, fontconfig, disk space, win10-vs-win11.
+        #
+        #   7.2.18 reaches the login screen on the same prefix. It is also the
+        #   build upstream verified end to end (their journal records this
+        #   zip's exact content-length, 659280808).
+        #
+        # Old releases stay fetchable, but each needs its own opaque stamp
+        # directory which rekordbox.com no longer advertises — the download page
+        # only ever lists the current release. These stamps come from
+        # SpecterShell/Dumplings, a winget bot that logs every release URL.
         #
         # stripRoot = false because the zip's single entry is the .exe itself,
         # not a directory, so there is no root to strip.
@@ -134,10 +149,10 @@ in
         # writes registry keys (not just files) into system.reg/user.reg, and it
         # writes into its own install dir at runtime — none of which survives
         # being pinned read-only in the store.
-        rekordboxVersion = "7.2.19";
+        rekordboxVersion = "7.2.18";
         rekordboxInstaller = pkgs.fetchzip {
-          url = "https://cdn.rekordbox.com/files/20260914104659/Install_rekordbox_x64_7_2_19.zip";
-          hash = "sha256-RVBHoZ4Z2D6brg4gyDy9TYZoV4PXcs2LtCQUIjH0AWs=";
+          url = "https://cdn.rekordbox.com/files/20260805131857/Install_rekordbox_x64_7_2_18.zip";
+          hash = "sha256-Ro16UqT+AFjtVmSqvYVMMY7vb7azMtmGYkBTtJOMkqg=";
           stripRoot = false;
         };
 
@@ -217,13 +232,22 @@ in
               exit $?
             fi
 
-            app=$(find "$WINEPREFIX/drive_c/Program Files/rekordbox" \
-                    -maxdepth 2 -name 'rekordbox.exe' 2>/dev/null | sort -V | tail -1)
-            if [ -z "$app" ]; then
-              echo "no rekordbox.exe under $WINEPREFIX" >&2
-              echo "install it with: rekordbox --install <installer.exe>" >&2
-              echo "(the installer is a ~660 MB login-gated download from rekordbox.com)" >&2
-              exit 2
+            # Prefer the PINNED version, not the newest. Upstream's launcher
+            # takes the newest deliberately, but that is wrong here: 7.2.19
+            # crashes before showing a window, and rekordbox updates itself from
+            # inside the prefix — so "newest" can silently become a broken
+            # build that was never chosen.
+            app="$WINEPREFIX/drive_c/Program Files/rekordbox/rekordbox ${rekordboxVersion}/rekordbox.exe"
+            if [ ! -f "$app" ]; then
+              app=$(find "$WINEPREFIX/drive_c/Program Files/rekordbox" \
+                      -maxdepth 2 -name 'rekordbox.exe' 2>/dev/null | sort -V | tail -1)
+              if [ -z "$app" ]; then
+                echo "no rekordbox.exe under $WINEPREFIX" >&2
+                echo "install the pinned ${rekordboxVersion} with: rekordbox --install" >&2
+                exit 2
+              fi
+              echo "warning: pinned ${rekordboxVersion} is not installed; falling back to" >&2
+              echo "         $(basename "$(dirname "$app")") — which is untested here." >&2
             fi
             wine "$app" "$@"
           '';
