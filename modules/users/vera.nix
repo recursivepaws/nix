@@ -8,7 +8,6 @@
     ++ (with den.aspects; [
       bitwig-studio
       dj
-      rekordbox
       windows-vst
       native-vst-plugins
       davinci
