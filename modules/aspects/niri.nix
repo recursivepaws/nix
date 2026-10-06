@@ -217,18 +217,6 @@
                   ];
                   open-floating = false;
                 }
-                # rekordbox is JUCE 8: every popup (including the login window)
-                # is surrounded by four 14px drop-shadow windows, and JUCE tears
-                # the popup down if it sees any of them repositioned. A tiling
-                # layout repositions by definition, so float them and leave
-                # their geometry alone. Without this, rekordbox needs a Wine
-                # virtual desktop instead (RB_DESKTOP in the rekordbox aspect).
-                {
-                  matches = [
-                    { app-id = "^rekordbox\\.exe$"; }
-                  ];
-                  open-floating = true;
-                }
                 {
                   geometry-corner-radius = {
                     bottom-left = 15.0;
