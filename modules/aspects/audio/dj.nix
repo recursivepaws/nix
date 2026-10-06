@@ -88,7 +88,20 @@
             libsoup_3
             webkitgtk_4_1
             stdenv.cc.cc.lib
-          ];
+          ]
+          # Without these the wrapper sets no GST_PLUGIN_SYSTEM_PATH_1_0 and
+          # rbxport logs "GStreamer element appsink not found" at startup —
+          # appsink is in gst-plugins-base. webkitgtk needs the same plugins
+          # for media playback, so this is load-bearing twice over.
+          # NOT gst-plugins-bad: it ships the LV2 wrapper element, which makes
+          # GStreamer scan every installed LV2 plugin at registry build. With
+          # this user's plugin set that added 4.3s to startup (884ms ->
+          # 5175ms) and a screenful of lilv duplicate-version warnings.
+          ++ (with pkgs.gst_all_1; [
+            gstreamer
+            gst-plugins-base
+            gst-plugins-good
+          ]);
 
           unpackCmd = "dpkg-deb -x $src .";
           sourceRoot = ".";
