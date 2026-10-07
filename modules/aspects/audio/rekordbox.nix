@@ -166,13 +166,10 @@ in
         # patched, so the builtin is what we want.
         rekordbox = pkgs.writeShellApplication {
           name = "rekordbox";
-          # niri comes from the session PATH, which writeShellApplication keeps —
-          # the scale we want is the running compositor's, not a build-time one.
           runtimeInputs = [
             wine
             pkgs.winetricks
             pkgs.findutils
-            pkgs.python3
           ];
           text = ''
             export WINEPREFIX="''${WINEPREFIX:-${defaultPrefix}}"
@@ -241,36 +238,15 @@ in
             # ShowSystray=1 and hang with 0. The tray is hidden compositor-side
             # instead — see the explorer.exe window-rule in niri.nix.
 
-            # UI scaling. Wine negotiates wp_fractional_scale_v1, but that only
-            # sets the buffer scale — it sharpens rendering and does NOT change
-            # the DPI the application asks for, so on a 1.5 output rekordbox
-            # still laid itself out at 96 DPI and came out unreadably small.
-            # Measured, after switching to Wayland: no change from X11.
-            #
-            # So take the scale from the compositor and convert it ourselves.
-            # LogPixels is dots per inch, 96 = 100%, so DPI = 96 * scale and a
-            # 1.5 output gives 144. Read it rather than hardcoding: this config
-            # runs on three machines and ampulex is the only 1.5 one.
-            #
-            # RB_DPI overrides, for when a scaled-up UI is not what you want on
-            # a given screen. Wine reads LogPixels at process start, so either
-            # way it applies to this launch.
-            dpi="''${RB_DPI:-}"
-            if [ -z "$dpi" ]; then
-              dpi=$(niri msg --json focused-output 2>/dev/null | python3 -c '
-import json, sys
-try:
-    scale = json.load(sys.stdin)["logical"]["scale"]
-except Exception:
-    sys.exit(1)
-print(round(96 * scale))
-' || true)
-            fi
-            if [ -n "$dpi" ] && [ "$dpi" != 96 ]; then
-              echo "scaling UI to $dpi DPI ($(( dpi * 100 / 96 ))%)"
-              wine reg add 'HKCU\Software\Wine\Fonts' /v LogPixels \
-                /t REG_DWORD /d "$dpi" /f
-            fi
+            # No DPI knob here, deliberately. LogPixels does nothing under this
+            # Wine: it is written, and Wine resets it to 0x60 (96) before the
+            # app reads it, every launch. The trace says why —
+            # "create_window_handle DPI context 0x22 not implemented" and
+            # "EnableNonClientDpiScaling (...): stub" — per-monitor DPI is not
+            # implemented in 11.16, so nothing is wired to the value.
+            # wp_fractional_scale_v1 is negotiated but only sets buffer scale,
+            # which sharpens rendering without changing layout size. Tried on
+            # both X11 and Wayland, at 144 and 192: no observable difference.
 
             # --install with no argument uses the pinned installer; pass a path
             # to override, which is the escape hatch for trying another build
@@ -406,10 +382,10 @@ for line in p.stdout:
 
         # The installer's own menu entry does not work, and cannot: NSIS has
         # winemenubuilder write `wine <the .lnk>`, so it gets the wine-staging on
-        # /run/current-system/sw/bin (unpatched — see the overlay comment), with
-        # no virtual desktop and no xwayland-satellite. All three are mandatory,
-        # which is exactly what the launcher above sets up. Hence an absolute
-        # store path: PATH order from a desktop launcher is not ours to assume.
+        # /run/current-system/sw/bin (unpatched — see the overlay comment)
+        # instead of our patched build, and none of the prefix setup the launcher
+        # above does. Hence an absolute store path: PATH order from a desktop
+        # launcher is not ours to assume.
         #
         # Icon is the one winemenubuilder extracted into ~/.local/share/icons.
         # Its prefix is derived from the install path, not random — 7.2.18 is

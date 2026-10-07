@@ -221,17 +221,24 @@
                   ];
                   open-floating = false;
                 }
+                # Wine chrome that must never take focus.
+                #
                 # rekordbox is JUCE 8 under winewayland, and JUCE draws its own
                 # drop shadows: every popup is surrounded by four slivers (1x1,
-                # 234x9, 9x90) that Wine maps as ordinary toplevels. niri focuses
+                # 234x9, 9x90) that Wine maps as ordinary toplevels. explorer.exe
+                # adds a 111x35 systray window of the same character. niri focuses
                 # new windows by default, so focus kept landing on a 1px window —
-                # the app stopped taking input and Mod+C closed the invisible
-                # sliver instead of rekordbox.
+                # rekordbox stopped taking input and Mod+C closed the invisible
+                # sliver instead of the app.
                 #
-                # Matched by empty title, which is what separates the shadows
+                # Matched by empty title, which is what separates this chrome
                 # from real windows: the main window is titled "rekordbox" and
-                # dialogs carry their own titles. They still open (nothing here
-                # hides them), they just never steal focus.
+                # dialogs carry their own titles. Nothing here hides them — niri
+                # has no rule for that, short of banishing them to a named
+                # workspace — they just never steal focus.
+                #
+                # The systray cannot be turned off Wine-side: ShowSystray=0
+                # deadlocks rekordbox on its splash screen. See rekordbox.nix.
                 {
                   matches = [
                     {
@@ -240,6 +247,10 @@
                     }
                     {
                       app-id = "^upmgr rekordbox\\.exe$";
+                      title = "^$";
+                    }
+                    {
+                      app-id = "^explorer\\.exe$";
                       title = "^$";
                     }
                   ];
