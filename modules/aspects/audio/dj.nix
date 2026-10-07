@@ -17,6 +17,32 @@
         ...
       }:
       let
+        # Mixxx 2.6 is unreleased — no tag, no beta, and nixpkgs has never
+        # shipped past 2.5.6. Built from the 2.6 branch because the stock FLX4
+        # mapping leaves Pad FX unimplemented ("too experimental", per its own
+        # header) and the one mapping that implements it — ElHanko's — needs
+        # 2.6's Stems controls ([ChannelN_Stem1] and friends).
+        #
+        # 2.6 pins libdjinterop 0.27.1 EXACT and nixpkgs has 0.26.1, so Denon
+        # Engine Prime export is switched off rather than packaging a second
+        # libdjinterop. rekordbox USB export here goes through baken/rbxport.
+        mixxx = pkgs.mixxx.overrideAttrs (old: {
+          version = "2.6-unstable-2026-10-06";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "mixxxdj";
+            repo = "mixxx";
+            rev = "20fdcbfc6f16d86d495dc8da5fc515ed19b25a66";
+            hash = "sha256-8Fxj+HxE+aMD0PQpqkbIATAz8G4ip4dsbYAyqfMpk2Y=";
+          };
+
+          # Upstream nixpkgs patches the 2.5 CMakeLists to accept a newer
+          # libdjinterop, marked "Should be removed when bumping to 2.6.x".
+          postPatch = "";
+
+          cmakeFlags = old.cmakeFlags ++ [ "-DENGINEPRIME=OFF" ];
+        });
+
         # Mixxx can import a rekordbox USB but has never been able to write one
         # (mixxxdj/mixxx#9463, open since 2018). baken writes the legacy
         # export.pdb + PIONEER/USBANLZ format a CDJ reads, straight from a
@@ -88,7 +114,20 @@
             libsoup_3
             webkitgtk_4_1
             stdenv.cc.cc.lib
-          ];
+          ]
+          # Without these the wrapper sets no GST_PLUGIN_SYSTEM_PATH_1_0 and
+          # rbxport logs "GStreamer element appsink not found" at startup —
+          # appsink is in gst-plugins-base. webkitgtk needs the same plugins
+          # for media playback, so this is load-bearing twice over.
+          # NOT gst-plugins-bad: it ships the LV2 wrapper element, which makes
+          # GStreamer scan every installed LV2 plugin at registry build. With
+          # this user's plugin set that added 4.3s to startup (884ms ->
+          # 5175ms) and a screenful of lilv duplicate-version warnings.
+          ++ (with pkgs.gst_all_1; [
+            gstreamer
+            gst-plugins-base
+            gst-plugins-good
+          ]);
 
           unpackCmd = "dpkg-deb -x $src .";
           sourceRoot = ".";
@@ -118,8 +157,8 @@
           # QT_QPA_PLATFORMTHEME=gtk3 makes Mixxx abort.
           # TODO: maybe fix upstream?
           (pkgs.symlinkJoin {
-            name = "mixxx-${pkgs.mixxx.version}";
-            paths = [ pkgs.mixxx ];
+            name = "mixxx-${mixxx.version}";
+            paths = [ mixxx ];
             nativeBuildInputs = [ pkgs.makeWrapper ];
             postBuild = ''
               wrapProgram $out/bin/mixxx --prefix XDG_DATA_DIRS : \

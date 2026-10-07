@@ -19,29 +19,30 @@ in
         mode = "0440";
       };
 
-      # Push every locally-built path. The hook fires only after a real build,
-      # so substituted paths never trigger a push.
+      # A single long-lived watcher instead of a post-build-hook.
       #
-      # Must be detached: nix runs post-build-hook synchronously and blocks the
-      # build loop until it exits, and `cachix push` uploads the full closure of
-      # $OUT_PATHS. Pushing inline makes a cold-cache rebuild hang for the length
-      # of a multi-GB upload. systemd-run hands the push to a transient unit and
-      # returns immediately; --collect reaps it when it exits.
+      # nix runs post-build-hook synchronously and blocks the build loop, so an
+      # inline push stalls a cold-cache rebuild for the length of a multi-GB
+      # upload. Detaching each push fixed the stall but not the duplication: the
+      # hook fires once per built derivation, each push walks the full closure,
+      # and `cachix push` computes its missing-paths set once at startup — so
+      # overlapping invocations can't see each other's in-flight uploads and
+      # re-send the same path (observed: wine-rekordbox, 779 MiB, twice in one
+      # rebuild). watch-store is one process with one view of the store, so
+      # there is nothing to race against and no closure re-walking.
       #
-      # cachix push walks the closure of $OUT_PATHS but skips paths already
-      # available on cache.nixos.org, so upstream nixpkgs is never duplicated
-      # into our cache. Verified against gen 68: of 3484 closure paths, the 356
-      # absent from cache.nixos.org were exactly the 356 present in our cache.
+      # Tradeoff: watch-store pushes every path newly added to the store, not
+      # only locally built ones. cachix skips paths available on cache.nixos.org,
+      # but not ones substituted from the other caches in substitutions.nix
+      # (nix-community, niri, noctalia, jake0x539) — those can get mirrored into
+      # our cache. Accepted: cheaper than the duplicate-upload races.
       #
-      # Token file holds CACHIX_AUTH_TOKEN=<token>. Leading "-" so the push unit
-      # still starts if agenix hasn't decrypted it yet (that push just fails).
-      nix.settings.post-build-hook = pkgs.writeShellScript "cachix-push" ''
-        set -eu
-        exec ${pkgs.systemd}/bin/systemd-run \
-          --no-block --collect \
-          --setenv=HOME=/root \
-          --property=EnvironmentFile=-${config.age.secrets.cachix-token.path} \
-          ${pkgs.cachix}/bin/cachix push ${cache} $OUT_PATHS
-      '';
+      # cachixTokenFile must hold the bare token — the module reads the whole
+      # file as the value, so no CACHIX_AUTH_TOKEN= prefix.
+      services.cachix-watch-store = {
+        enable = true;
+        cacheName = cache;
+        cachixTokenFile = config.age.secrets.cachix-token.path;
+      };
     };
 }
