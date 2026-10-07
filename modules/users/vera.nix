@@ -14,6 +14,7 @@
       varnam
       gaming
       crypto
+      syncthing
     ]);
 
     homeManager =
