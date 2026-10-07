@@ -125,6 +125,10 @@
                 };
                 mouse = {
                   accel-speed = 0.1;
+                  scroll-factor = {
+                    horizontal = -1.0;
+                    vertical = 1.0;
+                  };
                 };
               };
               layout = {
