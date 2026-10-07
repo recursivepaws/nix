@@ -112,7 +112,7 @@ in
       };
 
     homeManager =
-      { pkgs, ... }:
+      { pkgs, lib, config, ... }:
       let
         wine = pkgs.wine-rekordbox;
 
@@ -166,38 +166,48 @@ in
         # patched, so the builtin is what we want.
         rekordbox = pkgs.writeShellApplication {
           name = "rekordbox";
+          # niri comes from the session PATH, which writeShellApplication keeps —
+          # the scale we want is the running compositor's, not a build-time one.
           runtimeInputs = [
             wine
             pkgs.winetricks
             pkgs.findutils
-            pkgs.xwayland-satellite
+            pkgs.python3
           ];
           text = ''
             export WINEPREFIX="''${WINEPREFIX:-${defaultPrefix}}"
             export WINEARCH=win64
 
-            # X11 is required, not preferred: patch 0005 fixes winex11.drv, and
-            # winewayland.drv wins whenever DISPLAY is unset. niri 25.08 has no
-            # built-in XWayland and this config does not spawn the satellite at
-            # startup, so start one here if the session has no X display.
-            satellite_pid=""
-            if [ -z "''${DISPLAY:-}" ]; then
-              n=""
-              for c in 1 2 3 4 5; do
-                if [ ! -e "/tmp/.X11-unix/X$c" ]; then n="$c"; break; fi
-              done
-              [ -n "$n" ] || { echo "no free X display in :1-:5" >&2; exit 1; }
-              echo "no DISPLAY; starting xwayland-satellite on :$n"
-              xwayland-satellite ":$n" &
-              satellite_pid=$!
-              # shellcheck disable=SC2064
-              trap "kill $satellite_pid 2>/dev/null || true" EXIT
-              export DISPLAY=":$n"
-              for _ in $(seq 1 50); do
-                [ -e "/tmp/.X11-unix/X$n" ] && break
-                sleep 0.1
-              done
-              [ -e "/tmp/.X11-unix/X$n" ] || { echo "xwayland-satellite did not come up" >&2; exit 1; }
+            # NATIVE WAYLAND, NOT X11 — this replaced a Wine virtual desktop.
+            #
+            # Under X11 (winex11.drv through an XWayland satellite) rekordbox was
+            # unusable on niri for two reasons that turned out to be one:
+            #
+            #  - JUCE 8 surrounds every popup with four 14px drop-shadow windows
+            #    and tears the popup down if anything repositions one. Upstream's
+            #    patch 0005 stops Wine handing tool/layered popups to the WM,
+            #    which is enough for KWin but not for a *tiling* compositor,
+            #    which repositions everything it manages by definition. The login
+            #    window appeared and vanished instantly.
+            #  - eDP-1 is 2880x1920 at scale 1.5, and an X client through the
+            #    satellite never participates in compositor scaling, so the UI
+            #    rendered 1:1 and came out unreadably small. LogPixels did not
+            #    help: the X path never consults the compositor scale at all.
+            #
+            # winewayland.drv fixes both structurally rather than by policy. JUCE
+            # popups become xdg_popup surfaces placed via xdg_positioner, and a
+            # Wayland compositor cannot relocate a popup behind the client's
+            # back — so the teardown trigger does not exist, on any compositor.
+            # And Wine reads wp_fractional_scale_v1, so 1.5 becomes 150% DPI
+            # without us setting anything.
+            #
+            # DISPLAY is cleared, not just ignored: the session does run an
+            # xwayland-satellite on :0, and leaving DISPLAY set lets Wine fall
+            # back to X11 silently, which looks like "Wayland didn't help".
+            unset DISPLAY
+            if [ -z "''${WAYLAND_DISPLAY:-}" ]; then
+              echo "no WAYLAND_DISPLAY — this needs to run inside the Wayland session" >&2
+              exit 1
             fi
 
             if [ ! -d "$WINEPREFIX" ]; then
@@ -213,8 +223,55 @@ in
             # winepulse the sample-rate list comes up empty, so pin ALSA.
             wine reg add 'HKCU\Software\Wine\Drivers' /v Audio /t REG_SZ /d alsa /f
 
-            # Not exec: that would replace the shell and skip the EXIT trap,
-            # leaking the xwayland-satellite we may have started above.
+            # explorer.exe reads this key to pick the graphics driver. Set it
+            # explicitly rather than relying on DISPLAY being unset, so the
+            # choice is recorded in the prefix and visible in winecfg.
+            wine reg add 'HKCU\Software\Wine\Drivers' /v Graphics /t REG_SZ /d wayland /f
+
+            # DO NOT set HKCU\Software\Wine\Explorer\ShowSystray to 0 to get rid
+            # of the 111x35 tray sliver. It looks like the obvious fix and it
+            # deadlocks rekordbox on the splash screen, reproducibly: every
+            # thread blocks on ntdll's loader_section waiting for the one that
+            # is bringing the tray up, and the app never reaches its main window.
+            #
+            #   err:sync:RtlpWaitForCriticalSection section ...
+            #     "dlls/ntdll/loader.c: loader_section" ... blocked by 01f4
+            #
+            # Bisected here 2026-10-07: identical runs start fine with
+            # ShowSystray=1 and hang with 0. The tray is hidden compositor-side
+            # instead — see the explorer.exe window-rule in niri.nix.
+
+            # UI scaling. Wine negotiates wp_fractional_scale_v1, but that only
+            # sets the buffer scale — it sharpens rendering and does NOT change
+            # the DPI the application asks for, so on a 1.5 output rekordbox
+            # still laid itself out at 96 DPI and came out unreadably small.
+            # Measured, after switching to Wayland: no change from X11.
+            #
+            # So take the scale from the compositor and convert it ourselves.
+            # LogPixels is dots per inch, 96 = 100%, so DPI = 96 * scale and a
+            # 1.5 output gives 144. Read it rather than hardcoding: this config
+            # runs on three machines and ampulex is the only 1.5 one.
+            #
+            # RB_DPI overrides, for when a scaled-up UI is not what you want on
+            # a given screen. Wine reads LogPixels at process start, so either
+            # way it applies to this launch.
+            dpi="''${RB_DPI:-}"
+            if [ -z "$dpi" ]; then
+              dpi=$(niri msg --json focused-output 2>/dev/null | python3 -c '
+import json, sys
+try:
+    scale = json.load(sys.stdin)["logical"]["scale"]
+except Exception:
+    sys.exit(1)
+print(round(96 * scale))
+' || true)
+            fi
+            if [ -n "$dpi" ] && [ "$dpi" != 96 ]; then
+              echo "scaling UI to $dpi DPI ($(( dpi * 100 / 96 ))%)"
+              wine reg add 'HKCU\Software\Wine\Fonts' /v LogPixels \
+                /t REG_DWORD /d "$dpi" /f
+            fi
+
             # --install with no argument uses the pinned installer; pass a path
             # to override, which is the escape hatch for trying another build
             # without editing Nix.
@@ -250,36 +307,10 @@ in
               echo "         $(basename "$(dirname "$app")") — which is untested here." >&2
             fi
 
-            # VIRTUAL DESKTOP IS REQUIRED ON niri — not a preference.
-            #
-            # rekordbox 7 is JUCE 8, and JUCE surrounds every popup (including
-            # the login window) with four 14px drop-shadow windows. If the
-            # compositor repositions ANY of them, JUCE sees the geometry change
-            # and tears the whole popup down milliseconds after mapping it.
-            # Measured here: the login window appeared and vanished instantly,
-            # and X showed the four shadows at 14x590 / 682x14 around it.
-            #
-            # Upstream hit this on KWin and wrote patch 0005 to stop Wine
-            # handing WS_POPUP|WS_SYSMENU windows to the WM. That is not enough
-            # for a *tiling* compositor, which repositions everything it manages
-            # by definition.
-            #
-            # /desktop puts every Wine window inside ONE X window, so niri
-            # manages that single window and Wine handles popups internally
-            # where no compositor can touch them. Verified: login completes and
-            # the library loads.
-            #
-            # Override the size with RB_DESKTOP=WIDTHxHEIGHT, or set
-            # RB_DESKTOP=off to run natively — useful for testing whether a
-            # compositor-side fix (e.g. a niri window-rule making rekordbox
-            # float) removes the need for this.
-            if [ "''${RB_DESKTOP:-}" = "off" ]; then
-              echo "RB_DESKTOP=off: running without a Wine virtual desktop." >&2
-              echo "  JUCE popups may be dismissed by the compositor; see comment above." >&2
-              wine "$app" "$@"
-            else
-              wine explorer "/desktop=rekordbox,''${RB_DESKTOP:-2560x1400}" "$app" "$@"
-            fi
+            # Native windows. No `wine explorer /desktop=` wrapper: see the
+            # driver comment at the top for why that existed and what replaced
+            # it. Check with `rekordbox-probe` if popups start vanishing again.
+            wine "$app" "$@"
           '';
         };
 
@@ -303,6 +334,54 @@ in
           '';
         };
 
+        # Did the windows actually stay on screen? The failure this config keeps
+        # running into is silent and fast — a window maps and is gone again in
+        # milliseconds — so "it looked fine" is not evidence. This launches
+        # rekordbox, records niri's event stream and a Wine +win trace, and
+        # exits non-zero unless a rekordbox toplevel survived 8 seconds.
+        rekordbox-probe = pkgs.writeShellApplication {
+          name = "rekordbox-probe";
+          # niri comes from the session PATH, which writeShellApplication keeps:
+          # the point is to talk to the compositor that is actually running.
+          runtimeInputs = [
+            rekordbox
+            pkgs.python3
+          ];
+          text = ''
+            secs="''${1:-30}"
+            dir=$(mktemp -d /tmp/rekordbox-probe.XXXXXX)
+            echo "probing for ''${secs}s, logs in $dir"
+
+            # Monotonic stamps: wall clock would drift against the Wine trace.
+            python3 -c '
+import subprocess, sys, time
+t0 = time.monotonic()
+p = subprocess.Popen(["niri", "msg", "--json", "event-stream"],
+                     stdout=subprocess.PIPE, text=True)
+for line in p.stdout:
+    sys.stdout.write(f"{time.monotonic() - t0:.3f} {line}")
+    sys.stdout.flush()
+' > "$dir/niri.log" 2>/dev/null &
+            niri_pid=$!
+            # shellcheck disable=SC2064
+            trap "kill $niri_pid 2>/dev/null || true" EXIT
+
+            rekordbox > "$dir/wine.log" 2>&1 &
+            app_pid=$!
+
+            sleep "$secs"
+            kill "$niri_pid" 2>/dev/null || true
+
+            echo
+            python3 ${./rekordbox-probe.py} "$dir/niri.log"
+            rc=$?
+
+            echo
+            echo "rekordbox still running as $app_pid; logs kept in $dir"
+            exit $rc
+          '';
+        };
+
         # One exclusive hw: open can orphan the device for the rest of the
         # session (WirePlumber ALSA error-handler bug). This is the fix.
         rekordbox-reset-audio = pkgs.writeShellApplication {
@@ -322,7 +401,54 @@ in
           rekordbox
           rekordbox-wine
           rekordbox-reset-audio
+          rekordbox-probe
         ];
+
+        # The installer's own menu entry does not work, and cannot: NSIS has
+        # winemenubuilder write `wine <the .lnk>`, so it gets the wine-staging on
+        # /run/current-system/sw/bin (unpatched — see the overlay comment), with
+        # no virtual desktop and no xwayland-satellite. All three are mandatory,
+        # which is exactly what the launcher above sets up. Hence an absolute
+        # store path: PATH order from a desktop launcher is not ours to assume.
+        #
+        # Icon is the one winemenubuilder extracted into ~/.local/share/icons.
+        # Its prefix is derived from the install path, not random — 7.2.18 is
+        # always EA77 (7.2.19 was 26A7) — so pinning the version pins the icon.
+        xdg.enable = true;
+        xdg.desktopEntries.rekordbox = {
+          name = "rekordbox";
+          exec = lib.getExe rekordbox;
+          terminal = false;
+          icon = "EA77_rekordbox.0";
+          categories = [
+            "AudioVideo"
+            "Audio"
+          ];
+          # Measured with rekordbox-probe, not guessed: winewayland derives the
+          # app-id from the process name, so the main window comes up as
+          # "rekordbox.exe" (dialogs use "upmgr rekordbox.exe", and Wine's own
+          # systray sliver is "explorer.exe"). Under the old virtual desktop
+          # this was explorer.exe, and the installer's entry said "rekordbox" —
+          # neither matched. Also the app-id for any niri window rule.
+          settings.StartupWMClass = "rekordbox.exe";
+        };
+
+        # Everything winemenubuilder generates for rekordbox is unwanted: its
+        # launcher entry is broken (see above) and duplicates ours in the menu,
+        # and the "Uninstall rekordbox 7" entries are launcher clutter. It
+        # regenerates them on every install, so drop them on every activation.
+        #
+        # Deliberately scoped to this one subtree, not all of wine/Programs:
+        # Pioneer/FwUpdateManager lives beside it and is the DDJ firmware
+        # updater, which is worth keeping. Icons live under ~/.local/share/icons
+        # and are untouched — the entry above points at one.
+        #
+        # The uninstaller itself is unaffected, it is a .exe in the prefix:
+        #   rekordbox-wine "C:/Program Files/rekordbox/rekordbox <ver>/Uninstall rekordbox.exe"
+        home.activation.pruneRekordboxWineMenu =
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            run rm -rf "${config.xdg.dataHome}/applications/wine/Programs/rekordbox"
+          '';
       };
   };
 }

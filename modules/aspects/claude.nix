@@ -47,6 +47,11 @@
       url = "github:kalil0321/reverse-api-engineer/0f37681741faf2670310048c92a00d5bfb1de822";
       flake = false;
     };
+    # Unsplash photo search MCP server (plain server.py, deps from nixpkgs).
+    unsplash-mcp = {
+      url = "github:cevatkerim/unsplash-mcp";
+      flake = false;
+    };
   };
 
   den.aspects.claude =
@@ -115,6 +120,13 @@
               }
             } -C $out --strip-components=1
           '';
+          unsplashPython = pkgs.python3.withPackages (
+            ps: with ps; [
+              fastmcp
+              httpx
+              python-dotenv
+            ]
+          );
           caveman = pkgs.writeShellScriptBin "caveman" ''
             export CAVEMAN_PROXY_BIN=${cavemanGoBin "caveman-proxy" "sha256-gMcz1bHL/jtNBLYkdYa+mZVbjsWjhmbOQP8bdhFp6OE="}
             export CAVEMAN_ENGINE_BIN=${cavemanGoBin "caveman-engine" "sha256-GXB3LO1yhUi4Wv0KEmmV2mkIP1vY1G1JccSZjQ6ciJI="}
@@ -286,6 +298,13 @@
               };
               sanity = {
                 url = "https://mcp.sanity.io";
+              };
+              unsplash = {
+                command = "${unsplashPython}/bin/python";
+                args = [ "${inputs.unsplash-mcp}/server.py" ];
+                env = {
+                  UNSPLASH_ACCESS_KEY = "\${UNSPLASH_ACCESS_KEY}";
+                };
               };
             };
 

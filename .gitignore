@@ -3,3 +3,4 @@ result-*
 *.swp
 *.lock.tmp
 *.qcow2
+__pycache__

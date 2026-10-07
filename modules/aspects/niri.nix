@@ -221,6 +221,31 @@
                   ];
                   open-floating = false;
                 }
+                # rekordbox is JUCE 8 under winewayland, and JUCE draws its own
+                # drop shadows: every popup is surrounded by four slivers (1x1,
+                # 234x9, 9x90) that Wine maps as ordinary toplevels. niri focuses
+                # new windows by default, so focus kept landing on a 1px window —
+                # the app stopped taking input and Mod+C closed the invisible
+                # sliver instead of rekordbox.
+                #
+                # Matched by empty title, which is what separates the shadows
+                # from real windows: the main window is titled "rekordbox" and
+                # dialogs carry their own titles. They still open (nothing here
+                # hides them), they just never steal focus.
+                {
+                  matches = [
+                    {
+                      app-id = "^rekordbox\\.exe$";
+                      title = "^$";
+                    }
+                    {
+                      app-id = "^upmgr rekordbox\\.exe$";
+                      title = "^$";
+                    }
+                  ];
+                  open-floating = true;
+                  open-focused = false;
+                }
                 {
                   geometry-corner-radius = {
                     bottom-left = 15.0;

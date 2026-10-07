@@ -773,7 +773,8 @@
         "python-skills": "python-skills",
         "reverse-api-engineer": "reverse-api-engineer",
         "skills": "skills",
-        "spicetify-nix": "spicetify-nix"
+        "spicetify-nix": "spicetify-nix",
+        "unsplash-mcp": "unsplash-mcp"
       }
     },
     "skills": {
@@ -897,6 +898,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "unsplash-mcp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768074552,
+        "narHash": "sha256-TYBqIF3eL8YAtEOVW+YZsLsNDwJXJ1Hia6uaF13ysvE=",
+        "owner": "cevatkerim",
+        "repo": "unsplash-mcp",
+        "rev": "b92603cc9bdf34224729d6572e2d20fbfd8bca9d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cevatkerim",
+        "repo": "unsplash-mcp",
         "type": "github"
       }
     },

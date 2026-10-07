@@ -83,5 +83,9 @@
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    unsplash-mcp = {
+      url = "github:cevatkerim/unsplash-mcp";
+      flake = false;
+    };
   };
 }
