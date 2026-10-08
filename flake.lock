@@ -112,6 +112,22 @@
         "type": "github"
       }
     },
+    "davinci-resolve-mcp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791457668,
+        "narHash": "sha256-FODckQyZcYEAPA2pwzoEY+T+xYrDEmLQ6aTNj8GACNE=",
+        "owner": "samuelgursky",
+        "repo": "davinci-resolve-mcp",
+        "rev": "437f5703c66b3c2ad5a110919d30eacbf56d0634",
+        "type": "github"
+      },
+      "original": {
+        "owner": "samuelgursky",
+        "repo": "davinci-resolve-mcp",
+        "type": "github"
+      }
+    },
     "den": {
       "locked": {
         "lastModified": 1783011234,
@@ -750,6 +766,7 @@
         "apollo-skills": "apollo-skills",
         "caveman": "caveman",
         "claude-plugins-nix": "claude-plugins-nix",
+        "davinci-resolve-mcp": "davinci-resolve-mcp",
         "den": "den",
         "direnv-instant": "direnv-instant",
         "flake-file": "flake-file",
