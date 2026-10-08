@@ -112,7 +112,12 @@ in
       };
 
     homeManager =
-      { pkgs, lib, config, ... }:
+      {
+        pkgs,
+        lib,
+        config,
+        ...
+      }:
       let
         wine = pkgs.wine-rekordbox;
 
@@ -324,37 +329,37 @@ in
             pkgs.python3
           ];
           text = ''
-            secs="''${1:-30}"
-            dir=$(mktemp -d /tmp/rekordbox-probe.XXXXXX)
-            echo "probing for ''${secs}s, logs in $dir"
+                        secs="''${1:-30}"
+                        dir=$(mktemp -d /tmp/rekordbox-probe.XXXXXX)
+                        echo "probing for ''${secs}s, logs in $dir"
 
-            # Monotonic stamps: wall clock would drift against the Wine trace.
-            python3 -c '
-import subprocess, sys, time
-t0 = time.monotonic()
-p = subprocess.Popen(["niri", "msg", "--json", "event-stream"],
-                     stdout=subprocess.PIPE, text=True)
-for line in p.stdout:
-    sys.stdout.write(f"{time.monotonic() - t0:.3f} {line}")
-    sys.stdout.flush()
-' > "$dir/niri.log" 2>/dev/null &
-            niri_pid=$!
-            # shellcheck disable=SC2064
-            trap "kill $niri_pid 2>/dev/null || true" EXIT
+                        # Monotonic stamps: wall clock would drift against the Wine trace.
+                        python3 -c '
+            import subprocess, sys, time
+            t0 = time.monotonic()
+            p = subprocess.Popen(["niri", "msg", "--json", "event-stream"],
+                                 stdout=subprocess.PIPE, text=True)
+            for line in p.stdout:
+                sys.stdout.write(f"{time.monotonic() - t0:.3f} {line}")
+                sys.stdout.flush()
+            ' > "$dir/niri.log" 2>/dev/null &
+                        niri_pid=$!
+                        # shellcheck disable=SC2064
+                        trap "kill $niri_pid 2>/dev/null || true" EXIT
 
-            rekordbox > "$dir/wine.log" 2>&1 &
-            app_pid=$!
+                        rekordbox > "$dir/wine.log" 2>&1 &
+                        app_pid=$!
 
-            sleep "$secs"
-            kill "$niri_pid" 2>/dev/null || true
+                        sleep "$secs"
+                        kill "$niri_pid" 2>/dev/null || true
 
-            echo
-            python3 ${./rekordbox-probe.py} "$dir/niri.log"
-            rc=$?
+                        echo
+                        python3 ${./rekordbox-probe.py} "$dir/niri.log"
+                        rc=$?
 
-            echo
-            echo "rekordbox still running as $app_pid; logs kept in $dir"
-            exit $rc
+                        echo
+                        echo "rekordbox still running as $app_pid; logs kept in $dir"
+                        exit $rc
           '';
         };
 
@@ -421,10 +426,48 @@ for line in p.stdout:
         #
         # The uninstaller itself is unaffected, it is a .exe in the prefix:
         #   rekordbox-wine "C:/Program Files/rekordbox/rekordbox <ver>/Uninstall rekordbox.exe"
-        home.activation.pruneRekordboxWineMenu =
-          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            run rm -rf "${config.xdg.dataHome}/applications/wine/Programs/rekordbox"
-          '';
+        home.activation.pruneRekordboxWineMenu = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          run rm -rf "${config.xdg.dataHome}/applications/wine/Programs/rekordbox"
+        '';
+
+        programs.niri.settings.window-rules = [
+          # Wine chrome that must never take focus.
+          #
+          # rekordbox is JUCE 8 under winewayland, and JUCE draws its own
+          # drop shadows: every popup is surrounded by four slivers (1x1,
+          # 234x9, 9x90) that Wine maps as ordinary toplevels. explorer.exe
+          # adds a 111x35 systray window of the same character. niri focuses
+          # new windows by default, so focus kept landing on a 1px window —
+          # rekordbox stopped taking input and Mod+C closed the invisible
+          # sliver instead of the app.
+          #
+          # Matched by empty title, which is what separates this chrome
+          # from real windows: the main window is titled "rekordbox" and
+          # dialogs carry their own titles. Nothing here hides them — niri
+          # has no rule for that, short of banishing them to a named
+          # workspace — they just never steal focus.
+          #
+          # The systray cannot be turned off Wine-side: ShowSystray=0
+          # deadlocks rekordbox on its splash screen. See rekordbox.nix.
+          {
+            matches = [
+              {
+                app-id = "^rekordbox\\.exe$";
+                title = "^$";
+              }
+              {
+                app-id = "^upmgr rekordbox\\.exe$";
+                title = "^$";
+              }
+              {
+                app-id = "^explorer\\.exe$";
+                title = "^$";
+              }
+            ];
+            open-floating = true;
+            open-focused = false;
+          }
+        ];
       };
   };
 }
