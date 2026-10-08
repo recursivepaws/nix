@@ -1,0 +1,108 @@
+Subject: [PATCH] winewayland: give owned layered popups the subsurface role
+
+winex11.drv and winewayland.drv carry the same rule, and upstream's patch 0005
+only fixes the X11 copy:
+
+    if (style & WS_POPUP)
+    {
+        /* popup with sysmenu == caption are managed */
+        if (style & WS_SYSMENU) return TRUE;
+
+JUCE menus carry WS_POPUP|WS_SYSMENU, so is_window_managed() claims them. On
+Wayland a managed window becomes an xdg_toplevel, and a toplevel cannot ask to
+be placed -- the protocol has no way to express "put this under the File menu".
+The compositor places it by its own policy instead. Measured with rekordbox
+7.2.18 (JUCE 8) on niri 25.08: every dropdown opened centred on the screen,
+nowhere near the menu bar it belongs to, and each one arrived with four 14px
+drop-shadow slivers (1x1, 234x9, 9x90, 9x90) as separate toplevels alongside
+it. niri focuses new windows by default, so focus landed on a 1px shadow and
+the application stopped accepting input.
+
+An unmanaged window takes the other branch in WAYLAND_WindowPosChanged:
+
+    case WAYLAND_SURFACE_ROLE_SUBSURFACE:
+        wayland_surface_make_subsurface(surface, owner_surface);
+
+which is a wl_subsurface of the owner, positioned at an exact offset from it
+and never seen by the compositor as a window at all. That is what menus,
+tooltips and drop shadows want on Wayland, and it is the same conclusion patch
+0005 reached for X11: these are application chrome, not application windows,
+and Windows never hands them to a window manager either.
+
+NOT INVENTED HERE. The predicate and its placement are taken from
+lacamar/wine-arm64ec-rpm, wine/2026_09_15-winewayland-popup-subsurfaces.patch,
+which solves the same problem. Two details in it are load-bearing and both were
+wrong in this patch before that was found:
+
+  - The test must sit ABOVE "activated windows are managed". Menus are
+    frequently shown activated, and that test returns TRUE before any
+    style-based check below it could run.
+  - GW_OWNER must be present. The subsurface role is created against the
+    owner's surface, so an ownerless window returning FALSE here ends up with
+    no role at all and renders nothing. proton-ge-custom carries a patch
+    specifically for that case ("winewayland.drv: Avoid mapping ownerless menu
+    popups as toplevels"), so it is a real hazard, not a hypothetical one.
+
+Only the is_window_managed() hunk is taken. That patch also reworks subsurface
+restacking, adds a Decorated=Y option and clamps toplevels on-screen; none of
+that is needed here.
+
+WS_EX_LAYERED alone is the discriminator rather than TOOLWINDOW|LAYERED --
+0005's reproducer shows JUCE's popups carry both, so LAYERED is sufficient, and
+the extra WS_EX_APPWINDOW / WS_CAPTION / WS_THICKFRAME exclusions keep real
+windows that happen to be layered out of it.
+
+ex_style is read earlier than before because the new test needs it.
+
+---
+--- a/dlls/winewayland.drv/window.c
++++ b/dlls/winewayland.drv/window.c
+@@ -376,6 +376,40 @@
+     /* child windows are not managed */
+     style = NtUserGetWindowLongW(hwnd, GWL_STYLE);
+     if ((style & (WS_CHILD|WS_POPUP)) == WS_CHILD) return FALSE;
++    /* RBW-POPUP-WL: menus, tooltips and drop shadows are chrome, not
++     * application windows. As an xdg_toplevel they cannot be positioned --
++     * Wayland has no protocol for a client to place a toplevel -- so the
++     * compositor puts them where its own policy says, which for a dropdown
++     * means nowhere near the menu that opened it.
++     *
++     * Measured with rekordbox 7.2.18 (JUCE 8) on niri 25.08: every dropdown
++     * opened centred on the screen, each with four 14px drop-shadow slivers
++     * as separate toplevels, and focus landing on a 1px shadow left the
++     * application unable to accept input.
++     *
++     * Returning FALSE gives them the subsurface role instead, placed at an
++     * exact offset from their owner and never seen by the compositor as a
++     * window. This mirrors patch 0005, which fixes the identical rule in
++     * winex11.drv; see it for the reproducer that isolated the styles.
++     *
++     * Two things here are load-bearing and were taken from the same fix in
++     * lacamar/wine-arm64ec-rpm (2026_09_15-winewayland-popup-subsurfaces):
++     *
++     *  - It must sit ABOVE the activation test below. Menus are frequently
++     *    shown activated, and that test returns TRUE before any style check
++     *    could run.
++     *  - GW_OWNER must exist. The subsurface role is created against the
++     *    owner's surface, so an ownerless window returning FALSE here gets
++     *    no role at all and renders nothing. */
++    ex_style = NtUserGetWindowLongW(hwnd, GWL_EXSTYLE);
++    if ((ex_style & WS_EX_LAYERED) && !(ex_style & WS_EX_APPWINDOW) &&
++        (style & WS_CAPTION) != WS_CAPTION && !(style & WS_THICKFRAME) &&
++        NtUserGetWindowRelative(hwnd, GW_OWNER))
++    {
++        TRACE("RBW-POPUP-WL %p: owned layered popup, not managed (style %#x ex %#x)\n",
++              hwnd, (int)style, (int)ex_style);
++        return FALSE;
++    }
+     /* activated windows are managed */
+     if (!(swp_flags & (SWP_NOACTIVATE|SWP_HIDEWINDOW))) return TRUE;
+     if (hwnd == get_active_window()) return TRUE;
+@@ -391,7 +425,6 @@
+         if (fullscreen) return TRUE;
+     }
+     /* application windows are managed */
+-    ex_style = NtUserGetWindowLongW(hwnd, GWL_EXSTYLE);
+     if (ex_style & WS_EX_APPWINDOW) return TRUE;
+     /* windows that own popups are managed */
+     if (has_owned_popups(hwnd)) return TRUE;

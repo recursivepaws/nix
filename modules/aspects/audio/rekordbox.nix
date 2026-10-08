@@ -4,7 +4,9 @@ let
   # than fetched: upstream is one author, and we want this reproducible if the
   # repo moves. 0001-0010 are theirs verbatim; 0011 is their
   # bin/build-wineusb-hcd.sh splice of rbw-usbhcd.c into wineusb.c, rendered as
-  # an ordinary patch so the build applies a plain series.
+  # an ordinary patch so the build applies a plain series. 0012 is not theirs:
+  # they target KWin on X11, so winewayland carries the same bug unfixed, and
+  # the fix for it comes from lacamar/wine-arm64ec-rpm instead.
   patchDir = ./patches/rekordbox;
 
   # Each patched component carries a marker string. A component that silently
@@ -18,6 +20,7 @@ let
     "x86_64-windows/wineusb.sys" = "RBW-USBHCD";
     "x86_64-unix/winealsa.so" = "RBW-EVENT3";
     "x86_64-unix/winex11.so" = "RBW-POPUP";
+    "x86_64-unix/winewayland.so" = "RBW-POPUP-WL";
     "x86_64-unix/mountmgr.so" = "RBW-REMOVABLE";
     "x86_64-unix/wineusb.so" = "RBW-USBHCD";
   };
@@ -52,6 +55,10 @@ let
         "${patchDir}/0009-mountmgr-volume-devnodes.patch"
         "${patchDir}/0010-wineusb-hcd-unixlib.patch"
         "${patchDir}/0011-wineusb-hcd-pe-splice.patch"
+        # Not from MrNorm: they run KWin on X11, so winewayland was never in
+        # their path. Same problem their 0005 fixes, in the Wayland driver;
+        # the predicate is lacamar/wine-arm64ec-rpm's. See the patch header.
+        "${patchDir}/0012-winewayland-popup-not-managed.patch"
       ];
 
       postInstall = (old.postInstall or "") + ''
@@ -289,6 +296,27 @@ in
               echo "         $(basename "$(dirname "$app")") — which is untested here." >&2
             fi
 
+            # rekordbox ships its own updater as a separate program and starts it
+            # alongside itself. The "update packages were found" dialog is that
+            # program's window, not rekordbox's — it shows up in the compositor
+            # under its own app-id, "upmgr rekordbox.exe".
+            #
+            # It offers 7.2.19, which is exactly the build pinned away from above
+            # because it crashes before showing a window. Taking the offer would
+            # quietly replace a working install with a broken one, and the pin
+            # cannot prevent that: it only controls which installer we fetch, not
+            # what the app does to itself afterwards.
+            #
+            # Renamed rather than deleted so it is one mv to undo, and a
+            # reinstall restores it regardless. Re-applied every launch because
+            # reinstalling puts it back. Verified: rekordbox starts normally
+            # without it and no update dialog appears.
+            upmgr="$(dirname "$app")/Upmgr rekordbox.exe"
+            if [ -f "$upmgr" ]; then
+              echo "disabling rekordbox's bundled updater (it offers the broken 7.2.19)"
+              mv -- "$upmgr" "$upmgr.disabled"
+            fi
+
             # Native windows. No `wine explorer /desktop=` wrapper: see the
             # driver comment at the top for why that existed and what replaced
             # it. Check with `rekordbox-probe` if popups start vanishing again.
@@ -433,24 +461,31 @@ in
 
         programs = lib.optionalAttrs (user.hasAspect den.aspects.niri) {
           niri.settings.window-rules = [
-            # Wine chrome that must never take focus.
+            # Wine's systray, a 111x35 window with no title. Tiled rather
+            # than floating on purpose: floating, it hovers over rekordbox
+            # and is in the way; tiled it is just a narrow column you scroll
+            # past. It cannot be switched off Wine-side — ShowSystray=0
+            # deadlocks rekordbox on its splash screen, see above.
+            {
+              matches = [
+                {
+                  app-id = "^explorer\\.exe$";
+                  title = "^$";
+                }
+              ];
+              open-floating = false;
+              open-focused = false;
+            }
+            # Safety net for JUCE chrome. rekordbox is JUCE 8, which wraps
+            # every popup in four drop-shadow slivers (1x1, 234x9, 9x90);
+            # Wine used to hand each one over as a toplevel, niri focused the
+            # newest, and focus landing on a 1px window left the app unable
+            # to accept input with Mod+C closing the sliver instead.
             #
-            # rekordbox is JUCE 8 under winewayland, and JUCE draws its own
-            # drop shadows: every popup is surrounded by four slivers (1x1,
-            # 234x9, 9x90) that Wine maps as ordinary toplevels. explorer.exe
-            # adds a 111x35 systray window of the same character. niri focuses
-            # new windows by default, so focus kept landing on a 1px window —
-            # rekordbox stopped taking input and Mod+C closed the invisible
-            # sliver instead of the app.
-            #
-            # Matched by empty title, which is what separates this chrome
-            # from real windows: the main window is titled "rekordbox" and
-            # dialogs carry their own titles. Nothing here hides them — niri
-            # has no rule for that, short of banishing them to a named
-            # workspace — they just never steal focus.
-            #
-            # The systray cannot be turned off Wine-side: ShowSystray=0
-            # deadlocks rekordbox on its splash screen. See rekordbox.nix.
+            # Wine patch 0012 fixes that at the source — they are subsurfaces
+            # now and never reach the compositor — so this should match
+            # nothing. It stays because it is free and the failure it guards
+            # against is silent and very confusing.
             {
               matches = [
                 {
@@ -459,10 +494,6 @@ in
                 }
                 {
                   app-id = "^upmgr rekordbox\\.exe$";
-                  title = "^$";
-                }
-                {
-                  app-id = "^explorer\\.exe$";
                   title = "^$";
                 }
               ];
