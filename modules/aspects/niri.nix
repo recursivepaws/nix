@@ -362,14 +362,55 @@
                   "Mod+Ctrl+Page_Up".action = move-column-to-workspace-up;
 
                   # Media controls
-                  "XF86AudioPlay".action = sh "playerctl play-pause";
-                  "XF86AudioNext".action = sh "playerctl next";
-                  "XF86AudioPrev".action = sh "playerctl previous";
-                  "XF86AudioRaiseVolume".action = ns "volume-up";
-                  "XF86AudioLowerVolume".action = ns "volume-down";
-                  "XF86AudioMute".action = ns "volume-mute";
-                  "XF86MonBrightnessUp".action = ns "brightness-up";
-                  "XF86MonBrightnessDown".action = ns "brightness-down";
+                  "XF86AudioPlay" = {
+                    action = sh "playerctl play-pause";
+                    allow-when-locked = true;
+                  };
+                  "XF86AudioNext" = {
+                    action = sh "playerctl next";
+                    allow-when-locked = true;
+                  };
+                  "XF86AudioPrev" = {
+                    action = sh "playerctl previous";
+                    allow-when-locked = true;
+                  };
+                  "XF86AudioRaiseVolume" = {
+                    action = ns "volume-up";
+                    allow-when-locked = true;
+                  };
+                  "XF86AudioLowerVolume" = {
+                    action = ns "volume-down";
+                    allow-when-locked = true;
+                  };
+                  "XF86AudioMute" = {
+                    action = ns "volume-mute";
+                    allow-when-locked = true;
+                  };
+                  "XF86AudioMicMute" = {
+                    action = ns "mic-mute";
+                    allow-when-locked = true;
+                  };
+                  "XF86MonBrightnessUp" = {
+                    action = ns "brightness-up";
+                    allow-when-locked = true;
+                  };
+                  "XF86MonBrightnessDown" = {
+                    action = ns "brightness-down";
+                    allow-when-locked = true;
+                  };
+                  "XF86KbdBrightnessUp" = {
+                    action = ns "keyboard-backlight-up";
+                    allow-when-locked = true;
+                  };
+                  "XF86KbdBrightnessDown" = {
+                    action = ns "keyboard-backlight-down";
+                    allow-when-locked = true;
+                  };
+                  "XF86KbdLightOnOff" = {
+                    action = ns "keyboard-backlight-toggle";
+                    allow-when-locked = true;
+                  };
+                  "XF86Display".action = power-off-monitors;
                 };
             };
           };
