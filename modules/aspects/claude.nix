@@ -137,6 +137,17 @@
             export CAVEMAN_TELEMETRY="''${CAVEMAN_TELEMETRY:-0}"
             exec ${pkgs.nodejs}/bin/node ${cavemanCliSrc}/dist/index.js "$@"
           '';
+          pdfPackages = with pkgs; [
+            poppler-utils # pdfinfo, pdftotext, pdftoppm, pdfimages
+            qpdf # merge/split/decrypt
+            (python3.withPackages (
+              ps: with ps; [
+                pypdf
+                pdfplumber
+                reportlab
+              ]
+            ))
+          ];
         in
         {
           imports = with inputs; [
@@ -308,10 +319,10 @@
               };
             };
 
-          # These are required for the `typescript-lsp` plugin
           home.packages = [
             caveman
           ]
+          ++ pdfPackages
           ++ lib.optionals isWork (
             with pkgs;
             [
