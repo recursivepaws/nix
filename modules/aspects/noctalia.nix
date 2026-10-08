@@ -1,16 +1,11 @@
-{ inputs, ... }:
+{ inputs, den, ... }:
 {
   # nixpkgs follows would change hashes and miss cachix
   flake-file.inputs.noctalia.url = "github:noctalia-dev/noctalia";
 
   den.aspects.noctalia = {
     nixos =
-      {
-        host,
-        pkgs,
-        lib,
-        ...
-      }:
+      { pkgs, ... }:
       {
         environment.systemPackages = with pkgs; [
           inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
@@ -52,10 +47,6 @@
           };
         };
 
-        # Laptop-specific services
-        services = lib.mkIf (host.name == "amanita" || host.name == "ampulex") {
-          upower.enable = true;
-        };
       };
 
     homeManager =
@@ -67,7 +58,7 @@
         ...
       }:
       let
-        isWork = user.userName == "work";
+        hasHightouch = user.hasAspect den.aspects.hightouch;
         plugins = [
           "noctalia/timer"
           "noctalia/kaomoji"
@@ -75,7 +66,7 @@
           "nightwatch75/todo"
           "dotnetrob/cat"
         ]
-        ++ lib.optionals isWork [
+        ++ lib.optionals hasHightouch [
           "rylos/tailnet"
           "8bury/mini-docker"
           "shangshui0302/github-kanban"
@@ -87,14 +78,83 @@
           "clipboard"
           "nightwatch75/todo:todo"
         ]
-        ++ lib.optionals isWork [
+        ++ lib.optionals hasHightouch [
           "rylos/tailnet:bar"
           "8bury/mini-docker:mini-docker"
           "shangshui0302/github-kanban:github"
         ];
       in
       {
-        imports = [ inputs.noctalia.homeModules.default ];
+        imports = [
+          inputs.noctalia.homeModules.default
+        ]
+        # Niri integration: IPC binds, autostart, screencast privacy for toasts
+        ++ lib.optional (user.hasAspect den.aspects.niri) {
+          programs.niri.settings = {
+            spawn-at-startup = [
+              {
+                command = [
+                  "bash"
+                  "-c"
+                  "noctalia -d"
+                ];
+              }
+            ];
+            layer-rules = [
+              {
+                matches = [ { namespace = "^noctalia-notification$"; } ];
+                block-out-from = "screencast";
+              }
+            ];
+            binds =
+              with config.lib.niri.actions;
+              let
+                ns = x: spawn "sh" "-c" ("noctalia msg " + x);
+              in
+              {
+                "Mod+P".action = ns "panel-toggle session";
+                "Mod+X".action = ns "panel-toggle launcher";
+                "Mod+Ctrl+S".action = ns "screenshot-region";
+                "Print".action = ns "screenshot-annotate";
+                "XF86AudioRaiseVolume" = {
+                  action = ns "volume-up";
+                  allow-when-locked = true;
+                };
+                "XF86AudioLowerVolume" = {
+                  action = ns "volume-down";
+                  allow-when-locked = true;
+                };
+                "XF86AudioMute" = {
+                  action = ns "volume-mute";
+                  allow-when-locked = true;
+                };
+                "XF86AudioMicMute" = {
+                  action = ns "mic-mute";
+                  allow-when-locked = true;
+                };
+                "XF86MonBrightnessUp" = {
+                  action = ns "brightness-up";
+                  allow-when-locked = true;
+                };
+                "XF86MonBrightnessDown" = {
+                  action = ns "brightness-down";
+                  allow-when-locked = true;
+                };
+                "XF86KbdBrightnessUp" = {
+                  action = ns "keyboard-backlight-up";
+                  allow-when-locked = true;
+                };
+                "XF86KbdBrightnessDown" = {
+                  action = ns "keyboard-backlight-down";
+                  allow-when-locked = true;
+                };
+                "XF86KbdLightOnOff" = {
+                  action = ns "keyboard-backlight-toggle";
+                  allow-when-locked = true;
+                };
+              };
+          };
+        };
 
         programs.noctalia = {
           enable = true;
@@ -159,21 +219,17 @@
               custom_palette = "Oxocarbon";
             };
 
-            # work gets plain black via niri layout.background-color
-            wallpaper =
-              if isWork then
-                { enabled = false; }
-              else
-                {
-                  directory = "/var/lib/wallpapers";
-                  transition = [ "honeycomb" ];
-                  automation = {
-                    enabled = true;
-                    # Change wallpaper every two hours
-                    interval_seconds = 60 * 60 * 2;
-                    order = "random";
-                  };
-                };
+            # the plain-background aspect disables this per-user
+            wallpaper = {
+              directory = "/var/lib/wallpapers";
+              transition = [ "honeycomb" ];
+              automation = {
+                enabled = true;
+                # Change wallpaper every two hours
+                interval_seconds = 60 * 60 * 2;
+                order = "random";
+              };
+            };
 
             location.address = "New York, NY";
 
@@ -195,7 +251,7 @@
                   name = "Personal";
                 };
               }
-              // lib.optionalAttrs isWork {
+              // lib.optionalAttrs hasHightouch {
                 work = {
                   type = "google";
                   name = "Work";
@@ -297,7 +353,7 @@
         };
 
         # github-kanban shells out to gh, which needs persistent auth
-        home.activation = lib.optionalAttrs isWork {
+        home.activation = lib.optionalAttrs hasHightouch {
           ghHostsToken = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
             token_file="/run/agenix/github.token"
             hosts_file="${config.xdg.configHome}/gh/hosts.yml"

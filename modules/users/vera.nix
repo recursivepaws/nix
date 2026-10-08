@@ -16,6 +16,7 @@
       gaming
       crypto
       syncthing
+      messaging
     ]);
 
     homeManager =
@@ -24,11 +25,6 @@
         home.packages = with pkgs; [
           handbrake
           avidemux
-          telegram-desktop
-          signal-desktop
-          # discord
-          vesktop
-          discordchatexporter-desktop
           seahorse
           immich-go
           anki

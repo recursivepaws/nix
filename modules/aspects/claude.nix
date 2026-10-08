@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, den, ... }:
 {
   flake-file.inputs = {
     claude-plugins-nix.url = "github:mreimbold/claude-plugins-nix";
@@ -80,7 +80,7 @@
         let
           claudePluginsPkg =
             inputs.claude-plugins-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-plugins;
-          isWork = user.userName == "work";
+          hasHightouch = user.hasAspect den.aspects.hightouch;
           plugins = [
             "@anthropics/claude-code-plugins/pr-review-toolkit"
             "@anthropics/claude-code-plugins/frontend-design"
@@ -95,15 +95,10 @@
             "@anthropics/claude-plugins-official/lua-lsp"
             "@anthropics/claude-plugins-official/rust-analyzer-lsp"
           ]
-          ++ lib.optionals isWork [
+          ++ lib.optionals hasHightouch [
             "@anthropics/claude-plugins-official/linear"
             "@anthropics/claude-plugins-official/typescript-lsp"
           ];
-          # Run npx from $HOME so project configs can't interfere.
-          npxFromHome = pkgs.writeShellScript "npx-from-home" ''
-            cd "$HOME"
-            exec ${pkgs.nodejs}/bin/npx "$@"
-          '';
           cavemanGoBin =
             name: hash:
             pkgs.fetchurl {
@@ -250,80 +245,27 @@
             };
           };
 
-          mcp-servers.settings.servers =
-            lib.optionalAttrs isWork {
-              circleci = {
-                command = "${npxFromHome}";
-                args = [
-                  "-y"
-                  "@circleci/mcp-server-circleci@latest"
-                ];
-                env = {
-                  CIRCLECI_TOKEN = "\${CIRCLECI_TOKEN}";
-                };
-              };
-              snowflake = {
-                url = "\${SNOWFLAKE_MCP_URL}";
-                headers = {
-                  Authorization = "Bearer \${SNOWFLAKE_PAT}";
-                };
-              };
-              datadog = {
-                command = "${npxFromHome}";
-                args = [
-                  "-y"
-                  "@winor30/mcp-server-datadog"
-                ];
-                env = {
-                  DATADOG_API_KEY = "\${DATADOG_API_KEY}";
-                  DATADOG_APP_KEY = "\${DATADOG_APP_KEY}";
-                };
-              };
-              slack = {
-                command = "${npxFromHome}";
-                args = [
-                  "-y"
-                  "slack-mcp-server@latest"
-                  "--transport"
-                  "stdio"
-                ];
-                env = {
-                  SLACK_MCP_XOXC_TOKEN = "\${SLACK_MCP_XOXC_TOKEN}";
-                  SLACK_MCP_XOXD_TOKEN = "\${SLACK_MCP_XOXD_TOKEN}";
-                };
-              };
-              hightouch-internal = {
-                command = "${npxFromHome}";
-                args = [
-                  "-y"
-                  "@hightouchio/internal-mcp@latest"
-                ];
-                env = {
-                  HIGHTOUCH_API_KEY = "\${HIGHTOUCH_API_KEY}";
-                };
-              };
-            }
-            // {
-              vercel = {
-                url = "https://mcp.vercel.com";
-              };
-              sanity = {
-                url = "https://mcp.sanity.io";
-              };
-              unsplash = {
-                command = "${unsplashPython}/bin/python";
-                args = [ "${inputs.unsplash-mcp}/server.py" ];
-                env = {
-                  UNSPLASH_ACCESS_KEY = "\${UNSPLASH_ACCESS_KEY}";
-                };
+          mcp-servers.settings.servers = {
+            vercel = {
+              url = "https://mcp.vercel.com";
+            };
+            sanity = {
+              url = "https://mcp.sanity.io";
+            };
+            unsplash = {
+              command = "${unsplashPython}/bin/python";
+              args = [ "${inputs.unsplash-mcp}/server.py" ];
+              env = {
+                UNSPLASH_ACCESS_KEY = "\${UNSPLASH_ACCESS_KEY}";
               };
             };
+          };
 
           home.packages = [
             caveman
           ]
           ++ pdfPackages
-          ++ lib.optionals isWork (
+          ++ lib.optionals hasHightouch (
             with pkgs;
             [
               typescript-language-server

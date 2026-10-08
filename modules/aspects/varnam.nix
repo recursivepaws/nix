@@ -1,4 +1,4 @@
-{ ... }:
+{ den, ... }:
 
 let
   mkVarnamPackages = pkgs: rec {
@@ -145,7 +145,7 @@ in
       };
 
     homeManager =
-      { ... }:
+      { lib, user, ... }:
       {
         # NOTE: first-time vocabulary import
         # Varnam transliterates without imported words, but word suggestions
@@ -154,6 +154,12 @@ in
         #   cd $VARNAM_VST_DIR && ./import.sh
         #
         # Writes to ~/.local/share/varnam/learnings/sa.vst.learnings
+      }
+      // lib.optionalAttrs (user.hasAspect den.aspects.niri) {
+        programs.niri.settings.environment = {
+          QT_IM_MODULE = "fcitx"; # Qt5 apps
+          XMODIFIERS = "@im=fcitx"; # XWayland apps (and GTK3/4 via text-input-v3)
+        };
       };
   };
 }

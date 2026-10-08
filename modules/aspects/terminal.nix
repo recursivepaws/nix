@@ -1,8 +1,19 @@
+{ den, ... }:
 {
   den.aspects.terminal = {
     homeManager =
-      { pkgs, ... }:
       {
+        pkgs,
+        lib,
+        config,
+        user,
+        ...
+      }:
+      {
+        imports = lib.optional (user.hasAspect den.aspects.niri) {
+          programs.niri.settings.binds."Mod+Q".action = config.lib.niri.actions.spawn "kitty";
+        };
+
         # home.sessionVariables = { KITTY_SHELL_INTEGRATION = "enabled"; };
         programs.kitty = {
           enable = true;

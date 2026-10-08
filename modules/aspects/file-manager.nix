@@ -1,5 +1,17 @@
+{ den, ... }:
 {
   den.aspects.file-manager = {
+    homeManager =
+      {
+        lib,
+        config,
+        user,
+        ...
+      }:
+      lib.optionalAttrs (user.hasAspect den.aspects.niri) {
+        programs.niri.settings.binds."Mod+E".action = config.lib.niri.actions.spawn "nautilus";
+      };
+
     nixos =
       { pkgs, lib, ... }:
       let

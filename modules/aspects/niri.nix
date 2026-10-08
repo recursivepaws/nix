@@ -56,14 +56,7 @@
       };
 
     homeManager =
-      {
-        pkgs,
-        config,
-        lib,
-        host,
-        user,
-        ...
-      }:
+      { pkgs, config, ... }:
       {
         home.packages = with pkgs; [
           playerctl
@@ -77,12 +70,7 @@
           niri = {
             settings = {
               prefer-no-csd = true;
-              outputs = lib.mkIf (host.name == "ampulex") {
-                "eDP-1".scale = 1.5;
-              };
               environment = {
-                QT_IM_MODULE = "fcitx"; # Qt5 apps
-                XMODIFIERS = "@im=fcitx"; # XWayland apps (and GTK3/4 via text-input-v3)
                 QT_QPA_PLATFORMTHEME = "gtk3";
                 QT_QPA_PLATFORMTHEME_QT6 = "gtk3";
                 QT_QPA_PLATFORM = "wayland";
@@ -97,13 +85,6 @@
                     "bash"
                     "-c"
                     "1password --silent"
-                  ];
-                }
-                {
-                  command = [
-                    "bash"
-                    "-c"
-                    "noctalia -d"
                   ];
                 }
               ];
@@ -132,8 +113,6 @@
                 };
               };
               layout = {
-                # work runs no wallpaper; noctalia.nix disables it
-                background-color = lib.mkIf (user.userName == "work") "#000000";
                 empty-workspace-above-first = true;
 
                 border = {
@@ -181,23 +160,9 @@
                   proportion = 0.5;
                 };
               };
-              layer-rules = [
-                {
-                  matches = [ { namespace = "^noctalia-notification$"; } ];
-                  block-out-from = "screencast";
-                }
-              ];
               window-rules = [
                 {
-                  matches = [
-                    { app-id = "^org\\.telegram\\.desktop$"; }
-                    { app-id = "^com\\.ktechpit\\.whatsie$"; }
-                    { app-id = "^discord$"; }
-                    { app-id = "^vesktop$"; }
-                    { app-id = "^vencord$"; }
-                    { app-id = "^signal$"; }
-                    { app-id = "^1password$"; }
-                  ];
+                  matches = [ { app-id = "^1password$"; } ];
                   block-out-from = "screencast";
                 }
                 {
@@ -206,20 +171,6 @@
                     { app-id = "^xdg-desktop-portal-gtk"; }
                   ];
                   open-floating = true;
-                }
-                {
-                  matches = [
-                    { app-id = "^ibus-ui-gtk3$"; }
-                    { app-id = "^ibus-ui-gtk4$"; }
-                  ];
-                  open-floating = true;
-                  open-focused = false;
-                }
-                {
-                  matches = [
-                    { app-id = "^ibus-setup$"; }
-                  ];
-                  open-floating = false;
                 }
                 {
                   geometry-corner-radius = {
@@ -233,30 +184,20 @@
               ];
               debug = {
                 honor-xdg-activation-with-invalid-serial = [ ];
-
-                # TODO: disable this when not docked to the external monitor to save battery.
-                render-drm-device = lib.mkIf (host.name == "amanita") "/dev/dri/by-path/pci-0000:01:00.0-render";
               };
 
               binds =
                 with config.lib.niri.actions;
                 let
                   sh = spawn "sh" "-c";
-                  ns = x: sh ("noctalia msg " + x);
                 in
                 {
                   "Mod+Shift+slash".action = show-hotkey-overlay;
 
-                  "Mod+Q".action = spawn "kitty";
-                  "Mod+P".action = ns "panel-toggle session";
-                  "Mod+X".action = ns "panel-toggle launcher";
                   "Mod+Shift+X".action = quit;
                   "Mod+F".action = maximize-column;
                   "Mod+Shift+F".action = fullscreen-window;
                   "Mod+C".action = close-window;
-                  "Mod+E".action = spawn "nautilus";
-                  "Mod+Ctrl+S".action = ns "screenshot-region";
-                  "Print".action = ns "screenshot-annotate";
                   "Mod+S".action = toggle-column-tabbed-display;
 
                   "Mod+V".action = center-column;
@@ -336,42 +277,6 @@
                   };
                   "XF86AudioPrev" = {
                     action = sh "playerctl previous";
-                    allow-when-locked = true;
-                  };
-                  "XF86AudioRaiseVolume" = {
-                    action = ns "volume-up";
-                    allow-when-locked = true;
-                  };
-                  "XF86AudioLowerVolume" = {
-                    action = ns "volume-down";
-                    allow-when-locked = true;
-                  };
-                  "XF86AudioMute" = {
-                    action = ns "volume-mute";
-                    allow-when-locked = true;
-                  };
-                  "XF86AudioMicMute" = {
-                    action = ns "mic-mute";
-                    allow-when-locked = true;
-                  };
-                  "XF86MonBrightnessUp" = {
-                    action = ns "brightness-up";
-                    allow-when-locked = true;
-                  };
-                  "XF86MonBrightnessDown" = {
-                    action = ns "brightness-down";
-                    allow-when-locked = true;
-                  };
-                  "XF86KbdBrightnessUp" = {
-                    action = ns "keyboard-backlight-up";
-                    allow-when-locked = true;
-                  };
-                  "XF86KbdBrightnessDown" = {
-                    action = ns "keyboard-backlight-down";
-                    allow-when-locked = true;
-                  };
-                  "XF86KbdLightOnOff" = {
-                    action = ns "keyboard-backlight-toggle";
                     allow-when-locked = true;
                   };
                   "XF86Display".action = power-off-monitors;

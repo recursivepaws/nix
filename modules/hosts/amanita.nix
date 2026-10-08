@@ -35,6 +35,8 @@
         programs.chromium.enable = true;
 
         services = {
+          upower.enable = true;
+
           # Stop accidentally activating touchpad while i type
           udev.extraHwdb =
             let
@@ -56,6 +58,13 @@
         };
         # enabled in the niri flake aspect
         # security = { polkit.enable = true; };
+      };
+
+    provides.to-users.homeManager =
+      { lib, user, ... }:
+      lib.optionalAttrs (user.hasAspect den.aspects.niri) {
+        # TODO: disable this when not docked to the external monitor to save battery.
+        programs.niri.settings.debug.render-drm-device = "/dev/dri/by-path/pci-0000:01:00.0-render";
       };
   };
 }

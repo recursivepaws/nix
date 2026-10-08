@@ -9,7 +9,10 @@
   };
 
   den.aspects.davinci =
-    { user ? null, ... }:
+    {
+      user ? null,
+      ...
+    }:
     {
       homeManager =
         { pkgs, lib, ... }:

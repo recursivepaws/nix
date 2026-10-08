@@ -7,6 +7,7 @@
     ]
     ++ (with den.aspects; [
       hightouch
+      plain-background
     ]);
     homeManager =
       { pkgs, ... }:

@@ -27,6 +27,7 @@
         };
         programs.chromium.enable = true;
 
+        services.upower.enable = true;
         services.fwupd.enable = true;
         # enabled in niri flake aspect
         # security = { polkit.enable = true; };
@@ -53,5 +54,11 @@
     provides.to-users.includes = with den.aspects; [
       amd
     ];
+
+    provides.to-users.homeManager =
+      { lib, user, ... }:
+      lib.optionalAttrs (user.hasAspect den.aspects.niri) {
+        programs.niri.settings.outputs."eDP-1".scale = 1.5;
+      };
   };
 }
