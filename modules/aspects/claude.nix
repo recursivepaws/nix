@@ -52,11 +52,6 @@
       url = "github:cevatkerim/unsplash-mcp";
       flake = false;
     };
-    # DaVinci Resolve MCP server (plain server.py against Resolve's scripting API).
-    davinci-resolve-mcp = {
-      url = "github:samuelgursky/davinci-resolve-mcp";
-      flake = false;
-    };
   };
 
   den.aspects.claude =
@@ -86,7 +81,6 @@
           claudePluginsPkg =
             inputs.claude-plugins-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-plugins;
           isWork = user.userName == "work";
-          isVera = user.userName == "vera";
           plugins = [
             "@anthropics/claude-code-plugins/pr-review-toolkit"
             "@anthropics/claude-code-plugins/frontend-design"
@@ -126,7 +120,6 @@
               }
             } -C $out --strip-components=1
           '';
-          resolveMcpPython = pkgs.python3.withPackages (ps: [ ps.mcp ]);
           unsplashPython = pkgs.python3.withPackages (
             ps: with ps; [
               fastmcp
@@ -307,16 +300,6 @@
                 ];
                 env = {
                   HIGHTOUCH_API_KEY = "\${HIGHTOUCH_API_KEY}";
-                };
-              };
-            }
-            // lib.optionalAttrs isVera {
-              davinci-resolve = {
-                command = "${resolveMcpPython}/bin/python";
-                args = [ "${inputs.davinci-resolve-mcp}/src/server.py" ];
-                env = {
-                  RESOLVE_SCRIPT_API = "${pkgs.davinci-resolve-studio.davinci}/Developer/Scripting";
-                  RESOLVE_SCRIPT_LIB = "${pkgs.davinci-resolve-studio.davinci}/libs/Fusion/fusionscript.so";
                 };
               };
             }
