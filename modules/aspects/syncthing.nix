@@ -37,13 +37,6 @@
                 "ampulex"
               ];
             };
-            rekordbox = {
-              path = "~/.local/share/rbxport/rekordbox";
-              devices = [
-                "hericium"
-                "ampulex"
-              ];
-            };
             notes = {
               path = "~/Documents/notes";
               devices = [
