@@ -30,6 +30,9 @@
           };
       in
       {
+        xdg.configFile."rmpc/config.ron".source =
+          pkgs.runCommand "rmpc-config.ron" { } "${pkgs.rmpc}/bin/rmpc config > $out";
+
         home.packages = with pkgs; [
           rmpc
           nicotine-plus
