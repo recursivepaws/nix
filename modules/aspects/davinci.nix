@@ -15,7 +15,7 @@
     }:
     {
       homeManager =
-        { pkgs, lib, ... }:
+        { pkgs, lib, config, ... }:
         {
           # Resolve bundles Qt5 without a wayland platform plugin, so it dies
           # silently under the session-wide QT_QPA_PLATFORM=wayland set in niri.nix.
@@ -41,6 +41,12 @@
             env = {
               RESOLVE_SCRIPT_API = "${pkgs.davinci-resolve-studio.davinci}/Developer/Scripting";
               RESOLVE_SCRIPT_LIB = "${pkgs.davinci-resolve-studio.davinci}/libs/Fusion/fusionscript.so";
+              # server.py logs beside itself, which is the read-only store here.
+              # It dies at import without this.
+              RESOLVE_MCP_LOG_FILE = "${config.xdg.cacheHome}/davinci-resolve-mcp/server.log";
+              # fusionscript.so needs libs that exist only in Resolve's FHS sandbox.
+              # usr/lib there is an absolute symlink, so point at lib64 directly.
+              LD_LIBRARY_PATH = "${pkgs.davinci-resolve-studio.fhsenv}/usr/lib64";
             };
           };
         };
