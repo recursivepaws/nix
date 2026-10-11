@@ -211,6 +211,19 @@
             JAVA_HOME = "$HOME/.java-home";
             CPPFLAGS = "-I${pkgs.openjdk}/lib/openjdk/include";
             JAVA_TOOL_OPTIONS = "-Djavax.net.ssl.trustStore=$HOME/.java/cacerts";
+
+            # The one checkout that owns Tilt and docker-compose on this machine.
+            # Tilt is global per machine and pinned to whichever directory started
+            # it; the compose project name is that directory's basename, which is
+            # what caddy-trust-watcher above hardcodes as `hightouch-caddy-1`.
+            # Starting compose from a worktree silently renames the container and
+            # the watcher never fires. Keep this checkout on master; ticket work
+            # belongs in worktrees (see `ht-worktree` in worktrees.nix).
+            HIGHTOUCH_ROOT = "${config.home.homeDirectory}/Software/hightouch";
+            # Same value under the name the repo's own
+            # .cursor/copy-worktree-secrets.sh already requires, so that script
+            # works from any shell without a wrapper.
+            ROOT_WORKTREE_PATH = "${config.home.homeDirectory}/Software/hightouch";
           };
 
           activation.setupJavaCacerts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

@@ -6,11 +6,9 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Claude skills live in their own (private) repo; consumed as a plain source tree.
-    skills = {
-      url = "git+ssh://git@github.com/recursivepaws/skills";
-      flake = false;
-    };
+    # Note: our own skills (recursivepaws/skills) are deliberately NOT an input.
+    # They are linked live from the ~/Software/skills working copy that
+    # software-repos.nix clones — see home.activation.linkOwnSkills below.
     # Token-optimization skill for Claude Code (terse responses, byte-exact code).
     caveman = {
       url = "github:JuliusBrussee/caveman";
@@ -273,18 +271,10 @@
             ]
           );
 
-          # Symlink every skill from the recursivepaws/skills flake input into ~/.claude/skills.
-          # recursive = true links files individually, so installer-managed skills (e.g. pdf)
-          # still coexist here. Adding/editing a skill = push to that repo, then
-          # `nix flake update skills` and rebuild — no change needed in this file.
+          # Third-party skills are pinned flake inputs, linked per-skill below.
+          # Our own skills come from the ~/Software/skills working copy instead —
+          # see home.activation.linkOwnSkills.
           home.file = {
-            ".claude/skills" = {
-              source = inputs.skills;
-              recursive = true;
-            };
-
-            ".claude/skills/humanizer".source = inputs.humanizer;
-
             # Global user memory: loaded into every Claude Code session.
             ".claude/CLAUDE.md".text = ''
               Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
@@ -292,27 +282,49 @@
               When in /etc/nixos/, always load the nixos-managing skill.
             '';
           }
-          # Skill name = last path segment.
-          // lib.listToAttrs (
-            map
-              (
-                source:
-                lib.nameValuePair ".claude/skills/${baseNameOf (builtins.unsafeDiscardStringContext source)}" {
-                  inherit source;
-                }
-              )
-              [
-                "${inputs.caveman}/skills/caveman"
-                "${inputs.ponytail}/skills/ponytail"
-                "${inputs.nixos-management-skill}/nixos-managing"
-                "${inputs.apollo-skills}/skills/rust-best-practices"
-                "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api"
-                "${inputs.python-skills}/skills/python/project-setup"
-                "${inputs.python-skills}/skills/python/code-quality"
-                "${inputs.python-skills}/skills/python/testing-strategy"
-                "${inputs.python-skills}/skills/python/security-audit"
-              ]
-          );
+          # Attr name = skill name, as it appears under ~/.claude/skills.
+          // lib.mapAttrs' (
+            name: source: lib.nameValuePair ".claude/skills/${name}" { inherit source; }
+          ) {
+            caveman = "${inputs.caveman}/skills/caveman";
+            ponytail = "${inputs.ponytail}/skills/ponytail";
+            nixos-managing = "${inputs.nixos-management-skill}/nixos-managing";
+            rust-best-practices = "${inputs.apollo-skills}/skills/rust-best-practices";
+            # SKILL.md is at this repo's root rather than in a subdirectory.
+            humanizer = "${inputs.humanizer}";
+            reverse-engineering-api = "${inputs.reverse-api-engineer}/plugins/reverse-api-engineer/skills/reverse-engineering-api";
+            project-setup = "${inputs.python-skills}/skills/python/project-setup";
+            code-quality = "${inputs.python-skills}/skills/python/code-quality";
+            testing-strategy = "${inputs.python-skills}/skills/python/testing-strategy";
+            security-audit = "${inputs.python-skills}/skills/python/security-audit";
+          };
+
+          # Our own skills link straight from the ~/Software/skills working copy,
+          # so editing one takes effect in the next session — no commit, push,
+          # `nix flake update` or rebuild. The trade is that they are no longer
+          # pinned per-machine; the remaining pin is git itself, and the refresh
+          # on a secondary machine is `git -C ~/Software/skills pull`.
+          #
+          # Runs after software-repos clones the repo. The /nix/store guard means
+          # a name collision with a pinned third-party skill above (ponytail, say)
+          # leaves the pinned one alone rather than clobbering it every rebuild.
+          home.activation.linkOwnSkills = lib.hm.dag.entryAfter [ "cloneSoftwareRepos" ] ''
+            src="${config.home.homeDirectory}/Software/skills"
+            dst="${config.home.homeDirectory}/.claude/skills"
+            if [ -d "$src" ]; then
+              mkdir -p "$dst"
+              for d in "$src"/*/; do
+                [ -f "$d/SKILL.md" ] || continue
+                target="$dst/$(basename "$d")"
+                case "$(readlink "$target" 2>/dev/null)" in
+                  /nix/store/*) continue ;;
+                esac
+                run ln -sfn "$d" "$target"
+              done
+            else
+              warnEcho "linkOwnSkills: $src is missing; own skills not linked"
+            fi
+          '';
 
           # Upstream module doesn't add git to PATH during activation, so clone fails.
           # Override the activation script to fix this (pending upstream PR).

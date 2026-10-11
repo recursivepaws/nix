@@ -27,7 +27,7 @@ in
     claude
     gimp
     keyboard
-    # software-repos
+    software-repos
   ];
 
   # Allow unfree packages
