@@ -82,20 +82,27 @@
         # and creates master.db plus share/PIONEER/{Artwork,USBANLZ}. It has its
         # own beatgrid/key analysis engine, and is the only Linux-native writer
         # of the OneLibrary format the CDJ-3000X/XDJ-AZ/OPUS-QUAD generation
-        # requires. Prerelease: back up the library before trusting it.
+        # requires.
         #
-        # It hardcodes its library at ~/Library/Pioneer/rekordbox (a macOS path
-        # layout, on Linux). RBXPORT_OPTIONS can't move it — that points at an
-        # existing rekordbox install's options.json, whose `dp` key is base64
-        # SQLCipher key material, not a path. So redirect with a symlink below;
-        # rbxport follows it transparently.
+        # Its default library dir is still ~/Library/Pioneer/rekordbox on Linux
+        # (rbl-db default_library_dir: home_dir().join("Library")). Since 1.0 a
+        # `masterDbDirectory` in ~/.config/Pioneer/rekordbox6/rekordbox3.settings
+        # overrides it, but the app rewrites that file itself on a library
+        # switch, so it is not ours to manage declaratively — redirect with a
+        # symlink below instead; rbxport follows it transparently. (RBXPORT_OPTIONS
+        # can't move it either — that points at an existing rekordbox install's
+        # options.json, whose `dp` key is base64 SQLCipher key material.)
+        #
+        # Source is on GitHub (chrisle/rbxport, GPL-2.0-or-later) but this is the
+        # upstream .deb: the app is a Rust + pnpm/web build with a vendored
+        # rubberband, not worth packaging from source.
         rbxport = pkgs.stdenv.mkDerivation (finalAttrs: {
           pname = "rbxport";
-          version = "1.0.0-rc.13";
+          version = "1.6.0";
 
           src = pkgs.fetchurl {
             url = "https://download.rbxport.com/rbxport-${finalAttrs.version}-linux-x86_64.deb";
-            hash = "sha256-pPUYukKpBLbPWwtcokRjrTHc4jnFArMBwQh+YeptvRk=";
+            hash = "sha256-bfxKeBfQVBT6zVB5R/RI6zNoIx2z607QnAPSsqLSuIQ=";
           };
 
           nativeBuildInputs = with pkgs; [
@@ -142,7 +149,7 @@
           meta = {
             description = "Fast rekordbox library manager and USB/OneLibrary exporter";
             homepage = "https://rbxport.com/";
-            license = lib.licenses.unfree;
+            license = lib.licenses.gpl2Plus;
             sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
             platforms = [ "x86_64-linux" ];
             mainProgram = "rbxport";
