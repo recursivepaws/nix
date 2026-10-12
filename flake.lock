@@ -378,6 +378,22 @@
         "type": "github"
       }
     },
+    "monarch-mcp-server": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791784703,
+        "narHash": "sha256-pxjsF5Qs4KFRx41IbPTbY3sW9e3MXEfWoNFimOMITIw=",
+        "owner": "robcerda",
+        "repo": "monarch-mcp-server",
+        "rev": "994d1a124e68b3f3522a4f7945c5828ffb16d081",
+        "type": "github"
+      },
+      "original": {
+        "owner": "robcerda",
+        "repo": "monarch-mcp-server",
+        "type": "github"
+      }
+    },
     "niri-flake": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -775,6 +791,7 @@
         "humanizer": "humanizer",
         "import-tree": "import-tree",
         "mcp-servers-nix": "mcp-servers-nix",
+        "monarch-mcp-server": "monarch-mcp-server",
         "niri-flake": "niri-flake",
         "nix-flatpak": "nix-flatpak",
         "nix-photogimp": "nix-photogimp",
@@ -789,25 +806,8 @@
         "ponytail": "ponytail",
         "python-skills": "python-skills",
         "reverse-api-engineer": "reverse-api-engineer",
-        "skills": "skills",
         "spicetify-nix": "spicetify-nix",
         "unsplash-mcp": "unsplash-mcp"
-      }
-    },
-    "skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791390620,
-        "narHash": "sha256-CRQpIKvQdeR9Wp+pyXYeWCCswdaurVWsmZVdyouXfH0=",
-        "ref": "refs/heads/main",
-        "rev": "5b9a0959f18547939be8896793f5a2553c8f5365",
-        "revCount": 25,
-        "type": "git",
-        "url": "ssh://git@github.com/recursivepaws/skills"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/recursivepaws/skills"
       }
     },
     "spicetify-nix": {
