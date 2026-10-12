@@ -1,6 +1,14 @@
 { ... }:
 {
   den.aspects.syncthing = {
+    # Syncthing litters every synced folder with these.
+    homeManager = _: {
+      programs.git.ignores = [
+        ".stfolder/"
+        ".stignore"
+      ];
+    };
+
     nixos =
       {
         lib,
