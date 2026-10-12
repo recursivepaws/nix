@@ -188,36 +188,59 @@ in
             export WINEPREFIX="''${WINEPREFIX:-${defaultPrefix}}"
             export WINEARCH=win64
 
-            # NATIVE WAYLAND, NOT X11 — this replaced a Wine virtual desktop.
+            # VIRTUAL DESKTOP ON X11 BY DEFAULT — and the driver choice is not
+            # free: a Wine virtual desktop only exists under winex11.drv.
             #
-            # Under X11 (winex11.drv through an XWayland satellite) rekordbox was
-            # unusable on niri for two reasons that turned out to be one:
+            # Measured 2026-10-12 on winewayland.drv: `explorer /desktop=` does
+            # create the desktop window ("rbtest - Wine Desktop" in a +win
+            # trace), then
             #
-            #  - JUCE 8 surrounds every popup with four 14px drop-shadow windows
-            #    and tears the popup down if anything repositions one. Upstream's
-            #    patch 0005 stops Wine handing tool/layered popups to the WM,
-            #    which is enough for KWin but not for a *tiling* compositor,
-            #    which repositions everything it manages by definition. The login
-            #    window appeared and vanished instantly.
-            #  - eDP-1 is 2880x1920 at scale 1.5, and an X client through the
-            #    satellite never participates in compositor scaling, so the UI
-            #    rendered 1:1 and came out unreadably small. LogPixels did not
-            #    help: the X path never consults the compositor scale at all.
+            #   err:system:NtUserChangeDisplaySettings Changing (null) display
+            #     settings returned -2.
+            #   err:explorer:initialize_display_settings Failed to set primary
+            #     display settings.
             #
-            # winewayland.drv fixes both structurally rather than by policy. JUCE
-            # popups become xdg_popup surfaces placed via xdg_positioner, and a
-            # Wayland compositor cannot relocate a popup behind the client's
-            # back — so the teardown trigger does not exist, on any compositor.
-            # And Wine reads wp_fractional_scale_v1, so 1.5 becomes 150% DPI
-            # without us setting anything.
+            # and no toplevel ever reaches the compositor — nothing maps. So
+            # desktop mode implies X11, through the session's xwayland-satellite.
             #
-            # DISPLAY is cleared, not just ignored: the session does run an
-            # xwayland-satellite on :0, and leaving DISPLAY set lets Wine fall
-            # back to X11 silently, which looks like "Wayland didn't help".
-            unset DISPLAY
-            if [ -z "''${WAYLAND_DISPLAY:-}" ]; then
-              echo "no WAYLAND_DISPLAY — this needs to run inside the Wayland session" >&2
-              exit 1
+            # What the two modes trade:
+            #
+            #  - X11 + /desktop: every Wine window lives inside ONE X window, so
+            #    niri manages exactly that window and Wine handles popups
+            #    internally where no compositor can touch them. This is what
+            #    makes JUCE 8 behave — it wraps every popup in four 14px
+            #    drop-shadow windows and tears the popup down if anything
+            #    repositions one, which a tiling compositor does by definition.
+            #    Cost: an X client through the satellite does not participate in
+            #    compositor scaling, so on a 2880x1920 scale-1.5 output the UI
+            #    renders 1:1 and comes out small. RB_DESKTOP only changes how
+            #    much of the app you see, not how big its widgets are; the knob
+            #    for that is the X server's Xft.dpi (winex11 reads it and
+            #    overwrites LogPixels with it — which is why LogPixels alone was
+            #    measured to do nothing here), set with `xrdb -merge`.
+            #  - Native Wayland (RB_DESKTOP=off): popups become real xdg_popups
+            #    a compositor cannot relocate behind the client's back, and Wine
+            #    reads wp_fractional_scale_v1 so 1.5 becomes 150% DPI for free.
+            #    Cost: every Wine window is a separate toplevel for niri to
+            #    float, which is the arrangement this swapped away from.
+            #
+            # DISPLAY is cleared in the off path, not just ignored: the session
+            # runs an xwayland-satellite on :0, and leaving DISPLAY set lets Wine
+            # fall back to X11 silently, which looks like "Wayland didn't help".
+            if [ "''${RB_DESKTOP:-}" = "off" ]; then
+              unset DISPLAY
+              if [ -z "''${WAYLAND_DISPLAY:-}" ]; then
+                echo "no WAYLAND_DISPLAY — this needs to run inside the Wayland session" >&2
+                exit 1
+              fi
+              driver=wayland
+            else
+              if [ -z "''${DISPLAY:-}" ]; then
+                echo "no DISPLAY — the virtual desktop needs xwayland-satellite" >&2
+                echo "  (or run with RB_DESKTOP=off for native Wayland windows)" >&2
+                exit 1
+              fi
+              driver=x11
             fi
 
             if [ ! -d "$WINEPREFIX" ]; then
@@ -234,9 +257,11 @@ in
             wine reg add 'HKCU\Software\Wine\Drivers' /v Audio /t REG_SZ /d alsa /f
 
             # explorer.exe reads this key to pick the graphics driver. Set it
-            # explicitly rather than relying on DISPLAY being unset, so the
-            # choice is recorded in the prefix and visible in winecfg.
-            wine reg add 'HKCU\Software\Wine\Drivers' /v Graphics /t REG_SZ /d wayland /f
+            # explicitly rather than relying on DISPLAY being set or not, so the
+            # choice is recorded in the prefix and visible in winecfg. It follows
+            # the mode picked above, or a prefix left on wayland would quietly
+            # drop the virtual desktop.
+            wine reg add 'HKCU\Software\Wine\Drivers' /v Graphics /t REG_SZ /d "$driver" /f
 
             # DO NOT set HKCU\Software\Wine\Explorer\ShowSystray to 0 to get rid
             # of the 111x35 tray sliver. It looks like the obvious fix and it
@@ -253,7 +278,9 @@ in
 
             # No DPI knob here, deliberately. LogPixels does nothing under this
             # Wine: it is written, and Wine resets it to 0x60 (96) before the
-            # app reads it, every launch. The trace says why —
+            # app reads it, every launch (under x11 that reset is winex11
+            # applying Xft.dpi, which is why Xft.dpi is the knob that bites and
+            # LogPixels is not). The trace says why —
             # "create_window_handle DPI context 0x22 not implemented" and
             # "EnableNonClientDpiScaling (...): stub" — per-monitor DPI is not
             # implemented in 11.16, so nothing is wired to the value.
@@ -317,10 +344,15 @@ in
               mv -- "$upmgr" "$upmgr.disabled"
             fi
 
-            # Native windows. No `wine explorer /desktop=` wrapper: see the
-            # driver comment at the top for why that existed and what replaced
-            # it. Check with `rekordbox-probe` if popups start vanishing again.
-            wine "$app" "$@"
+            # One X window holding every Wine window, per the driver comment at
+            # the top. Size it with RB_DESKTOP=WIDTHxHEIGHT, or RB_DESKTOP=off
+            # for native Wayland toplevels. Either way `rekordbox-probe` is how
+            # to tell whether the windows actually stayed on screen.
+            if [ "''${RB_DESKTOP:-}" = "off" ]; then
+              wine "$app" "$@"
+            else
+              wine explorer "/desktop=rekordbox,''${RB_DESKTOP:-2560x1400}" "$app" "$@"
+            fi
           '';
         };
 
@@ -434,13 +466,14 @@ in
             "AudioVideo"
             "Audio"
           ];
-          # Measured with rekordbox-probe, not guessed: winewayland derives the
-          # app-id from the process name, so the main window comes up as
-          # "rekordbox.exe" (dialogs use "upmgr rekordbox.exe", and Wine's own
-          # systray sliver is "explorer.exe"). Under the old virtual desktop
-          # this was explorer.exe, and the installer's entry said "rekordbox" —
-          # neither matched. Also the app-id for any niri window rule.
-          settings.StartupWMClass = "rekordbox.exe";
+          # The virtual desktop is explorer.exe's window, not rekordbox's, so
+          # that is the app-id the compositor sees — titled "rekordbox - Wine
+          # Desktop". (Running RB_DESKTOP=off instead gives per-window
+          # toplevels, where winewayland derives the app-id from the process
+          # name: "rekordbox.exe", plus "upmgr rekordbox.exe" for dialogs. Both
+          # measured with rekordbox-probe.) The installer's own entry says
+          # "rekordbox", which matches neither.
+          settings.StartupWMClass = "explorer.exe";
         };
 
         # Everything winemenubuilder generates for rekordbox is unwanted: its
