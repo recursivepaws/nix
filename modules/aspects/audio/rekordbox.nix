@@ -115,6 +115,34 @@ in
               KERNEL=="hidraw*", ATTRS{idVendor}=="2b73", MODE="0660", GROUP="audio", TAG+="uaccess"
             '';
           })
+
+          # Wine's mountmgr names a volume's filesystem by reading the boot
+          # sector off the raw device node, not from the mount. The node is
+          # root:disk 0660 and we are not in `disk`, so the open fails
+          #
+          #   get_volume_device_info Failed to open /dev/sda1, err 5
+          #
+          # and mountmgr falls back to reporting NTFS. rekordbox then refuses
+          # the stick with "formatted with an unsupported file system", listing
+          # the FAT/HFS+/exFAT set — on a drive that is already FAT32. The
+          # mounted path stays browsable throughout (udisks2 mounts it
+          # uid=1000), so only the format probe is affected, which is what makes
+          # this look like a formatting problem rather than a permissions one.
+          #
+          # This is the other half of patch 0006: that patch fixed the drive
+          # being reported DRIVE_FIXED, and its header records this filesystem
+          # misreport as the packaging matter it deliberately left alone.
+          #
+          # Scoped to ID_BUS=usb rather than adding the user to `disk`: `disk`
+          # would also hand over the raw LUKS container on the internal NVMe.
+          # Same 60- prefix constraint as above.
+          (pkgs.writeTextFile {
+            name = "usb-block-uaccess-udev-rules";
+            destination = "/lib/udev/rules.d/60-usb-block-uaccess.rules";
+            text = ''
+              SUBSYSTEM=="block", ENV{ID_BUS}=="usb", TAG+="uaccess"
+            '';
+          })
         ];
       };
 
