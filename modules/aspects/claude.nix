@@ -313,12 +313,22 @@
             dst="${config.home.homeDirectory}/.claude/skills"
             if [ -d "$src" ]; then
               mkdir -p "$dst"
+              # Drop links to skills that have left the working copy.
+              # Only $src-pointing links qualify, so pinned store links survive.
+              for l in "$dst"/*; do
+                case "$(readlink "$l" 2>/dev/null)" in
+                  "$src"/*) [ -e "$l/SKILL.md" ] || run rm -f "$l" ;;
+                esac
+              done
               for d in "$src"/*/; do
                 [ -f "$d/SKILL.md" ] || continue
                 target="$dst/$(basename "$d")"
                 case "$(readlink "$target" 2>/dev/null)" in
                   /nix/store/*) continue ;;
                 esac
+                # ln -sfn follows a real directory and links inside it.
+                # -n only guards symlinks-to-directories.
+                [ -L "$target" ] || run rm -rf "$target"
                 run ln -sfn "$d" "$target"
               done
             else
