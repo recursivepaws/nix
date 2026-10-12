@@ -4,7 +4,7 @@
     homeManager =
       { pkgs, config, ... }:
       let
-        # Same node/pnpm pin as hightouch.nix — the version in pnpm-workspace.yaml.
+        # Same node/pnpm pin as hightouch.nix - the version in pnpm-workspace.yaml.
         nodePkgs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system};
         nodejs = nodePkgs.nodejs_24;
         pnpm = nodePkgs.pnpm.override { nodejs-slim = nodePkgs.nodejs-slim_24; };
@@ -18,7 +18,7 @@
         # .envrc, node_modules and the .env* secrets are all gitignored, so a fresh
         # worktree has none of them and a missing one fails later in a way that
         # looks like a code bug. Hence all five steps, and hence re-running on an
-        # existing worktree re-hydrates rather than erroring — this doubles as the
+        # existing worktree re-hydrates rather than erroring - this doubles as the
         # "fix my worktree" command.
         htWorktree = pkgs.writeShellApplication {
           name = "ht-worktree";
@@ -77,7 +77,7 @@
             else
               # Fallback: decrypt in place. Use the dotenvx that pnpm install just
               # put in node_modules (1.14.1, matching the repo's mise.toml pin)
-              # rather than anything on the ambient PATH — bin/secrets resolves it
+              # rather than anything on the ambient PATH - bin/secrets resolves it
               # by `shutil.which`, and a major version mismatch against committed
               # ciphertext is not worth risking.
               (cd "$dir" \

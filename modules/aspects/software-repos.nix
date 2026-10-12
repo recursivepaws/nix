@@ -49,7 +49,7 @@
       {
         # Bootstrap only: existing directories are never touched, so working copies stay untouched.
         # Clones fail soft with a warning so a fresh machine without ssh keys still activates.
-        # `tickets` is not a repo — it is the per-ticket memory root the Claude
+        # `tickets` is not a repo - it is the per-ticket memory root the Claude
         # skills write to, and claude.nix already ships a managed-settings
         # permission for //home/*/Software/tickets/** that assumes it exists.
         home.activation.cloneSoftwareRepos = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

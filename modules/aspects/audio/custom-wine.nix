@@ -44,7 +44,7 @@ let
         postInstall = (oldAttrs.postInstall or "") + ''
           echo "Re-indexing Wine archives..."
 
-          # ELF archives — only x86_64-unix exists in Wine 11 wow64 mode
+          # ELF archives - only x86_64-unix exists in Wine 11 wow64 mode
           for dir in x86_64-unix i386-unix; do
             full="$out/lib/wine/$dir"
             [ -d "$full" ] || continue
@@ -52,7 +52,7 @@ let
               | xargs -0 -r ${prev.binutils}/bin/ranlib
           done
 
-          # PE import libraries — winebuild --lib re-indexes in-place
+          # PE import libraries - winebuild --lib re-indexes in-place
           for arch in i386-windows x86_64-windows; do
             dir="$out/lib/wine/$arch"
             [ -d "$dir" ] || continue

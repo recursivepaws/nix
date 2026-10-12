@@ -3,8 +3,7 @@
     nixos =
       { pkgs, ... }:
       let
-        # Analog and Intel HDMI audio share one ALSA card.
-        # Only one output profile is active at a time.
+        # Analog and Intel HDMI share one ALSA card, one active profile at a time.
         # Force HDMI when a display is connected.
         monitor-audio-switch = pkgs.writeShellScript "monitor-audio-switch" ''
           set -u

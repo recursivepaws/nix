@@ -10,8 +10,8 @@ let
   patchDir = ./patches/rekordbox;
 
   # Each patched component carries a marker string. A component that silently
-  # built unpatched loads fine and simply behaves as though stock — the failure
-  # mode upstream says it has paid for repeatedly — so assert on them.
+  # built unpatched loads fine and simply behaves as though stock - the failure
+  # mode upstream says it has paid for repeatedly - so assert on them.
   markers = {
     "x86_64-windows/dxgi.dll" = "RBW-PATCH";
     "x86_64-windows/mmdevapi.dll" = "RBW-MMDEV";
@@ -95,7 +95,7 @@ in
         boot.kernelModules = [ "ntsync" ];
 
         # rekordbox finds a controller through the Windows HID stack, which Wine
-        # backs with /dev/hidraw* — root-only by default, so under Wine the
+        # backs with /dev/hidraw* - root-only by default, so under Wine the
         # controller is invisible and its MIDI port never opens. Vendor-wide
         # (2b73), so this covers the FLX4 as well as the DDJ-400.
         #
@@ -103,7 +103,7 @@ in
         # 73-seat-late.rules, so a rule numbered above 73 tags too late and no
         # ACL is ever granted. Upstream hit this exact bug writing it as 99-.
         #
-        # So this CANNOT use services.udev.extraRules — that option hardcodes
+        # So this CANNOT use services.udev.extraRules - that option hardcodes
         # destination = /etc/udev/rules.d/99-local.rules, which is the broken
         # case. Ship a correctly-named rules file as a package instead, the same
         # way dj.nix pulls in Mixxx's own rules.
@@ -124,7 +124,7 @@ in
           #
           # and mountmgr falls back to reporting NTFS. rekordbox then refuses
           # the stick with "formatted with an unsupported file system", listing
-          # the FAT/HFS+/exFAT set — on a drive that is already FAT32. The
+          # the FAT/HFS+/exFAT set - on a drive that is already FAT32. The
           # mounted path stays browsable throughout (udisks2 mounts it
           # uid=1000), so only the format probe is affected, which is what makes
           # this look like a formatting problem rather than a permissions one.
@@ -161,12 +161,12 @@ in
         # cannot drift onto different prefixes.
         defaultPrefix = "$HOME/.local/share/rekordbox-wine";
 
-        # PINNED TO 7.2.18 DELIBERATELY — do not "update" this to the current
+        # PINNED TO 7.2.18 DELIBERATELY - do not "update" this to the current
         # release without re-testing. Measured here 2026-10-05:
         #
         #   7.2.19 crashes before showing a window, every time, identically on
         #   two machines (integrated RDNA 3.5 and discrete Navi 24) AND on stock
-        #   unpatched wine-staging 11.14 as well as our patched 11.16 — so it is
+        #   unpatched wine-staging 11.14 as well as our patched 11.16 - so it is
         #   rekordbox-vs-Wine, not our patches. EXCEPTION_ACCESS_VIOLATION
         #   reading 0x0 at rekordbox.exe+0x2aae1a3: a factory call leaves an
         #   out-param NULL and the caller makes a virtual call through it
@@ -178,7 +178,7 @@ in
         #   zip's exact content-length, 659280808).
         #
         # Old releases stay fetchable, but each needs its own opaque stamp
-        # directory which rekordbox.com no longer advertises — the download page
+        # directory which rekordbox.com no longer advertises - the download page
         # only ever lists the current release. These stamps come from
         # SpecterShell/Dumplings, a winget bot that logs every release URL.
         #
@@ -188,7 +188,7 @@ in
         # Only the INPUT is pinned here. The install stays imperative on purpose:
         # rekordbox updates itself from inside the prefix, its NSIS installer
         # writes registry keys (not just files) into system.reg/user.reg, and it
-        # writes into its own install dir at runtime — none of which survives
+        # writes into its own install dir at runtime - none of which survives
         # being pinned read-only in the store.
         rekordboxVersion = "7.2.18";
         rekordboxInstaller = pkgs.fetchzip {
@@ -203,7 +203,7 @@ in
         #
         # Upstream's launcher forces WINEDLLOVERRIDES=dxgi=n and copies a
         # patched dxgi.dll into the prefix. That is an Arch workaround for
-        # overlaying onto an unpatched system Wine — our builtin dxgi is already
+        # overlaying onto an unpatched system Wine - our builtin dxgi is already
         # patched, so the builtin is what we want.
         rekordbox = pkgs.writeShellApplication {
           name = "rekordbox";
@@ -216,7 +216,7 @@ in
             export WINEPREFIX="''${WINEPREFIX:-${defaultPrefix}}"
             export WINEARCH=win64
 
-            # VIRTUAL DESKTOP ON X11 BY DEFAULT — and the driver choice is not
+            # VIRTUAL DESKTOP ON X11 BY DEFAULT - and the driver choice is not
             # free: a Wine virtual desktop only exists under winex11.drv.
             #
             # Measured 2026-10-12 on winewayland.drv: `explorer /desktop=` does
@@ -228,7 +228,7 @@ in
             #   err:explorer:initialize_display_settings Failed to set primary
             #     display settings.
             #
-            # and no toplevel ever reaches the compositor — nothing maps. So
+            # and no toplevel ever reaches the compositor - nothing maps. So
             # desktop mode implies X11, through the session's xwayland-satellite.
             #
             # What the two modes trade:
@@ -236,7 +236,7 @@ in
             #  - X11 + /desktop: every Wine window lives inside ONE X window, so
             #    niri manages exactly that window and Wine handles popups
             #    internally where no compositor can touch them. This is what
-            #    makes JUCE 8 behave — it wraps every popup in four 14px
+            #    makes JUCE 8 behave - it wraps every popup in four 14px
             #    drop-shadow windows and tears the popup down if anything
             #    repositions one, which a tiling compositor does by definition.
             #    Cost: an X client through the satellite does not participate in
@@ -244,7 +244,7 @@ in
             #    renders 1:1 and comes out small. RB_DESKTOP only changes how
             #    much of the app you see, not how big its widgets are; the knob
             #    for that is the X server's Xft.dpi (winex11 reads it and
-            #    overwrites LogPixels with it — which is why LogPixels alone was
+            #    overwrites LogPixels with it - which is why LogPixels alone was
             #    measured to do nothing here), set with `xrdb -merge`.
             #  - Native Wayland (RB_DESKTOP=off): popups become real xdg_popups
             #    a compositor cannot relocate behind the client's back, and Wine
@@ -302,15 +302,15 @@ in
             #
             # Bisected here 2026-10-07: identical runs start fine with
             # ShowSystray=1 and hang with 0. The tray is hidden compositor-side
-            # instead — see the explorer.exe window-rule in niri.nix.
+            # instead - see the explorer.exe window-rule in niri.nix.
 
             # No DPI knob here, deliberately. LogPixels does nothing under this
             # Wine: it is written, and Wine resets it to 0x60 (96) before the
             # app reads it, every launch (under x11 that reset is winex11
             # applying Xft.dpi, which is why Xft.dpi is the knob that bites and
-            # LogPixels is not). The trace says why —
+            # LogPixels is not). The trace says why:
             # "create_window_handle DPI context 0x22 not implemented" and
-            # "EnableNonClientDpiScaling (...): stub" — per-monitor DPI is not
+            # "EnableNonClientDpiScaling (...): stub" - per-monitor DPI is not
             # implemented in 11.16, so nothing is wired to the value.
             # wp_fractional_scale_v1 is negotiated but only sets buffer scale,
             # which sharpens rendering without changing layout size. Tried on
@@ -336,7 +336,7 @@ in
             # Prefer the PINNED version, not the newest. Upstream's launcher
             # takes the newest deliberately, but that is wrong here: 7.2.19
             # crashes before showing a window, and rekordbox updates itself from
-            # inside the prefix — so "newest" can silently become a broken
+            # inside the prefix - so "newest" can silently become a broken
             # build that was never chosen.
             app="$WINEPREFIX/drive_c/Program Files/rekordbox/rekordbox ${rekordboxVersion}/rekordbox.exe"
             if [ ! -f "$app" ]; then
@@ -353,7 +353,7 @@ in
 
             # rekordbox ships its own updater as a separate program and starts it
             # alongside itself. The "update packages were found" dialog is that
-            # program's window, not rekordbox's — it shows up in the compositor
+            # program's window, not rekordbox's - it shows up in the compositor
             # under its own app-id, "upmgr rekordbox.exe".
             #
             # It offers 7.2.19, which is exactly the build pinned away from above
@@ -388,7 +388,7 @@ in
         # as plain `wine`: home-manager's profile (~/.nix-profile/bin, PATH
         # position 8) precedes /run/current-system/sw/bin (position 13), so it
         # would shadow the wine-staging that windows-vst.nix installs for
-        # yabridge — and yabridge is version-sensitive enough that
+        # yabridge - and yabridge is version-sensitive enough that
         # custom-wine.nix keeps a 9.21 fallback for it. Regressing a working VST
         # setup for an unproven one is a bad trade.
         #
@@ -405,8 +405,8 @@ in
         };
 
         # Did the windows actually stay on screen? The failure this config keeps
-        # running into is silent and fast — a window maps and is gone again in
-        # milliseconds — so "it looked fine" is not evidence. This launches
+        # running into is silent and fast - a window maps and is gone again in
+        # milliseconds - so "it looked fine" is not evidence. This launches
         # rekordbox, records niri's event stream and a Wine +win trace, and
         # exits non-zero unless a rekordbox toplevel survived 8 seconds.
         rekordbox-probe = pkgs.writeShellApplication {
@@ -476,14 +476,14 @@ in
 
         # The installer's own menu entry does not work, and cannot: NSIS has
         # winemenubuilder write `wine <the .lnk>`, so it gets the wine-staging on
-        # /run/current-system/sw/bin (unpatched — see the overlay comment)
+        # /run/current-system/sw/bin (unpatched - see the overlay comment)
         # instead of our patched build, and none of the prefix setup the launcher
         # above does. Hence an absolute store path: PATH order from a desktop
         # launcher is not ours to assume.
         #
         # Icon is the one winemenubuilder extracted into ~/.local/share/icons.
-        # Its prefix is derived from the install path, not random — 7.2.18 is
-        # always EA77 (7.2.19 was 26A7) — so pinning the version pins the icon.
+        # Its prefix is derived from the install path, not random - 7.2.18 is
+        # always EA77 (7.2.19 was 26A7) - so pinning the version pins the icon.
         xdg.enable = true;
         xdg.desktopEntries.rekordbox = {
           name = "rekordbox";
@@ -495,7 +495,7 @@ in
             "Audio"
           ];
           # The virtual desktop is explorer.exe's window, not rekordbox's, so
-          # that is the app-id the compositor sees — titled "rekordbox - Wine
+          # that is the app-id the compositor sees - titled "rekordbox - Wine
           # Desktop". (Running RB_DESKTOP=off instead gives per-window
           # toplevels, where winewayland derives the app-id from the process
           # name: "rekordbox.exe", plus "upmgr rekordbox.exe" for dialogs. Both
@@ -512,7 +512,7 @@ in
         # Deliberately scoped to this one subtree, not all of wine/Programs:
         # Pioneer/FwUpdateManager lives beside it and is the DDJ firmware
         # updater, which is worth keeping. Icons live under ~/.local/share/icons
-        # and are untouched — the entry above points at one.
+        # and are untouched - the entry above points at one.
         #
         # The uninstaller itself is unaffected, it is a .exe in the prefix:
         #   rekordbox-wine "C:/Program Files/rekordbox/rekordbox <ver>/Uninstall rekordbox.exe"
@@ -525,7 +525,7 @@ in
             # Wine's systray, a 111x35 window with no title. Tiled rather
             # than floating on purpose: floating, it hovers over rekordbox
             # and is in the way; tiled it is just a narrow column you scroll
-            # past. It cannot be switched off Wine-side — ShowSystray=0
+            # past. It cannot be switched off Wine-side - ShowSystray=0
             # deadlocks rekordbox on its splash screen, see above.
             {
               matches = [
@@ -543,8 +543,8 @@ in
             # newest, and focus landing on a 1px window left the app unable
             # to accept input with Mod+C closing the sliver instead.
             #
-            # Wine patch 0012 fixes that at the source — they are subsurfaces
-            # now and never reach the compositor — so this should match
+            # Wine patch 0012 fixes that at the source - they are subsurfaces
+            # now and never reach the compositor - so this should match
             # nothing. It stays because it is free and the failure it guards
             # against is silent and very confusing.
             {

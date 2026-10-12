@@ -1,6 +1,5 @@
-# enables `nix run .#vm`. it is very useful to have a VM
-# you can edit your config and launch the VM to test stuff
-# instead of having to reboot each time.
+# enables `nix run .#vm`.
+# test config edits in a VM instead of rebooting each time.
 { inputs, den, ... }:
 {
   perSystem =

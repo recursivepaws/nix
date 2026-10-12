@@ -32,7 +32,7 @@
       # Selective Update (0x200) + Panel Replay (0x400). All three engage on static
       # content, which is when the flicker shows up. 0x410 left PSR-SU enabled.
       # abmlevel=0 disables Adaptive Backlight Management, which modulates backlight
-      # from frame content and pumps brightness on an idle screen — the driver
+      # from frame content and pumps brightness on an idle screen - the driver
       # default (-1) leaves it on.
       # sg_display=0 stops scanout out of system RAM, which this host leans on
       # heavily with a 512 MiB VRAM carveout driving a 2880x1920 panel.
@@ -139,10 +139,6 @@
 
       swapDevices = [ ];
 
-      # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-      # (the default) this is the recommended approach. When using systemd-networkd it's
-      # still possible to use this option, but it's recommended to use it in conjunction
-      # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
       networking.useDHCP = lib.mkDefault true;
       # networking.interfaces.eno0.useDHCP = lib.mkDefault true;
       # networking.interfaces.wlp0s20f3.useDHCP = lib.mkDefault true;
@@ -192,7 +188,7 @@
       fileSystems."/home" = {
         device = "/dev/disk/by-uuid/e2821909-3c68-4b9d-9836-bcf3f6ded2a7";
         fsType = "ext4";
-        # bind source for /nix — must be mounted in stage 1
+        # bind source for /nix - must be mounted in stage 1
         neededForBoot = true;
       };
 
@@ -235,10 +231,6 @@
 
       swapDevices = [ ];
 
-      # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-      # (the default) this is the recommended approach. When using systemd-networkd it's
-      # still possible to use this option, but it's recommended to use it in conjunction
-      # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
       networking.useDHCP = lib.mkDefault true;
       # networking.interfaces.enp6s0.useDHCP = lib.mkDefault true;
       # networking.interfaces.wlp7s0.useDHCP = lib.mkDefault true;

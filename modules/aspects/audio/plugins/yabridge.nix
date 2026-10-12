@@ -18,9 +18,8 @@
             yabridgectl
           ];
           text = ''
-            # Get plugins from the current system's package closure
-            # Use recursive query to find all dependencies, including plugins
-            # This ensures we only use plugins from the active system configuration
+            # Recursive closure of the running system, so only plugins the
+            # active configuration actually pulls in can match below.
             SYSTEM_REFS=$(nix-store -qR /run/current-system/sw 2>/dev/null || echo "")
 
             # Filter for plugin packages (exclude bundle and other non-VST packages)

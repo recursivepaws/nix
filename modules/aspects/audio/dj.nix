@@ -17,10 +17,10 @@
         ...
       }:
       let
-        # Mixxx 2.6 is unreleased — no tag, no beta, and nixpkgs has never
+        # Mixxx 2.6 is unreleased - no tag, no beta, and nixpkgs has never
         # shipped past 2.5.6. Built from the 2.6 branch because the stock FLX4
         # mapping leaves Pad FX unimplemented ("too experimental", per its own
-        # header) and the one mapping that implements it — ElHanko's — needs
+        # header) and the one mapping that implements it - ElHanko's - needs
         # 2.6's Stems controls ([ChannelN_Stem1] and friends).
         #
         # 2.6 pins libdjinterop 0.27.1 EXACT and nixpkgs has 0.26.1, so Denon
@@ -46,7 +46,7 @@
         # Mixxx can import a rekordbox USB but has never been able to write one
         # (mixxxdj/mixxx#9463, open since 2018). baken writes the legacy
         # export.pdb + PIONEER/USBANLZ format a CDJ reads, straight from a
-        # rekordbox XML — no rekordbox, no Wine. --generate-analysis computes
+        # rekordbox XML - no rekordbox, no Wine. --generate-analysis computes
         # the waveforms for tracks rekordbox never touched; grid and cues come
         # from the XML.
         baken = pkgs.rustPlatform.buildRustPackage (finalAttrs: {
@@ -77,7 +77,7 @@
             mainProgram = "baken";
           };
         });
-        # rbxport builds its own rekordbox-format library — verified: with no
+        # rbxport builds its own rekordbox-format library - verified: with no
         # rekordbox installed it logs "no library here; offering to make one"
         # and creates master.db plus share/PIONEER/{Artwork,USBANLZ}. It has its
         # own beatgrid/key analysis engine, and is the only Linux-native writer
@@ -88,9 +88,9 @@
         # (rbl-db default_library_dir: home_dir().join("Library")). Since 1.0 a
         # `masterDbDirectory` in ~/.config/Pioneer/rekordbox6/rekordbox3.settings
         # overrides it, but the app rewrites that file itself on a library
-        # switch, so it is not ours to manage declaratively — redirect with a
+        # switch, so it is not ours to manage declaratively - redirect with a
         # symlink below instead; rbxport follows it transparently. (RBXPORT_OPTIONS
-        # can't move it either — that points at an existing rekordbox install's
+        # can't move it either - that points at an existing rekordbox install's
         # options.json, whose `dp` key is base64 SQLCipher key material.)
         #
         # Source is on GitHub (chrisle/rbxport, GPL-2.0-or-later) but this is the
@@ -123,7 +123,7 @@
             stdenv.cc.cc.lib
           ]
           # Without these the wrapper sets no GST_PLUGIN_SYSTEM_PATH_1_0 and
-          # rbxport logs "GStreamer element appsink not found" at startup —
+          # rbxport logs "GStreamer element appsink not found" at startup:
           # appsink is in gst-plugins-base. webkitgtk needs the same plugins
           # for media playback, so this is load-bearing twice over.
           # NOT gst-plugins-bad: it ships the LV2 wrapper element, which makes
@@ -177,7 +177,7 @@
         # Keep rbxport's library under XDG instead of ~/Library. The directory
         # must exist before the symlink is useful, so create it first.
         # If a real ~/Library/Pioneer/rekordbox already holds data, home-manager
-        # refuses rather than clobbering it — move it into place by hand.
+        # refuses rather than clobbering it - move it into place by hand.
         home.file."Library/Pioneer/rekordbox".source =
           config.lib.file.mkOutOfStoreSymlink "${config.xdg.dataHome}/rbxport/rekordbox";
 

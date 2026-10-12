@@ -17,7 +17,7 @@
         };
       };
 
-      # Disable USB autosuspend for btusb — the Intel Legacy ROM 2.x adapter
+      # Disable USB autosuspend for btusb - the Intel Legacy ROM 2.x adapter
       # (0aa7) firmware crashes when it tries to resume from suspend during an
       # active SCO link, which is what kills the adapter mid-call.
       boot.extraModprobeConfig = ''

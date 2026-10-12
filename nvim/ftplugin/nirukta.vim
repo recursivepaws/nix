@@ -1,4 +1,4 @@
-" ftplugin/nirukta.vim  — buffer-local settings for nirukta files
+" ftplugin/nirukta.vim  - buffer-local settings for nirukta files
 
 let s:fmt = expand('~/Software/nirukta/format.py')
 " only wire up the formatter if the nirukta repo's format.py is present

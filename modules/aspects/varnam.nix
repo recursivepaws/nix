@@ -43,7 +43,7 @@ let
 
     # Fcitx5 input engine for Varnam, built from source.
     # Uses CMake + extra-cmake-modules; links against govarnam-lib and fcitx5.
-    # On first build this hash will be wrong — update it from the error output.
+    # On first build this hash will be wrong - update it from the error output.
     varnam-fcitx5 = pkgs.stdenv.mkDerivation {
       pname = "varnam-fcitx5";
       version = "0.0.2";
@@ -126,7 +126,7 @@ in
               notifications = {
                 globalSection = { };
                 sections.HiddenNotifications = {
-                  # Suppress the Wayland setup advice — we handle it ourselves.
+                  # Suppress the Wayland setup advice - we handle it ourselves.
                   "0" = "wayland-diagnose-gnome";
                 };
               };

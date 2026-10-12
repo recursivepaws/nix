@@ -27,7 +27,7 @@
               copyDesktopItems
             ];
 
-            # Skip the normal build phases — there's nothing to compile
+            # Skip the normal build phases - there's nothing to compile
             dontUnpack = true;
             dontBuild = true;
 

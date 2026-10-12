@@ -26,7 +26,7 @@
       in
       {
         # Default pkgs.beets enables every plugin below and wraps
-        # ffmpeg/imagemagick/flac/mp3val onto beet's PATH — no override needed.
+        # ffmpeg/imagemagick/flac/mp3val onto beet's PATH - no override needed.
         programs.beets = {
           enable = true;
           settings = {

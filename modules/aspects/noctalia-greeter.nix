@@ -107,9 +107,8 @@
           "L+ /var/lib/noctalia-greeter/appearance.json - - - - ${appearanceJson}"
         ];
 
-        # The greeter scans /run/current-system/sw/share/wayland-sessions
-        # Not populated by default.
-        # Linking it surfaces niri.desktop for discovery.
+        # The greeter scans /run/current-system/sw/share/wayland-sessions.
+        # Empty by default, so link it or niri.desktop is never offered.
         environment.pathsToLink = [
           "/share/wayland-sessions"
           "/share/icons"

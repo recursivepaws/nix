@@ -13,7 +13,7 @@
         home.packages = with pkgs; [
 
           # wine / yabridge / yabridgectl come from the windows-vst aspect
-          # (systemPackages). Don't duplicate them here — two wine versions
+          # (systemPackages). Don't duplicate them here - two wine versions
           # confuses yabridge.
 
           # airwave
@@ -30,7 +30,7 @@
           lsp-plugins
           linvstmanager
 
-          # vocal chain — VST3/CLAP, load directly in Bitwig
+          # vocal chain - VST3/CLAP, load directly in Bitwig
           airwin2rack # Airwindows Consolidated: DeBess de-esser, Pop, Pressure4, Console, ToTape
           dragonfly-reverb # plate/room/hall
           surge-xt # FX bank: Reverb2, Nimbus, chorus, delay
@@ -38,7 +38,7 @@
           rnnoise-plugin # RNNoise room-noise strip
           zam-plugins # ZaMultiCompX2, ZamGateX2
 
-          # vocal chain — LV2 only, host via carla.vst inside Bitwig
+          # vocal chain - LV2 only, host via carla.vst inside Bitwig
           x42-plugins # fil4 EQ, darc compressor, dpl limiter, zconvo, EBU meters
           calf # De-Esser, Vocoder
           aether-lv2 # lush algorithmic reverb
@@ -58,18 +58,14 @@
           DSSI_PATH = "$HOME/.dssi:$HOME/.nix-profile/lib/dssi:/run/current-system/sw/lib/dssi";
         };
 
-        # ===================================================================
-        # CREATE PLUGIN DIRECTORY SYMLINKS
-        #
         # LV2 hosts do NOT recurse: bundles must be direct children of a
         # search path entry, so ~/.lv2 is symlinked whole. Nesting them in
         # ~/.lv2/nix/ makes every host report zero plugins.
         #
         # VST2/VST3/CLAP scanners DO recurse, and the yabridge aspect owns
-        # ~/.vst3/yabridge, ~/.vst/yabridge and ~/.clap/yabridge — so those
+        # ~/.vst3/yabridge, ~/.vst/yabridge and ~/.clap/yabridge - so those
         # three get a "nix" subfolder instead, to avoid a home.file collision
         # on the parent directory.
-        # ===================================================================
         home.file = {
           ".lv2".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/lv2";
           ".lxvst".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/lxvst";

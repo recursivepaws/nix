@@ -58,13 +58,13 @@
           allowedUDPPorts = [ config.services.tailscale.port ];
           checkReversePath = "loose";
           # Allow Docker containers to reach host ports.
-          # Without this, container→host TCP is blocked by the INPUT chain —
+          # Without this, container->host TCP is blocked by the INPUT chain,
           # which is why https://tilt.local.hightouch.dev proxies to 172.17.0.1:10350
           # but the connection times out.
           # We match on source IP rather than interface name because Docker Compose
           # networks use dynamically-named bridges (br-<network-id>), not docker0.
           # 172.16.0.0/12 covers the full RFC 1918 range Docker assigns to its networks.
-          # Ports: 10350 = Tilt UI; 3000 = app, 5000 = api — the tilt:local model
+          # Ports: 10350 = Tilt UI; 3000 = app, 5000 = api - the tilt:local model
           # runs app/api as host processes, so Caddy (a container) must reach them
           # here or app./api.local.hightouch.dev return 503 "no upstreams available".
           # Add 8000 (destinations) / 3001 (agent-runtime) if run on the host.
@@ -110,7 +110,7 @@
 
         # Script that trusts Caddy's local root certificate in the NSS database
         # and restarts Chrome so it picks up the new trust anchor.
-        # Only runs when the cert fingerprint has actually changed — avoids
+        # Only runs when the cert fingerprint has actually changed - avoids
         # needlessly killing Chrome on every caddy container start.
         caddyTrustScript = pkgs.writeShellScriptBin "caddy-trust" ''
           set -euo pipefail
@@ -190,7 +190,7 @@
 
         # Watches for caddy container start events and fires caddyTrustScript
         # when the cert changes. Uses `docker events` so it's reactive rather
-        # than polling — zero overhead when nothing is happening.
+        # than polling - zero overhead when nothing is happening.
         caddyTrustWatcherScript = pkgs.writeShellScript "caddy-trust-watcher" ''
           set -euo pipefail
           echo "caddy-trust-watcher: listening for hightouch-caddy-1 start events"

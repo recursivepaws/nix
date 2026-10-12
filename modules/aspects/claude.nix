@@ -6,9 +6,8 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Note: our own skills (recursivepaws/skills) are deliberately NOT an input.
-    # They are linked live from the ~/Software/skills working copy that
-    # software-repos.nix clones — see home.activation.linkOwnSkills below.
+    # NOTE: our own skills (recursivepaws/skills) are deliberately NOT an input.
+    # They link live from ~/Software/skills; see home.activation.linkOwnSkills.
     # Token-optimization skill for Claude Code (terse responses, byte-exact code).
     caveman = {
       url = "github:JuliusBrussee/caveman";
@@ -272,8 +271,8 @@
           );
 
           # Third-party skills are pinned flake inputs, linked per-skill below.
-          # Our own skills come from the ~/Software/skills working copy instead —
-          # see home.activation.linkOwnSkills.
+          # Our own skills come from the ~/Software/skills working copy instead.
+          # See home.activation.linkOwnSkills.
           home.file = {
             # Global user memory: loaded into every Claude Code session.
             ".claude/CLAUDE.md".text = ''
@@ -300,7 +299,7 @@
           };
 
           # Our own skills link straight from the ~/Software/skills working copy,
-          # so editing one takes effect in the next session — no commit, push,
+          # so editing one takes effect in the next session - no commit, push,
           # `nix flake update` or rebuild. The trade is that they are no longer
           # pinned per-machine; the remaining pin is git itself, and the refresh
           # on a secondary machine is `git -C ~/Software/skills pull`.
