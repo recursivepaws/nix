@@ -6,8 +6,10 @@
       { pkgs, ... }:
       let
         # Run npx from $HOME so project configs can't interfere.
+        # npx's shebang is `env node`, so nodejs has to be on PATH too.
         npxFromHome = pkgs.writeShellScript "npx-from-home" ''
           cd "$HOME"
+          export PATH="${pkgs.nodejs}/bin:$PATH"
           exec ${pkgs.nodejs}/bin/npx "$@"
         '';
       in
