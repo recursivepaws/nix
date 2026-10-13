@@ -1,4 +1,9 @@
-{ inputs, den, ... }:
+{
+  inputs,
+  den,
+  lib,
+  ...
+}:
 {
   flake-file.inputs = {
     claude-plugins-nix.url = "github:mreimbold/claude-plugins-nix";
@@ -54,6 +59,10 @@
   den.aspects.claude =
     { user, ... }:
     {
+      # Hevy workout-tracker MCP: personal, so vera only.
+      # NOTE: hasAspect is cyclic inside `includes`, hence the name check.
+      includes = lib.optional (user != null && user.userName == "vera") den.aspects.hevy;
+
       nixos = {
         environment.etc."claude-code/managed-settings.json".source =
           builtins.toFile "managed-settings.json"
