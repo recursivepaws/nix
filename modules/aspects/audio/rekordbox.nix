@@ -291,6 +291,34 @@ in
             # drop the virtual desktop.
             wine reg add 'HKCU\Software\Wine\Drivers' /v Graphics /t REG_SZ /d "$driver" /f
 
+            # VULKAN, NOT OPENGL - radeonsi runs out of 32-bit GPU virtual
+            # address space during a long session and takes rekordbox with it.
+            # Measured 2026-10-14 on a Radeon 890M (RADV STRIX1) after a few
+            # hours of DJing:
+            #
+            #   MESA: error: amdgpu: failed to allocate 2097152 bytes from the
+            #     32-bit address space              (repeating)
+            #   radeonsi: not enough memory to upload descriptors
+            #   err:seh:NtRaiseException Exception frame is not in stack limits
+            #     => unable to dispatch exception.
+            #
+            # Not memory pressure: GTT was 2.5 of 15.7 GiB and 13 GiB of system
+            # RAM was free while 2 MiB requests failed. The buffer object
+            # allocates fine; what fails is ac_drm_va_range_alloc() with
+            # AMDGPU_VA_RANGE_32_BIT in mesa's amdgpu_bo.c, so it is the 32-bit
+            # VA window that is exhausted, not RAM. radeonsi puts descriptor and
+            # upload buffers there via SI_RESOURCE_FLAG_32BIT and there is no
+            # driconf or AMD_DEBUG knob to opt out, so the only escape is to
+            # stop using radeonsi. RADV allocates from the 64-bit range and has
+            # no equivalent descriptor window.
+            #
+            # Registry rather than WINE_D3D_CONFIG for the same reason as the
+            # Graphics key above: it is recorded in the prefix and visible in
+            # winecfg. Override with RB_RENDERER=gl to get the old behaviour
+            # back for a run.
+            wine reg add 'HKCU\Software\Wine\Direct3D' /v renderer /t REG_SZ \
+              /d "''${RB_RENDERER:-vulkan}" /f
+
             # DO NOT set HKCU\Software\Wine\Explorer\ShowSystray to 0 to get rid
             # of the 111x35 tray sliver. It looks like the obvious fix and it
             # deadlocks rekordbox on the splash screen, reproducibly: every
