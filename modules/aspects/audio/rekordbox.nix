@@ -319,6 +319,38 @@ in
             wine reg add 'HKCU\Software\Wine\Direct3D' /v renderer /t REG_SZ \
               /d "''${RB_RENDERER:-vulkan}" /f
 
+            # ...and the renderer key above is not enough on its own, because
+            # rekordbox is TWO GPU clients, not one. rekordboxAgent.exe is an
+            # Electron app that spawns its own --type=gpu-process, and that one
+            # goes through OpenGL no matter what wined3d is set to. Its
+            # --use-angle=swiftshader-webgl flag only forces WebGL to
+            # SwiftShader; the compositor still uses native GL, i.e. radeonsi,
+            # i.e. the same 32-bit VA window that runs out above.
+            #
+            # Confirmed 2026-10-14 after the renderer key was already live: the
+            # only process in the Wine tree holding /dev/dri/renderD128 was
+            #
+            #   rekordboxAgent.exe --type=gpu-process
+            #
+            # while the radeonsi errors kept coming. amdgpu VA space is
+            # per-process, so the other GPU users on the box are irrelevant -
+            # the agent exhausts its own.
+            #
+            # LIBGL_ALWAYS_SOFTWARE is GL/EGL only and does not touch Vulkan
+            # (RADV is a separate libvulkan_radeon.so), so this splits cleanly:
+            # rekordbox.exe keeps hardware acceleration through wined3d-on-RADV
+            # and only the agent drops to llvmpipe. The agent is a mostly idle
+            # helper, so the CPU cost is not noticeable. Verified present in
+            # the mesa actually installed here (26.1.4): the string lives in
+            # libgallium-26.1.4.so, libGLX_mesa.so and libEGL_mesa.so.
+            #
+            # RB_SOFTWARE_GL=0 opts out. Set as a conditional rather than
+            # exporting 0, because an unset variable is the only unambiguous
+            # "off" for this one.
+            if [ "''${RB_SOFTWARE_GL:-1}" != "0" ]; then
+              export LIBGL_ALWAYS_SOFTWARE=1
+            fi
+
             # DO NOT set HKCU\Software\Wine\Explorer\ShowSystray to 0 to get rid
             # of the 111x35 tray sliver. It looks like the obvious fix and it
             # deadlocks rekordbox on the splash screen, reproducibly: every
