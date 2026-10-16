@@ -267,16 +267,18 @@
                   "Mod+Ctrl+Page_Up".action = move-column-to-workspace-up;
 
                   # Media controls
+                  # mpd first, so the keys hit rmpc/mpd whenever mpd-mpris is up
+                  # instead of whichever browser tab MPRIS happened to list first.
                   "XF86AudioPlay" = {
-                    action = sh "playerctl play-pause";
+                    action = sh "playerctl --player=mpd,%any play-pause";
                     allow-when-locked = true;
                   };
                   "XF86AudioNext" = {
-                    action = sh "playerctl next";
+                    action = sh "playerctl --player=mpd,%any next";
                     allow-when-locked = true;
                   };
                   "XF86AudioPrev" = {
-                    action = sh "playerctl previous";
+                    action = sh "playerctl --player=mpd,%any previous";
                     allow-when-locked = true;
                   };
                   "XF86Display".action = power-off-monitors;
