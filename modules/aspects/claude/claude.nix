@@ -11,8 +11,9 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # NOTE: our own skills (recursivepaws/skills) are deliberately NOT an input.
+    # NOTE: our own skills (recursivepaws/skills) are deliberately not an input.
     # They link live from ~/Software/skills; see home.activation.linkOwnSkills.
+
     # Token-optimization skill for Claude Code (terse responses, byte-exact code).
     caveman = {
       url = "github:JuliusBrussee/caveman";
@@ -205,12 +206,8 @@
             claude-code = {
               enable = true;
               enableMcpIntegration = true;
-              # Nirukta LSP for .sutra/.sloka; server lives in the nirukta repo checkout.
-              # Routed through that repo's #headless devshell: the venv's manylinux
-              # wheels dlopen libstdc++/libGL at import time, so the server only
-              # starts with the devshell's LD_LIBRARY_PATH. #headless rather than the
-              # default shell because the latter's shellHook writes uv sync output and
-              # an opengl.py traceback to stdout, corrupting the JSON-RPC stream.
+              # Routed through the nirukta repo's devshell because the venv's manylinux wheels dlopen libstdc++/libGL at import time.
+              # #headless, not the default shell: that one's shellHook writes to stdout and corrupts the JSON-RPC stream.
               lspServers.nirukta = {
                 command = "nix";
                 args = [
@@ -280,8 +277,7 @@
           );
 
           # Third-party skills are pinned flake inputs, linked per-skill below.
-          # Our own skills come from the ~/Software/skills working copy instead.
-          # See home.activation.linkOwnSkills.
+          # Our own come from the ~/Software/skills working copy instead, see home.activation.linkOwnSkills.
           home.file = {
             # Global user memory: loaded into every Claude Code session.
             ".claude/CLAUDE.md".text = ''
@@ -307,15 +303,8 @@
             security-audit = "${inputs.python-skills}/skills/python/security-audit";
           };
 
-          # Our own skills link straight from the ~/Software/skills working copy,
-          # so editing one takes effect in the next session - no commit, push,
-          # `nix flake update` or rebuild. The trade is that they are no longer
-          # pinned per-machine; the remaining pin is git itself, and the refresh
-          # on a secondary machine is `git -C ~/Software/skills pull`.
-          #
-          # Runs after software-repos clones the repo. The /nix/store guard means
-          # a name collision with a pinned third-party skill above (ponytail, say)
-          # leaves the pinned one alone rather than clobbering it every rebuild.
+          # Linking from the working copy means editing a skill takes effect next session, at the cost of no per-machine pin - refresh elsewhere with `git -C ~/Software/skills pull`.
+          # The /nix/store guard leaves a pinned third-party skill of the same name alone rather than clobbering it every rebuild.
           home.activation.linkOwnSkills = lib.hm.dag.entryAfter [ "cloneSoftwareRepos" ] ''
             src="${config.home.homeDirectory}/Software/skills"
             dst="${config.home.homeDirectory}/.claude/skills"

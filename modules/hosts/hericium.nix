@@ -22,9 +22,8 @@
         };
 
         services = {
-          # BT headphones: A2DP output only, no HFP/HSP, no profile autoswitch.
-          # Stops playback falling back to mono HFP "mic mode".
-          # Headset mic unusable as a result; StreamCam is the input anyway.
+          # A2DP only, so playback can't fall back to mono HFP "mic mode".
+          # The headset mic is unusable as a result; StreamCam is the input anyway.
           pipewire.wireplumber.extraConfig."51-bluez-headphones" = {
             "wireplumber.settings" = {
               "bluetooth.autoswitch-to-headset-profile" = false;
@@ -35,9 +34,8 @@
             };
           };
 
-          # Deauthorize flaky Intel radio (see modules/default/bluetooth.nix).
-          # BlueZ then only sees the external Realtek dongle.
-          # hericium-only: amanita needs the Intel radio. No dongle = no BT.
+          # Deauthorize the flaky Intel radio (see modules/default/bluetooth.nix) so BlueZ only sees the external Realtek dongle.
+          # WARN: hericium-only, and no dongle means no bluetooth at all - amanita needs its Intel radio.
           udev.extraRules = ''
             ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="8087", ATTR{idProduct}=="0aa7", ATTR{authorized}="0"
           '';

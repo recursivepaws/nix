@@ -39,8 +39,8 @@
                 od -A n -t x1 | tr -d ' \n' |
                 cut -c1-32)
 
-              # Strip 3-byte v10 prefix (6 hex chars), write cipher to temp file,
-              # decrypt (openssl strips PKCS7 padding). IV = 16 space bytes (0x20).
+              # Strip the 3-byte v10 prefix, then decrypt (openssl strips PKCS7 padding itself).
+              # The IV is 16 space bytes, 0x20.
               cipher_bin=$(mktemp)
               decrypted_bin=$(mktemp)
               printf '%b' "$(printf '%s' "''${enc_hex:6}" | sed 's/../\\x&/g')" >"$cipher_bin"

@@ -8,7 +8,6 @@
         ...
       }:
       let
-        # Script to configure yabridge
         yabridgeSetup = pkgs.writeShellApplication {
           name = "yabridge-setup";
           runtimeInputs = with pkgs; [
@@ -18,20 +17,16 @@
             yabridgectl
           ];
           text = ''
-            # Recursive closure of the running system, so only plugins the
-            # active configuration actually pulls in can match below.
+            # Recursive closure of the running system, so only plugins the active configuration pulls in can match below.
             SYSTEM_REFS=$(nix-store -qR /run/current-system/sw 2>/dev/null || echo "")
 
-            # Filter for plugin packages (exclude bundle and other non-VST packages)
             PLUGIN_PATHS=$(echo "$SYSTEM_REFS" | grep -E "(serum-|serum2-|shaperbox3-|vst-)" | grep -v "windows-plugin-bundle" | grep -v "vamp-plugin" | grep -v "nautilus" || echo "")
 
             echo "Plugin Paths: $PLUGIN_PATHS"
 
-            # Get current yabridge paths
             CURRENT_PATHS=$(yabridgectl list 2>/dev/null || echo "")
 
-            # Remove all old nix store paths from yabridge
-            # This prevents duplicates from accumulating
+            # Drop store paths the current system no longer pulls in, or they accumulate as duplicates.
             for old_path in $CURRENT_PATHS; do
               if echo "$old_path" | grep -q "^/nix/store/"; then
                 if ! echo "$PLUGIN_PATHS" | grep -q "^$old_path$"; then
@@ -41,22 +36,17 @@
               fi
             done
 
-            # Here's where we store actual preset resources
             PRESET_PATH="${config.home.homeDirectory}/Documents/Presets/"
             echo "Preset Path: $PLUGIN_PATHS"
             mkdir -p "$PRESET_PATH"
             chmod -R u+w "$PRESET_PATH"
 
-            # Add current plugins
             if [ -n "$PLUGIN_PATHS" ]; then
               for plugin_path in $PLUGIN_PATHS; do
-                # Check if this path contains VST files
                 if [ -d "$plugin_path" ]; then
-                  # Extract Plugin name from folder name
                   PLUGIN_NAME=$(basename "$plugin_path" | sed 's/-[0-9].*//')
 
                   if (find "$plugin_path" -name "*.vst3" -o -name "*.dll" 2>/dev/null | grep -q .); then
-                    # Only add if not already in the list
                     if ! echo "$CURRENT_PATHS" | grep -q "^$plugin_path$"; then
                       echo "Adding plugin: $PLUGIN_NAME"
                       yabridgectl add "$plugin_path"
@@ -71,7 +61,6 @@
                 fi
               done
 
-              # Sync yabridge
               echo "Syncing yabridge..."
               yabridgectl sync
             else
@@ -83,12 +72,11 @@
       in
       {
         home = {
-          # Run yabridge setup when home configuration is activated
           activation.yabridgeSetup = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             $DRY_RUN_CMD ${yabridgeSetup}/bin/yabridge-setup
           '';
 
-          # Ensure yabridge directories exist
+          # yabridge's own search dirs; native-vst-plugins.nix owns the "nix" siblings.
           file = {
             ".vst3/yabridge/.keep".text = "";
             ".vst/yabridge/.keep".text = "";

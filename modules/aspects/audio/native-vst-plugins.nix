@@ -12,9 +12,8 @@
       {
         home.packages = with pkgs; [
 
-          # wine / yabridge / yabridgectl come from the windows-vst aspect
-          # (systemPackages). Don't duplicate them here - two wine versions
-          # confuses yabridge.
+          # WARN: wine / yabridge / yabridgectl come from the windows-vst aspect.
+          # Duplicating them here gives yabridge two wine versions to pick from.
 
           # airwave
           # surge
@@ -58,14 +57,8 @@
           DSSI_PATH = "$HOME/.dssi:$HOME/.nix-profile/lib/dssi:/run/current-system/sw/lib/dssi";
         };
 
-        # LV2 hosts do NOT recurse: bundles must be direct children of a
-        # search path entry, so ~/.lv2 is symlinked whole. Nesting them in
-        # ~/.lv2/nix/ makes every host report zero plugins.
-        #
-        # VST2/VST3/CLAP scanners DO recurse, and the yabridge aspect owns
-        # ~/.vst3/yabridge, ~/.vst/yabridge and ~/.clap/yabridge - so those
-        # three get a "nix" subfolder instead, to avoid a home.file collision
-        # on the parent directory.
+        # LV2 hosts do not recurse, so ~/.lv2 is symlinked whole - nesting bundles under ~/.lv2/nix/ makes every host report zero plugins.
+        # VST2/VST3/CLAP scanners do recurse, so those get a "nix" subfolder to avoid colliding with the yabridge aspect on the parent directory.
         home.file = {
           ".lv2".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/lv2";
           ".lxvst".source = config.lib.file.mkOutOfStoreSymlink "${config.home.profileDirectory}/lib/lxvst";

@@ -27,7 +27,6 @@
               copyDesktopItems
             ];
 
-            # Skip the normal build phases - there's nothing to compile
             dontUnpack = true;
             dontBuild = true;
 
@@ -43,11 +42,9 @@
             ];
 
             installPhase = ''
-              # Install the JAR
               mkdir -p $out/share/java
               cp $src $out/share/java/${pname}.jar
 
-              # Create a wrapper script in bin/
               mkdir -p $out/bin
               makeWrapper ${pkgs.jre}/bin/java $out/bin/${pname} \
                 --add-flags "-jar $out/share/java/${pname}.jar"
@@ -86,13 +83,10 @@
           installPhase = ''
             mkdir -p $out/bin $out/libexec $out/share
 
-            # Copy the app files
             cp -r opt/bitwig-studio/* $out/libexec/
-
-            # COPY THE ICONS AND DESKTOP FILES (This was missing!)
             cp -r usr/share/* $out/share/
 
-            # Patch the bitwig jar to use the theme editor
+            # Swap in the theme-editor-patched jar.
             rm $out/libexec/bin/bitwig.jar
 
             cp ${./bitwig.jar} $out/libexec/bin/bitwig.jar
@@ -104,7 +98,6 @@
             # mkdir -p $out/share/bitwig/
             # cp -r /build/.bitwig-theme-editor $out/share/bitwig/
 
-            # Link the binary
             ln -s $out/libexec/bitwig-studio $out/bin/bitwig-studio
           '';
         };
@@ -174,12 +167,10 @@
             mkdir -p $out/share/icons/hicolor/scalable/apps
             mkdir -p $out/share/applications
 
-            # Link icons from our fixed local build
-            # Note: Using a wildcard *bitwig* ensures we catch whatever name they used
+            # Globbed because upstream renames the icon and .desktop between releases.
             cp ${bitwig6-local}/share/icons/hicolor/scalable/apps/*.svg \
                $out/share/icons/hicolor/scalable/apps/bitwig-studio.svg
 
-            # Link the desktop file
             cp ${bitwig6-local}/share/applications/*.desktop \
                $out/share/applications/bitwig-studio.desktop
           '';

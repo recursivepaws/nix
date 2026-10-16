@@ -114,8 +114,8 @@
           "/share/icons"
         ];
 
-        # The noctalia lock screen claims the fprintd sensor itself, and pam_fprintd
-        # short-circuits pam_gnome_keyring. greetd substacks login, so this covers both.
+        # The noctalia lock screen claims the fprintd sensor itself, and pam_fprintd short-circuits pam_gnome_keyring.
+        # greetd substacks login, so this covers both.
         security.pam.services.login.fprintAuth = false;
       };
   };

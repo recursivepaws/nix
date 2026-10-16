@@ -24,8 +24,7 @@
           dataDir = "/home/${user.userName}";
           configDir = "/home/${user.userName}/.config/syncthing";
           openDefaultPorts = true;
-          # Anything paired through the web UI at http://127.0.0.1:8384 survives a
-          # rebuild while these stay false.
+          # While these stay false, anything paired through the web UI at http://127.0.0.1:8384 survives a rebuild.
           overrideDevices = false;
           overrideFolders = false;
 
@@ -57,8 +56,7 @@
                   "hericium"
                   "ampulex"
                 ];
-                # .obsidian holds home-manager-managed files that are read-only
-                # symlinks into the store, so syncthing can't write them.
+                # .obsidian holds home-manager-managed store symlinks, which syncthing can't write.
                 ignorePatterns = [ ".obsidian" ];
               };
             };

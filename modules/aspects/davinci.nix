@@ -17,9 +17,8 @@
       homeManager =
         { pkgs, lib, config, ... }:
         {
-          # Resolve bundles Qt5 without a wayland platform plugin, so it dies
-          # silently under the session-wide QT_QPA_PLATFORM=wayland set in niri.nix.
-          # https://github.com/NixOS/nixpkgs/issues/341634
+          # Resolve bundles Qt5 with no wayland platform plugin, so it dies silently under the QT_QPA_PLATFORM=wayland set in niri.nix.
+          # DOCS: https://github.com/NixOS/nixpkgs/issues/341634
           home.packages = [
             (pkgs.symlinkJoin {
               name = "davinci-resolve-studio-xcb";

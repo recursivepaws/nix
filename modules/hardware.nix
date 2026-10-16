@@ -26,26 +26,16 @@
       boot.initrd.kernelModules = [ ];
       boot.kernelModules = [ "kvm-amd" ];
 
-      # Strix Point display mitigations. nixos-hardware applies these to the 16-inch
-      # AI 300 sibling but not the 13-inch, whose module only disables PSR (0x10).
-      # 0x610 is Framework's own published Strix Point value: PSR (0x10) + PSR
-      # Selective Update (0x200) + Panel Replay (0x400). All three engage on static
-      # content, which is when the flicker shows up. 0x410 left PSR-SU enabled.
-      # abmlevel=0 disables Adaptive Backlight Management, which modulates backlight
-      # from frame content and pumps brightness on an idle screen - the driver
-      # default (-1) leaves it on.
-      # sg_display=0 stops scanout out of system RAM, which this host leans on
-      # heavily with a 512 MiB VRAM carveout driving a 2880x1920 panel.
-      # mkAfter keeps these last on the cmdline, so they win over the 0x10 above.
+      # nixos-hardware only disables PSR (0x10) on the 13-inch AI 300; 0x610 is Framework's published Strix Point value, adding PSR-SU (0x200) and Panel Replay (0x400), which all engage on static content and flicker.
+      # abmlevel=0 stops backlight pumping on an idle screen, sg_display=0 stops scanout from system RAM (512 MiB VRAM carveout, 2880x1920 panel), and mkAfter keeps these last so they beat the 0x10 above.
       boot.kernelParams = lib.mkAfter [
         "amdgpu.dcdebugmask=0x610"
         "amdgpu.abmlevel=0"
         "amdgpu.sg_display=0"
       ];
 
-      # The shared amd aspect turns on overdrive with ppfeaturemask=0xffffffff for
-      # hericium's dGPU. nixpkgs documents that value as unstable and flicker-prone,
-      # and this host is an APU with no use for overclocking.
+      # The shared amd aspect sets ppfeaturemask=0xffffffff for hericium's dGPU, which nixpkgs documents as unstable and flicker-prone.
+      # This host is an APU with no use for overclocking.
       hardware.amdgpu.overdrive.enable = lib.mkForce false;
       boot.extraModulePackages = [ ];
       fileSystems."/" = {

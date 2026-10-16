@@ -14,12 +14,12 @@
             util-linux # mountpoint, mount
             coreutils # tee, id, readlink, cat, basename, seq, mkdir, sleep
             cifs-utils # mount.cifs
-            rsync # rsync
+            rsync
             systemd # udevadm
             gnugrep # grep
-            bash # bash
-            zenity # progress
-            sudo # sudo
+            bash
+            zenity # progress dialog
+            sudo
           ];
           text = builtins.readFile ../../scripts/ipod-sync.sh;
         };

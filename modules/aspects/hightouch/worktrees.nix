@@ -9,17 +9,8 @@
         nodejs = nodePkgs.nodejs_24;
         pnpm = nodePkgs.pnpm.override { nodejs-slim = nodePkgs.nodejs-slim_24; };
 
-        # Create (or repair) a per-ticket worktree of the Hightouch monorepo.
-        #
-        # One ticket = one worktree = one branch. $HIGHTOUCH_ROOT stays on master
-        # and exists to run Tilt; ticket work never happens there. Worktrees are
-        # flat siblings of the root, named after the ticket: ~/Software/plat-1234.
-        #
-        # .envrc, node_modules and the .env* secrets are all gitignored, so a fresh
-        # worktree has none of them and a missing one fails later in a way that
-        # looks like a code bug. Hence all five steps, and hence re-running on an
-        # existing worktree re-hydrates rather than erroring - this doubles as the
-        # "fix my worktree" command.
+        # One ticket = one worktree = one branch, as a flat sibling of the root: ~/Software/plat-1234.
+        # Re-running re-hydrates rather than erroring - .envrc, node_modules and .env* are gitignored, so a fresh worktree has none of them and a missing one looks like a code bug later.
         htWorktree = pkgs.writeShellApplication {
           name = "ht-worktree";
           runtimeInputs = [
@@ -75,11 +66,8 @@
             if [ -f "$root/.cursor/copy-worktree-secrets.sh" ]; then
               (cd "$dir" && ROOT_WORKTREE_PATH="$root" bash "$root/.cursor/copy-worktree-secrets.sh")
             else
-              # Fallback: decrypt in place. Use the dotenvx that pnpm install just
-              # put in node_modules (1.14.1, matching the repo's mise.toml pin)
-              # rather than anything on the ambient PATH - bin/secrets resolves it
-              # by `shutil.which`, and a major version mismatch against committed
-              # ciphertext is not worth risking.
+              # Fallback: decrypt in place with the dotenvx pnpm just put in node_modules (1.14.1, matching the repo's mise.toml pin).
+              # bin/secrets resolves it by `shutil.which`, so an ambient-PATH major version mismatch would hit committed ciphertext.
               (cd "$dir" \
                 && PATH="$dir/packages/backend/core/node_modules/.bin:$PATH" \
                    ./bin/secrets inject)

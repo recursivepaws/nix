@@ -30,9 +30,8 @@
         enable = true;
         theme = {
           name = "Nightfox-Dark-Carbonfox";
-          # nightfox-gtk-theme was dropped from nixpkgs for depending on
-          # gtk-engine-murrine (GTK2, unmaintained). Only the GTK2 variant needs
-          # murrine, and nothing here runs GTK2, so build upstream directly.
+          # Dropped from nixpkgs over gtk-engine-murrine, which only the GTK2 variant needs.
+          # Nothing here runs GTK2, so build upstream directly.
           package = pkgs.stdenvNoCC.mkDerivation {
             pname = "nightfox-gtk-theme";
             version = "0-unstable-2025-10-23";

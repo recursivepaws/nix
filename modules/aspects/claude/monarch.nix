@@ -17,9 +17,8 @@
         python = pkgs.python313;
         py = python.pkgs;
 
-        # Neither of the next two is in nixpkgs. oathtool is a pure-Python TOTP
-        # generator (jaraco); monarchmoneycommunity is the maintained fork of
-        # the Monarch API client that the MCP server is built on.
+        # Neither of the next two is in nixpkgs: oathtool is jaraco's pure-Python TOTP generator.
+        # monarchmoneycommunity is the maintained fork of the Monarch API client the MCP server is built on.
         oathtool = py.buildPythonPackage rec {
           pname = "oathtool";
           version = "2.4.0";

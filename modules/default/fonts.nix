@@ -3,7 +3,6 @@
     { pkgs, ... }:
     {
       environment.systemPackages = with pkgs; [ lohit-fonts.devanagari ];
-      # Download and install Tiro Devanagari Sanskrit font
 
       fonts = {
         enableDefaultPackages = true;

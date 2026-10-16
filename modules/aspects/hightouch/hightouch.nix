@@ -57,17 +57,8 @@
           trustedInterfaces = [ "tailscale0" ];
           allowedUDPPorts = [ config.services.tailscale.port ];
           checkReversePath = "loose";
-          # Allow Docker containers to reach host ports.
-          # Without this, container->host TCP is blocked by the INPUT chain,
-          # which is why https://tilt.local.hightouch.dev proxies to 172.17.0.1:10350
-          # but the connection times out.
-          # We match on source IP rather than interface name because Docker Compose
-          # networks use dynamically-named bridges (br-<network-id>), not docker0.
-          # 172.16.0.0/12 covers the full RFC 1918 range Docker assigns to its networks.
-          # Ports: 10350 = Tilt UI; 3000 = app, 5000 = api - the tilt:local model
-          # runs app/api as host processes, so Caddy (a container) must reach them
-          # here or app./api.local.hightouch.dev return 503 "no upstreams available".
-          # Add 8000 (destinations) / 3001 (agent-runtime) if run on the host.
+          # Container->host TCP is dropped by the INPUT chain, so Caddy 503s on app./api.local.hightouch.dev and tilt.local never connects.
+          # Matched on source IP because Compose bridges are named br-<network-id>; add 8000 (destinations) / 3001 (agent-runtime) if those ever run on the host.
           extraInputRules = ''
             ip saddr 172.16.0.0/12 tcp dport { 3000, 5000, 10350 } accept
           '';
@@ -87,14 +78,13 @@
         ...
       }:
       let
-        # The specific version of node pinned in `pnpm-workspace.yaml`.
-        # Pulled directly from the pinned nixpkgs-node input rather than via an
-        # overlay so the main package set (and its binary cache hits) is untouched.
+        # The node version pinned in `pnpm-workspace.yaml`.
+        # Taken from the nixpkgs-node input rather than an overlay, so the main package set keeps its cache hits.
         nodePkgs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system};
         nodejs = nodePkgs.nodejs_24;
         pnpm = nodePkgs.pnpm.override { nodejs-slim = nodePkgs.nodejs-slim_24; };
 
-        #  Allows the Hightouch backend (which uses Java/JVM-based tooling) to trust custom CAs
+        # Lets the backend's JVM tooling trust custom CAs.
         setupJavaCacertsScript = pkgs.writeShellScript "setup-java-cacerts" ''
           set -euo pipefail
           mkdir -p "$HOME/.java"
@@ -108,10 +98,8 @@
           ln -sf "$HOME/.java/cacerts" "$HOME/.java-home/lib/security/cacerts"
         '';
 
-        # Script that trusts Caddy's local root certificate in the NSS database
-        # and restarts Chrome so it picks up the new trust anchor.
-        # Only runs when the cert fingerprint has actually changed - avoids
-        # needlessly killing Chrome on every caddy container start.
+        # Trusts Caddy's local root cert in the NSS database, then restarts Chrome to pick up the new anchor.
+        # Fingerprint-gated so Chrome is not killed on every caddy container start.
         caddyTrustScript = pkgs.writeShellScriptBin "caddy-trust" ''
           set -euo pipefail
 
@@ -121,9 +109,7 @@
           CERT_TMP=$(mktemp /tmp/caddy-local-root.XXXXXX.crt)
           trap 'rm -f "$CERT_TMP"' EXIT
 
-          # Wait for Caddy to serve a valid root certificate. Fetches and
-          # validates in one step to avoid a race between checking API
-          # readiness and the actual fetch.
+          # Fetch and validate in one step - probing API readiness separately races the fetch.
           CERT_READY=false
           for i in $(seq 1 30); do
             if ${pkgs.curl}/bin/curl -sf --max-time 5 http://localhost:2019/pki/ca/local 2>/dev/null \
@@ -151,9 +137,7 @@
           fi
 
           echo "caddy-trust: cert changed, re-trusting"
-          # Chrome reads the sqlite NSS db (cert9.db) under sql:. On a fresh
-          # user this directory may not exist yet (Chrome has never run), so
-          # create and initialize an empty db before touching it.
+          # Chrome reads the sqlite NSS db (cert9.db) under sql:, which does not exist until Chrome has run once.
           NSSDB="$HOME/.pki/nssdb"
           mkdir -p "$NSSDB"
           if [ ! -f "$NSSDB/cert9.db" ]; then
@@ -188,9 +172,7 @@
           fi
         '';
 
-        # Watches for caddy container start events and fires caddyTrustScript
-        # when the cert changes. Uses `docker events` so it's reactive rather
-        # than polling - zero overhead when nothing is happening.
+        # `docker events` rather than polling, so this is idle-free when nothing is happening.
         caddyTrustWatcherScript = pkgs.writeShellScript "caddy-trust-watcher" ''
           set -euo pipefail
           echo "caddy-trust-watcher: listening for hightouch-caddy-1 start events"
@@ -212,17 +194,10 @@
             CPPFLAGS = "-I${pkgs.openjdk}/lib/openjdk/include";
             JAVA_TOOL_OPTIONS = "-Djavax.net.ssl.trustStore=$HOME/.java/cacerts";
 
-            # The one checkout that owns Tilt and docker-compose on this machine.
-            # Tilt is global per machine and pinned to whichever directory started
-            # it; the compose project name is that directory's basename, which is
-            # what caddy-trust-watcher above hardcodes as `hightouch-caddy-1`.
-            # Starting compose from a worktree silently renames the container and
-            # the watcher never fires. Keep this checkout on master; ticket work
-            # belongs in worktrees (see `ht-worktree` in worktrees.nix).
+            # Tilt is global per machine and pinned to whichever directory started it, and the compose project name is that directory's basename - hardcoded above as `hightouch-caddy-1`.
+            # WARN: starting compose from a worktree renames the container silently and the watcher never fires, so keep this checkout on master and do ticket work in worktrees.
             HIGHTOUCH_ROOT = "${config.home.homeDirectory}/Software/hightouch";
-            # Same value under the name the repo's own
-            # .cursor/copy-worktree-secrets.sh already requires, so that script
-            # works from any shell without a wrapper.
+            # Same value under the name .cursor/copy-worktree-secrets.sh requires.
             ROOT_WORKTREE_PATH = "${config.home.homeDirectory}/Software/hightouch";
           };
 
@@ -263,9 +238,6 @@
           export LD_LIBRARY_PATH="${pkgs.unixodbc}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
         '';
 
-        # Watches for the Caddy container to (re)start and re-trusts its local
-        # root cert in the NSS database only when the cert has actually changed
-        # (i.e. after a volume wipe). Chrome is restarted only in that case.
         systemd.user.services.caddy-trust-watcher = {
           Unit = {
             Description = "Re-trust Caddy local root cert when it changes";

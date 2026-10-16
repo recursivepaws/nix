@@ -68,7 +68,6 @@
           }
         ];
 
-        # Build the kubeconfig attrset in pure Nix
         kubeconfigAttrs = {
           apiVersion = "v1";
           kind = "Config";
@@ -93,10 +92,8 @@
           preferences = { };
         };
 
-        # Render to YAML using pkgs.formats.yaml
         kubeconfigYaml = (pkgs.formats.yaml { }).generate "kubeconfig" kubeconfigAttrs;
 
-        # Script to merge generated config into existing ~/.kube/config
         mergeKubeconfig = pkgs.writeShellApplication {
           name = "merge-hightouch-kubeconfig";
           runtimeInputs = with pkgs; [ kubectl ];
@@ -106,7 +103,7 @@
             mkdir -p "$(dirname "$KUBECONFIG_PATH")"
 
             if [ -f "$KUBECONFIG_PATH" ]; then
-              # Merge: existing config wins for current-context, new clusters/contexts/users are upserted
+              # Existing config wins for current-context; clusters, contexts and users are upserted.
               KUBECONFIG="$KUBECONFIG_PATH:${kubeconfigYaml}" \
                 kubectl config view --flatten > "$KUBECONFIG_PATH.tmp"
               mv "$KUBECONFIG_PATH.tmp" "$KUBECONFIG_PATH"
@@ -123,7 +120,6 @@
       {
         home = {
           packages = [ mergeKubeconfig ];
-          # Run the merge on every home-manager activation
           activation.mergeHightouchKubeconfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             $DRY_RUN_CMD ${mergeKubeconfig}/bin/merge-hightouch-kubeconfig
           '';

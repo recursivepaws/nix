@@ -47,11 +47,8 @@
         cloneAll = lib.flatten (lib.mapAttrsToList (owner: names: map (cloneOne owner) names) repos);
       in
       {
-        # Bootstrap only: existing directories are never touched, so working copies stay untouched.
-        # Clones fail soft with a warning so a fresh machine without ssh keys still activates.
-        # `tickets` is not a repo - it is the per-ticket memory root the Claude
-        # skills write to, and claude.nix already ships a managed-settings
-        # permission for //home/*/Software/tickets/** that assumes it exists.
+        # Bootstrap only: existing directories are never touched, and clones fail soft so a fresh machine without ssh keys still activates.
+        # `tickets` is not a repo but the per-ticket memory root, which claude.nix already ships a managed-settings permission for.
         home.activation.cloneSoftwareRepos = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           mkdir -p ${lib.escapeShellArg software} ${lib.escapeShellArg "${software}/tickets"}
           ${lib.concatStringsSep "\n" cloneAll}

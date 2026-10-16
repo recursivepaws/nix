@@ -122,9 +122,8 @@
               canonical = true;
             };
 
-            # Downsample above-CD-quality to 16-bit/44.1kHz FLAC on import (one-way).
-            # max_bitrate = 1 forces should_transcode to fire for every lossless file;
-            # portableFlac copies CD-quality files verbatim and downsamples the rest.
+            # Downsample above-CD-quality to 16-bit/44.1kHz FLAC on import, one-way.
+            # max_bitrate = 1 fires should_transcode for every lossless file, and portableFlac copies CD-quality verbatim.
             convert = {
               auto = true;
               format = "portable_flac";

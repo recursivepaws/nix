@@ -2,9 +2,8 @@
 
 let
   mkVarnamPackages = pkgs: rec {
-    # govarnam prebuilt release zip contains: libgovarnam.so, all C headers
-    # (including the CGO-generated libgovarnam.h), govarnam.pc, and varnamcli.
-    # We rewrite the .pc file so it points at the Nix store path.
+    # Prebuilt release zip: libgovarnam.so, the C headers, govarnam.pc and varnamcli.
+    # The shipped .pc is rewritten to point at the store path.
     govarnam-lib = pkgs.stdenv.mkDerivation {
       pname = "govarnam";
       version = "1.9.1";
@@ -41,9 +40,8 @@ let
       '';
     };
 
-    # Fcitx5 input engine for Varnam, built from source.
-    # Uses CMake + extra-cmake-modules; links against govarnam-lib and fcitx5.
-    # On first build this hash will be wrong - update it from the error output.
+    # Fcitx5 input engine for Varnam, built from source against govarnam-lib.
+    # WARN: on a version bump this hash will be wrong - take the right one from the error output.
     varnam-fcitx5 = pkgs.stdenv.mkDerivation {
       pname = "varnam-fcitx5";
       version = "0.0.2";
@@ -65,8 +63,7 @@ let
     };
 
     # Sanskrit VST scheme file.
-    # fetchzip strips the single top-level directory so ${sa-scheme}/sa.vst
-    # is the path govarnam needs.
+    # fetchzip strips the single top-level directory, so ${sa-scheme}/sa.vst is the path govarnam needs.
     sa-scheme = pkgs.fetchzip {
       url = "https://github.com/varnamproject/schemes/releases/download/v1.8.0/sa.zip";
       hash = "sha256-p8P360lvuQG80nfPCiI8cX8SMGbit6UtLWu+XNoQNNM=";
@@ -89,9 +86,7 @@ in
             pkgs.fcitx5-gtk # Needed for GTK3/4 text-input-v3 integration; GTK_IM_MODULE must be unset
             pkgs.fcitx5-mellow-themes
           ];
-          # waylandFrontend = true: fcitx5 implements zwp_input_method_v2, so
-          # candidates follow the cursor in all Wayland-native apps (GTK4, Qt6,
-          # Chrome) without any extra env vars.
+          # fcitx5 implements zwp_input_method_v2, so candidates follow the cursor in Wayland-native apps with no extra env vars.
           fcitx5.waylandFrontend = true;
 
           fcitx5.settings = {
@@ -147,13 +142,8 @@ in
     homeManager =
       { lib, user, ... }:
       {
-        # NOTE: first-time vocabulary import
-        # Varnam transliterates without imported words, but word suggestions
-        # need a learnings file.  Run once after rebuilding:
-        #
-        #   cd $VARNAM_VST_DIR && ./import.sh
-        #
-        # Writes to ~/.local/share/varnam/learnings/sa.vst.learnings
+        # NOTE: transliteration works bare, but word suggestions need a learnings file.
+        # Once after rebuilding: `cd $VARNAM_VST_DIR && ./import.sh`, which writes ~/.local/share/varnam/learnings/sa.vst.learnings.
       }
       // lib.optionalAttrs (user.hasAspect den.aspects.niri) {
         programs.niri.settings.environment = {

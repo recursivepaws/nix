@@ -177,8 +177,7 @@
               screenshot = {
                 # region captures go straight to the annotation editor
                 annotate = true;
-                # absolute: noctalia expands "~" and writes the result back as a
-                # runtime override, which would then shadow this value
+                # Absolute, because noctalia expands "~" into a runtime override that would shadow this value.
                 directory = "${config.home.homeDirectory}/Pictures/Screenshots";
                 # ".png" is appended; saves from the annotator also get "-annotated"
                 filename_pattern = "%Y-%m-%d-%H-%M-%S";
@@ -243,8 +242,8 @@
                 enabled = true;
                 default_lead_minutes = 10;
               };
-              # OAuth is one-time per account via Settings > Calendar > Accounts >
-              # Save and Connect; refresh tokens land in gnome-keyring, not in config
+              # OAuth is one-time per account, via Settings > Calendar > Accounts > Save and Connect.
+              # Refresh tokens land in gnome-keyring, not in config.
               account = {
                 personal = {
                   type = "google";
