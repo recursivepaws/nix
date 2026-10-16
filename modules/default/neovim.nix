@@ -199,7 +199,7 @@
           # html/css/json/eslint servers
           vscode-langservers-extracted
           # bin: tsgo; project-local wins via pnpm_or_path
-          typescript-go
+          typescript
           biome
           yaml-language-server
           gh-actions-language-server

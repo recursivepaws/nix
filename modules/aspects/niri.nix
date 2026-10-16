@@ -22,7 +22,9 @@
 
         programs.niri = {
           enable = true;
-          package = pkgs.niri-stable;
+          # niri-flake's niri-stable (25.08) still wants libdisplay-info_0_2, which
+          # nixpkgs removed. Stock nixpkgs niri is newer and cached on cache.nixos.org.
+          package = pkgs.niri;
         };
 
         services.gnome.gnome-keyring.enable = true;
