@@ -5,7 +5,12 @@ let
 in
 {
   den.default.nixos =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      config,
+      lib,
+      ...
+    }:
     {
       environment.systemPackages = [ pkgs.cachix ];
 
@@ -44,5 +49,22 @@ in
         cacheName = cache;
         cachixTokenFile = config.age.secrets.cachix-token.path;
       };
+
+      # The module takes no extra args, so override its script to tune upload
+      # concurrency. Defaults (-j 8, -s 32MiB) can't finish a multi-GB path on a
+      # home uplink: cachix fans out across 8 paths at once, so no single upload
+      # gets enough bandwidth to beat the 1h expiry on its presigned S3 chunk
+      # URLs. Chunks expire mid-flight, cachix retries, watch-store re-detects
+      # the path, and it loops - davinci-resolve-studio (14.21 GiB) was pushed 32
+      # times in one 5h stretch, 133.8 GB egress in the run before that, and
+      # never completed once.
+      #
+      # -j 1 gives the current path the whole uplink; -s 256MiB cuts a 14 GiB
+      # path from ~455 chunks to ~57, so there are far fewer URLs that can
+      # expire. Large paths are now slow but finite rather than looping.
+      systemd.services.cachix-watch-store-agent.script = lib.mkForce ''
+        export CACHIX_AUTH_TOKEN="$(<"$CREDENTIALS_DIRECTORY/cachix-token")"
+        exec ${pkgs.cachix}/bin/cachix watch-store -j 1 -s 268435456 ${cache}
+      '';
     };
 }
