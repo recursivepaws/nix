@@ -230,6 +230,7 @@ in
         cameractrls-gtk4
         wl-clipboard
         baobab
+        resources
         gnome-disk-utility
         vlc
         popsicle

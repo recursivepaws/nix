@@ -23,8 +23,7 @@
             chdirToPwd = false;
             extraInstallCommands = ''
               install -Dm444 ${contents}/dj-scrobbler.desktop -t $out/share/applications
-              substituteInPlace $out/share/applications/dj-scrobbler.desktop \
-                --replace-fail 'Exec=AppRun' 'Exec=dj-scrobbler'
+              substituteInPlace $out/share/applications/dj-scrobbler.desktop --replace-fail 'Exec=AppRun' 'Exec=dj-scrobbler'
               cp -r ${contents}/usr/share/icons $out/share
             '';
           };
@@ -76,12 +75,14 @@
       in
       {
         xdg.configFile."rmpc/config.ron".source =
-          pkgs.runCommand "rmpc-config.ron" { } "${pkgs.rmpc}/bin/rmpc config > $out";
+          pkgs.runCommand "rmpc-config.ron" { }
+            "${pkgs.rmpc}/bin/rmpc config > $out";
 
         home.packages = with pkgs; [
           rmpc
           nicotine-plus
           pavucontrol
+          spotiflac
           dj-scrobbler
           mpd-playlists
         ];
