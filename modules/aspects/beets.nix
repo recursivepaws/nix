@@ -3,7 +3,7 @@
   # Config reconstructed from ~/Music/IPOD/{config.yaml,context.md,MAINTENANCE.md}.
   den.aspects.beets = {
     homeManager =
-      { pkgs, ... }:
+      { config, pkgs, ... }:
       let
         # max_bitrate = 1 makes beets hand every lossless file to this script;
         # the resolution decision lives here, via soxi, not in beets.
@@ -23,6 +23,19 @@
             ${pkgs.sox}/bin/sox "$src" -G -b 16 -C 8 -r "$target_sr" "$dst"
           fi
         '';
+
+        # Overlay for `beet -c`: one folder per playlist under ~/Music/playlists,
+        # which mpd-playlists turns into MPD stored playlists.
+        playlistsConfig = (pkgs.formats.yaml { }).generate "beets-playlists.yaml" {
+          directory = "~/Music/playlists";
+          library = "~/Music/playlists/musiclibrary.db";
+          # source_path maps each new file back to its old path, for repointing rekordbox.
+          plugins = config.programs.beets.settings.plugins ++ [ "importsource" ];          paths = {
+            default = "$playlist/$artist - $title";
+            comp = "$playlist/$artist - $title";
+            singleton = "$playlist/$artist - $title";
+          };
+        };
       in
       {
         # Default pkgs.beets enables every plugin below and wraps
@@ -143,6 +156,9 @@
             };
           };
         };
+
+        # beet-pl import -s --set playlist=<name> <dir>
+        home.shellAliases.beet-pl = "beet -c ${playlistsConfig}";
 
         # Also on user PATH for manual ffmpeg/flac steps in MAINTENANCE.md.
         home.packages = with pkgs; [
