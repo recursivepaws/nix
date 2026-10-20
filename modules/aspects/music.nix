@@ -80,6 +80,7 @@
 
         home.packages = with pkgs; [
           rmpc
+          euphonica
           nicotine-plus
           pavucontrol
           spotiflac
