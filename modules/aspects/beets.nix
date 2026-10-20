@@ -81,6 +81,7 @@
               "deezer"
               "spotify"
               "fetchart"
+              "embedart"
               "ftintitle"
               "lastgenre"
               "lyrics"
@@ -117,6 +118,13 @@
                 "amazon"
                 "albumart"
               ];
+            };
+
+            # Embed a shrunk copy in every file; cover.jpg on disk stays full-res.
+            embedart = {
+              auto = true;
+              maxwidth = 500;
+              quality = 85;
             };
 
             lyrics = {
