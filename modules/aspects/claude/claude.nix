@@ -157,30 +157,34 @@
             mcp-servers-nix.homeManagerModules.default
           ];
 
-          programs.zsh.initContent =
-            let
-              agenixHook = pkgs.writeShellScript "claude-hook-agenix" ''
-                if [ -f /run/agenix/agent-env ]; then
-                  source /run/agenix/agent-env
-                  echo "info: sourced agenix agent-env"
-                else
-                  echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
-                fi
-              '';
-            in
-            lib.mkOrder 900 ''
-              _claude_pre_hooks=(${agenixHook})
-              # caveman-wrap auto-invocation is currently disabled; `claude` runs directly.
-              # The `caveman` CLI is still installed for manual use: `caveman wrap claude`.
-              claude() {
-                for _hook in "''${_claude_pre_hooks[@]}"; do
-                  source "$_hook"
-                done
-                command claude "$@"
-              }
-            '';
-
           programs = {
+            # TODO: make conditional on the presence of the playwright mcp
+            git.ignores = [
+              ".playwright-mcp/"
+            ];
+            zsh.initContent =
+              let
+                agenixHook = pkgs.writeShellScript "claude-hook-agenix" ''
+                  if [ -f /run/agenix/agent-env ]; then
+                    source /run/agenix/agent-env
+                    echo "info: sourced agenix agent-env"
+                  else
+                    echo "warning: /run/agenix/agent-env not found, agent environment variables may be missing" >&2
+                  fi
+                '';
+              in
+              lib.mkOrder 900 ''
+                _claude_pre_hooks=(${agenixHook})
+                # caveman-wrap auto-invocation is currently disabled; `claude` runs directly.
+                # The `caveman` CLI is still installed for manual use: `caveman wrap claude`.
+                claude() {
+                  for _hook in "''${_claude_pre_hooks[@]}"; do
+                    source "$_hook"
+                  done
+                  command claude "$@"
+                }
+              '';
+
             claude-tools = {
               # Enable plugin manager
               claude-plugins = {
@@ -287,9 +291,7 @@
             '';
           }
           # Attr name = skill name, as it appears under ~/.claude/skills.
-          // lib.mapAttrs' (
-            name: source: lib.nameValuePair ".claude/skills/${name}" { inherit source; }
-          ) {
+          // lib.mapAttrs' (name: source: lib.nameValuePair ".claude/skills/${name}" { inherit source; }) {
             caveman = "${inputs.caveman}/skills/caveman";
             ponytail = "${inputs.ponytail}/skills/ponytail";
             nixos-managing = "${inputs.nixos-management-skill}/nixos-managing";
