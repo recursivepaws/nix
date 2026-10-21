@@ -16,6 +16,14 @@
           pnpm
         ];
 
+        # Share vera's music library with work. Host-specific: vera doesn't exist on amanita.
+        # Write access comes from a one-off `setfacl -R -m u:work:rwX -m d:u:work:rwX -m d:u:vera:rwX ~/Music` as vera.
+        home-manager.users.work =
+          { config, ... }:
+          {
+            home.file.Music.source = config.lib.file.mkOutOfStoreSymlink "/home/vera/Music";
+          };
+
         programs.obs-studio = {
           enable = true;
           enableVirtualCamera = true;

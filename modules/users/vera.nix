@@ -37,6 +37,8 @@
       };
 
     user = {
+      # Traverse-only, so work's ~/Music symlink (hericium.nix) can reach /home/vera/Music.
+      homeMode = "711";
       extraGroups = [
         "video"
         "audio"
