@@ -74,6 +74,12 @@
         };
       in
       {
+        # Euphonica defaults to localhost:6600; the socket also loads the file:// playlists.
+        dconf.settings."io/github/htkhiem/Euphonica/client" = {
+          mpd-use-unix-socket = true;
+          mpd-unix-socket = mpdSocket;
+        };
+
         xdg.configFile."rmpc/config.ron".source =
           pkgs.runCommand "rmpc-config.ron" { }
             "${pkgs.rmpc}/bin/rmpc config > $out";
@@ -93,10 +99,9 @@
             musicDirectory = "${config.home.homeDirectory}/Music/beets";
             # Also exports MPD_HOST, which is how rmpc ends up on the socket.
             network.listenAddress = mpdSocket;
+            # No TCP: every user on a host gets this aspect, and two mpds can't share 127.0.0.1:6600.
+            # The loser's mpdscribble then scrobbles the other user's plays.
             extraConfig = ''
-              # Additive: home-manager appends extraConfig after its own bind_to_address.
-              # TCP stays up for mpdscribble and mpd-mpris.
-              bind_to_address "127.0.0.1"
               audio_output {
                 type    "pipewire"
                 name    "pipewire"
@@ -107,13 +112,17 @@
             '';
           };
 
-          mpd-mpris.enable = true;
+          mpd-mpris = {
+            enable = true;
+            settings = {
+              network = "unix";
+              host = mpdSocket;
+            };
+          };
           mpdscribble = {
             enable = true;
             verbose = 3;
-            # Defaults to mpd's listenAddress, and a non-TCP host drops After=mpd.service.
-            # This unit has no Restart=, so it would stay dead.
-            host = "127.0.0.1";
+            host = mpdSocket;
             endpoints = {
               "last.fm" = {
                 passwordFile = "/run/agenix/lastfm";
@@ -130,6 +139,9 @@
         # A .path unit can't cover this: a new track bumps the subfolder's mtime.
         # Watching ~/Music/playlists only fires when a folder appears or disappears.
         systemd.user = {
+          # Both modules only order after mpd for a TCP localhost host.
+          services.mpd-mpris.Unit.After = [ "mpd.service" ];
+          services.mpdscribble.Unit.After = [ "mpd.service" ];
           services.mpd-playlists = {
             Unit.Description = "Generate MPD stored playlists from ~/Music/playlists";
             Service = {
