@@ -27,7 +27,8 @@ in
       # PERF: post-build-hook blocks the build loop and fires per derivation, so closures re-walk and big paths upload twice (wine-rekordbox, 779 MiB, twice in one rebuild).
       # NOTE: watch-store pushes anything new in the store, so paths substituted from substitutions.nix get mirrored into our cache too.
       services.cachix-watch-store = {
-        enable = true;
+        # TODO: re-enable once davinci-resolve-studio is excluded or pushes reliably - it keeps failing the upload.
+        enable = false;
         cacheName = cache;
         # WARN: bare token only - the module reads the whole file as the value.
         cachixTokenFile = config.age.secrets.cachix-token.path;
@@ -35,9 +36,12 @@ in
 
       # PERF: default -j 8 / -s 32MiB splits a home uplink 8 ways, so chunks hit the 1h presigned-URL expiry and watch-store loops (davinci-resolve-studio, 14.21 GiB, 32 pushes in 5h, never finished).
       # The module takes no extra args, hence mkForce: -j 1 with 256MiB chunks cuts a 14 GiB path from ~455 chunks to ~57.
-      systemd.services.cachix-watch-store-agent.script = lib.mkForce ''
-        export CACHIX_AUTH_TOKEN="$(<"$CREDENTIALS_DIRECTORY/cachix-token")"
-        exec ${pkgs.cachix}/bin/cachix watch-store -j 1 -s 268435456 ${cache}
-      '';
+      # Guarded so the override does not leave an orphan unit behind while the agent is disabled.
+      systemd.services.cachix-watch-store-agent = lib.mkIf config.services.cachix-watch-store.enable {
+        script = lib.mkForce ''
+          export CACHIX_AUTH_TOKEN="$(<"$CREDENTIALS_DIRECTORY/cachix-token")"
+          exec ${pkgs.cachix}/bin/cachix watch-store -j 1 -s 268435456 ${cache}
+        '';
+      };
     };
 }
