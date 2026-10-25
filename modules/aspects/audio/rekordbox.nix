@@ -230,6 +230,9 @@ in
               mv -- "$upmgr" "$upmgr.disabled"
             fi
 
+            # rekordbox leaves FWUPDM and wineserver running after it exits, and the next launch reuses their dead virtual desktop and dies with X BadWindow.
+            trap 'wineserver -k 2>/dev/null || true' EXIT
+
             # One X window holding every Wine window, per the driver comment above.
             # Size with RB_DESKTOP=WIDTHxHEIGHT, or RB_DESKTOP=off for native Wayland toplevels; `rekordbox-probe` tells you whether they stayed on screen.
             if [ "''${RB_DESKTOP:-}" = "off" ]; then
