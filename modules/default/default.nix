@@ -93,6 +93,7 @@ in
         fd
         clang
         htop
+        jq
 
         # Dev toolchain + media tools shared by all hosts
         gcc # TODO: fix nvim building without these (gcc, gnumake)
