@@ -28,6 +28,7 @@ in
     gimp
     keyboard
     software-repos
+    ollama
   ];
 
   # Allow unfree packages
