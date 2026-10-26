@@ -712,6 +712,22 @@
         "type": "github"
       }
     },
+    "resumeskills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781853629,
+        "narHash": "sha256-Mv1rSfP5TzeQiyt5+KLSJqPWBr7w6dEgqt4PuGE3hAc=",
+        "owner": "paramchoudhary",
+        "repo": "resumeskills",
+        "rev": "74ae19e7c62b0516d1c298328e5544976c12da5d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "paramchoudhary",
+        "repo": "resumeskills",
+        "type": "github"
+      }
+    },
     "reverse-api-engineer": {
       "flake": false,
       "locked": {
@@ -758,6 +774,7 @@
         "obsidian-extensions": "obsidian-extensions",
         "ponytail": "ponytail",
         "python-skills": "python-skills",
+        "resumeskills": "resumeskills",
         "reverse-api-engineer": "reverse-api-engineer",
         "spicetify-nix": "spicetify-nix",
         "unsplash-mcp": "unsplash-mcp"

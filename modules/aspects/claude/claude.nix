@@ -50,6 +50,11 @@
       url = "github:kalil0321/reverse-api-engineer/0f37681741faf2670310048c92a00d5bfb1de822";
       flake = false;
     };
+    # Resume, cover letter, interview and job-search skills.
+    resumeskills = {
+      url = "github:paramchoudhary/resumeskills";
+      flake = false;
+    };
     # Unsplash photo search MCP server (plain server.py, deps from nixpkgs).
     unsplash-mcp = {
       url = "github:cevatkerim/unsplash-mcp";
@@ -306,7 +311,13 @@
             code-quality = "${inputs.python-skills}/skills/python/code-quality";
             testing-strategy = "${inputs.python-skills}/skills/python/testing-strategy";
             security-audit = "${inputs.python-skills}/skills/python/security-audit";
-          };
+          }
+          # Resume/career skills: personal, so vera only. Links every dir under skills/.
+          // lib.optionalAttrs (user.userName == "vera") (
+            lib.mapAttrs' (
+              name: _: lib.nameValuePair ".claude/skills/${name}" { source = "${inputs.resumeskills}/skills/${name}"; }
+            ) (builtins.readDir "${inputs.resumeskills}/skills")
+          );
 
           # Linking from the working copy means editing a skill takes effect next session, at the cost of no per-machine pin - refresh elsewhere with `git -C ~/Software/skills pull`.
           # The /nix/store guard leaves a pinned third-party skill of the same name alone rather than clobbering it every rebuild.

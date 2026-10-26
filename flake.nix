@@ -79,6 +79,10 @@
       url = "github:wdm0006/python-skills";
       flake = false;
     };
+    resumeskills = {
+      url = "github:paramchoudhary/resumeskills";
+      flake = false;
+    };
     reverse-api-engineer = {
       url = "github:kalil0321/reverse-api-engineer/0f37681741faf2670310048c92a00d5bfb1de822";
       flake = false;
