@@ -192,6 +192,15 @@
                 with config.lib.niri.actions;
                 let
                   sh = spawn "sh" "-c";
+                  # focus-column-left/right land on the column's last-active window.
+                  # Re-focus by row afterwards to stay in the same row (niri clamps it).
+                  focus-row =
+                    dir:
+                    sh ''
+                      row=$(niri msg -j focused-window | jq '.layout.pos_in_scrolling_layout[1] // empty')
+                      niri msg action focus-column-${dir}
+                      [ -n "$row" ] && niri msg action focus-window-in-column "$row"
+                    '';
                 in
                 {
                   "Mod+Shift+slash".action = show-hotkey-overlay;
@@ -211,10 +220,10 @@
 
                   "Mod+Shift+V".action = toggle-window-floating;
 
-                  "Mod+H".action = focus-column-left;
+                  "Mod+H".action = focus-row "left";
                   "Mod+J".action = focus-window-down;
                   "Mod+K".action = focus-window-up;
-                  "Mod+L".action = focus-column-right;
+                  "Mod+L".action = focus-row "right";
 
                   "Mod+Ctrl+H".action = move-column-left;
                   "Mod+Ctrl+J".action = move-window-down;
