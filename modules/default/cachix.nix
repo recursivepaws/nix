@@ -2,13 +2,13 @@ let
   # Personal cachix cache - every host pushes what it builds, all hosts pull.
   cache = "recursivepaws";
   publicKey = "recursivepaws.cachix.org-1:TOIUVFStMLMVHRQxs0+Sv5qzJMNMOO0KdubeaDWGCVs=";
+  socket = "/run/cachix-daemon/daemon.sock";
 in
 {
   den.default.nixos =
     {
       pkgs,
       config,
-      lib,
       ...
     }:
     {
@@ -24,23 +24,39 @@ in
         mode = "0440";
       };
 
-      # PERF: post-build-hook blocks the build loop and fires per derivation, so closures re-walk and big paths upload twice (wine-rekordbox, 779 MiB, twice in one rebuild).
-      # NOTE: watch-store pushes anything new in the store, so paths substituted from substitutions.nix get mirrored into our cache too.
-      services.cachix-watch-store = {
-        # TODO: re-enable once davinci-resolve-studio is excluded or pushes reliably - it keeps failing the upload.
-        enable = false;
-        cacheName = cache;
-        # WARN: bare token only - the module reads the whole file as the value.
-        cachixTokenFile = config.age.secrets.cachix-token.path;
-      };
+      # NOTE: replaces cachix-watch-store, which has no exclude flag and kept dying on davinci-resolve-studio (14.21 GiB, 32 pushes in 5h, never finished).
+      # Hook only enqueues over the socket so builds never block; the daemon serializes uploads and skips paths already in the cache.
+      nix.settings.post-build-hook = pkgs.writeShellScript "cachix-enqueue" ''
+        set -f
+        paths=
+        for p in $OUT_PATHS; do
+          case $p in
+            *-davinci-resolve*) ;;
+            *) paths="$paths $p" ;;
+          esac
+        done
+        [ -n "$paths" ] || exit 0
+        ${pkgs.coreutils}/bin/timeout 5 ${pkgs.cachix}/bin/cachix daemon push --socket ${socket} $paths \
+          || echo "cachix daemon unavailable, built outputs not queued" >&2
+      '';
 
-      # PERF: default -j 8 / -s 32MiB splits a home uplink 8 ways, so chunks hit the 1h presigned-URL expiry and watch-store loops (davinci-resolve-studio, 14.21 GiB, 32 pushes in 5h, never finished).
-      # The module takes no extra args, hence mkForce: -j 1 with 256MiB chunks cuts a 14 GiB path from ~455 chunks to ~57.
-      # Guarded so the override does not leave an orphan unit behind while the agent is disabled.
-      systemd.services.cachix-watch-store-agent = lib.mkIf config.services.cachix-watch-store.enable {
-        script = lib.mkForce ''
+      # PERF: -j 1 with 256MiB chunks so a home uplink is not split 8 ways into chunks that outlive the 1h presigned-URL expiry.
+      systemd.services.cachix-daemon = {
+        description = "Cachix push daemon for ${cache}";
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        serviceConfig = {
+          RuntimeDirectory = "cachix-daemon";
+          RuntimeDirectoryMode = "0700";
+          LoadCredential = [ "cachix-token:${config.age.secrets.cachix-token.path}" ];
+          KillSignal = "SIGINT";
+          Restart = "on-failure";
+          RestartSec = "30s";
+        };
+        script = ''
           export CACHIX_AUTH_TOKEN="$(<"$CREDENTIALS_DIRECTORY/cachix-token")"
-          exec ${pkgs.cachix}/bin/cachix watch-store -j 1 -s 268435456 ${cache}
+          exec ${pkgs.cachix}/bin/cachix daemon run --socket ${socket} --no-remote-stop -j 1 -s 268435456 ${cache}
         '';
       };
     };
