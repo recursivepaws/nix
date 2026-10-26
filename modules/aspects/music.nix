@@ -10,7 +10,7 @@
               url = "https://github.com/ericcastro/dj-scrobbler/releases/download/v${version}/DJ-Scrobbler-${version}.AppImage";
               hash = "sha256-j03yPcUcmaPPvIIY4maXSMfUVbL0qX+eWOJHpPUxXps=";
             };
-            contents = pkgs.appimageTools.extractType2 {
+            contents = pkgs.appimageTools.extract {
               inherit version src;
               pname = "dj-scrobbler";
             };
