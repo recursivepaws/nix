@@ -79,6 +79,18 @@
       url = "github:DietrichGebert/ponytail";
       flake = false;
     };
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        pyproject-nix.follows = "pyproject-nix";
+        uv2nix.follows = "uv2nix";
+      };
+    };
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     python-skills = {
       url = "github:wdm0006/python-skills";
       flake = false;
@@ -98,6 +110,13 @@
     unsplash-mcp = {
       url = "github:cevatkerim/unsplash-mcp";
       flake = false;
+    };
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        pyproject-nix.follows = "pyproject-nix";
+      };
     };
   };
 }

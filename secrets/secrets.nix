@@ -18,4 +18,6 @@ in
   "secrets.age".publicKeys = keys;
   "lastfm.age".publicKeys = keys;
   "cachix-token.age".publicKeys = keys;
+  "google-oauth-client-work.age".publicKeys = keys;
+  "google-oauth-client-vera.age".publicKeys = keys;
 }
