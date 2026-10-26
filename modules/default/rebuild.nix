@@ -7,10 +7,19 @@
           set -euo pipefail
 
           HOST=$(hostname)
+          case "''${1:-}" in
+            switch|boot|test|build) ACTION=$1; shift ;;
+            *) ACTION=switch ;;
+          esac
           HM_SERVICE="home-manager-$(whoami).service"
           NIXOS_DIR="/etc/nixos"
           MAX_RETRIES=5
           attempt=0
+
+          # nh auths silently and then evaluates quietly for a while.
+          # Validate sudo up front so accepted auth is visible.
+          sudo -v
+          echo "rebuild: auth accepted, starting $ACTION"
 
           while true; do
             if [ "$attempt" -ge "$MAX_RETRIES" ]; then
@@ -21,7 +30,7 @@
             start_time=$(date -Is)
             attempt=$((attempt + 1))
 
-            if (cd "$NIXOS_DIR" && nix run ".#''${HOST}" -- switch "$@"); then
+            if (cd "$NIXOS_DIR" && nix run ".#''${HOST}" -- "$ACTION" "$@"); then
               exit 0
             fi
 
