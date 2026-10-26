@@ -70,11 +70,11 @@
         # Packaged from the upstream .deb rather than source (chrisle/rbxport): Rust plus a pnpm/web build with a vendored rubberband.
         rbxport = pkgs.stdenv.mkDerivation (finalAttrs: {
           pname = "rbxport";
-          version = "1.6.0";
+          version = "1.9.0";
 
           src = pkgs.fetchurl {
             url = "https://download.rbxport.com/rbxport-${finalAttrs.version}-linux-x86_64.deb";
-            hash = "sha256-bfxKeBfQVBT6zVB5R/RI6zNoIx2z607QnAPSsqLSuIQ=";
+            hash = "sha256-ttfSoL21UqSfK4Dlf0vnzNoyfI7S+QL9CuLfLSHj9pk=";
           };
 
           nativeBuildInputs = with pkgs; [
@@ -83,24 +83,26 @@
             wrapGAppsHook3
           ];
 
-          buildInputs = with pkgs; [
-            alsa-lib
-            cairo
-            dbus
-            gdk-pixbuf
-            glib
-            gtk3
-            libsoup_3
-            webkitgtk_4_1
-            stdenv.cc.cc.lib
-          ]
-          # Without these there is no GST_PLUGIN_SYSTEM_PATH_1_0 and rbxport fails startup with "GStreamer element appsink not found"; webkitgtk needs the same plugins for media playback.
-          # WARN: not gst-plugins-bad - its LV2 wrapper element makes GStreamer scan every installed LV2 plugin at registry build (884ms -> 5175ms startup here).
-          ++ (with pkgs.gst_all_1; [
-            gstreamer
-            gst-plugins-base
-            gst-plugins-good
-          ]);
+          buildInputs =
+            with pkgs;
+            [
+              alsa-lib
+              cairo
+              dbus
+              gdk-pixbuf
+              glib
+              gtk3
+              libsoup_3
+              webkitgtk_4_1
+              stdenv.cc.cc.lib
+            ]
+            # Without these there is no GST_PLUGIN_SYSTEM_PATH_1_0 and rbxport fails startup with "GStreamer element appsink not found"; webkitgtk needs the same plugins for media playback.
+            # WARN: not gst-plugins-bad - its LV2 wrapper element makes GStreamer scan every installed LV2 plugin at registry build (884ms -> 5175ms startup here).
+            ++ (with pkgs.gst_all_1; [
+              gstreamer
+              gst-plugins-base
+              gst-plugins-good
+            ]);
 
           unpackCmd = "dpkg-deb -x $src .";
           sourceRoot = ".";
@@ -129,15 +131,15 @@
 
           # QT_QPA_PLATFORMTHEME=gtk3 makes Mixxx abort.
           # TODO: maybe fix upstream?
-          (pkgs.symlinkJoin {
-            name = "mixxx-${mixxx.version}";
-            paths = [ mixxx ];
-            nativeBuildInputs = [ pkgs.makeWrapper ];
-            postBuild = ''
-              wrapProgram $out/bin/mixxx --prefix XDG_DATA_DIRS : \
-                "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}"
-            '';
-          })
+          # (pkgs.symlinkJoin {
+          #   name = "mixxx-${mixxx.version}";
+          #   paths = [ mixxx ];
+          #   nativeBuildInputs = [ pkgs.makeWrapper ];
+          #   postBuild = ''
+          #     wrapProgram $out/bin/mixxx --prefix XDG_DATA_DIRS : \
+          #       "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}"
+          #   '';
+          # })
         ];
 
         # Symlink rather than `masterDbDirectory` in rekordbox3.settings: rbxport rewrites that file itself on a library switch, so it is not ours to manage.
