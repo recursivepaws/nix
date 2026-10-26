@@ -234,6 +234,23 @@
         "type": "github"
       }
     },
+    "google-workspace-mcp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793025326,
+        "narHash": "sha256-6aTkvFCiuHW9jaGJq27dH+Dr5L3hFRxWp3u4fmeNZ1E=",
+        "owner": "taylorwilsdon",
+        "repo": "google_workspace_mcp",
+        "rev": "0801afb3e58f51754f5a40161c07675f50565448",
+        "type": "github"
+      },
+      "original": {
+        "owner": "taylorwilsdon",
+        "ref": "v2.2.1",
+        "repo": "google_workspace_mcp",
+        "type": "github"
+      }
+    },
     "hercules-ci-effects": {
       "inputs": {
         "flake-parts": [
@@ -301,13 +318,13 @@
       "locked": {
         "lastModified": 1788467110,
         "narHash": "sha256-ljEMTXP/rH0tOvDzc9gzwww6KcHRPRnEHzd9lK48V7s=",
-        "owner": "vic",
+        "owner": "denful",
         "repo": "import-tree",
         "rev": "eb1b52eaecc57f7c136d07ae8a93e724dfecac46",
         "type": "github"
       },
       "original": {
-        "owner": "vic",
+        "owner": "denful",
         "repo": "import-tree",
         "type": "github"
       }
@@ -601,11 +618,11 @@
         "narHash": "sha256-MTJCMrhDFb+GRbLxBPTp8kB4dDlO+egmQ5qsJgYuaWw=",
         "rev": "f20cd90e28fe0403873f473b29e42662cd86e8c4",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1093421.f20cd90e28fe/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1093421.f20cd90e28fe/nixexprs.tar.zst"
       },
       "original": {
         "type": "tarball",
-        "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
+        "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.zst"
       }
     },
     "nixpkgs_5": {
@@ -756,6 +773,7 @@
         "direnv-instant": "direnv-instant",
         "flake-file": "flake-file",
         "flake-parts": "flake-parts_2",
+        "google-workspace-mcp": "google-workspace-mcp",
         "home-manager": "home-manager",
         "humanizer": "humanizer",
         "import-tree": "import-tree",

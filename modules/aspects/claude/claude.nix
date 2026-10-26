@@ -65,9 +65,12 @@
   den.aspects.claude =
     { user, ... }:
     {
+      includes = [
+        den.aspects.google-workspace
+      ]
       # Hevy workout-tracker MCP: personal, so vera only.
       # NOTE: hasAspect is cyclic inside `includes`, hence the name check.
-      includes = lib.optional (user != null && user.userName == "vera") den.aspects.hevy;
+      ++ lib.optional (user != null && user.userName == "vera") den.aspects.hevy;
 
       nixos = {
         environment.etc."claude-code/managed-settings.json".source =
@@ -267,6 +270,12 @@
             figma = {
               url = "https://mcp.figma.com/mcp";
             };
+            notion = {
+              url = "https://mcp.notion.com/mcp";
+            };
+            launchdarkly = {
+              url = "https://mcp.launchdarkly.com/mcp/launchdarkly";
+            };
             unsplash = {
               command = "${unsplashPython}/bin/python";
               args = [ "${inputs.unsplash-mcp}/server.py" ];
@@ -313,9 +322,10 @@
             security-audit = "${inputs.python-skills}/skills/python/security-audit";
           }
           # Resume/career skills: personal, so vera only. Links every dir under skills/.
-          // lib.optionalAttrs (user.userName == "vera") (
+          // lib.optionalAttrs (user.userName == "vera" || true) (
             lib.mapAttrs' (
-              name: _: lib.nameValuePair ".claude/skills/${name}" { source = "${inputs.resumeskills}/skills/${name}"; }
+              name: _:
+              lib.nameValuePair ".claude/skills/${name}" { source = "${inputs.resumeskills}/skills/${name}"; }
             ) (builtins.readDir "${inputs.resumeskills}/skills")
           );
 
