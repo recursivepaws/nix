@@ -231,7 +231,16 @@ in
         cameractrls
         cameractrls-gtk4
         wl-clipboard
+        # Elevate a GUI app via polkit (noctalia agent shows the prompt).
+        # Forward the whole environment so HOME-based gtk theming survives.
+        (writeShellScriptBin "pkexec-gui" ''
+          mapfile -d "" vars < <(env -0)
+          exec pkexec env "''${vars[@]}" "$@"
+        '')
         baobab
+        (hiPrio (writeShellScriptBin "baobab" ''
+          exec pkexec-gui ${baobab}/bin/baobab "$@"
+        ''))
         resources
         gnome-disk-utility
         vlc
