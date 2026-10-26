@@ -10,7 +10,7 @@
         '';
 
         # wrapSudo pkg: same package, but every binary elevates via pkexec-gui.
-        # Desktop files with an absolute store-path Exec would bypass the wrapper.
+        # Desktop files pointing at the original store path are rewritten too.
         wrapSudo =
           pkg:
           final.symlinkJoin {
@@ -25,6 +25,15 @@
               exec ${final.pkexec-gui}/bin/pkexec-gui ${pkg}/bin/$name "\$@"
               EOF
                 chmod +x "$f"
+              done
+
+              for d in $out/share/applications/*.desktop; do
+                [ -e "$d" ] || continue
+                if grep -q "${pkg}/bin" "$d"; then
+                  real=$(readlink -f "$d")
+                  rm "$d"
+                  sed "s|${pkg}/bin|$out/bin|g" "$real" > "$d"
+                fi
               done
             '';
           };

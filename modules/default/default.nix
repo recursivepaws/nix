@@ -235,8 +235,8 @@ in
         resources
         gnome-disk-utility
         vlc
-        popsicle
-        gparted
+        (wrapSudo popsicle)
+        (wrapSudo gparted)
       ];
     };
 }
