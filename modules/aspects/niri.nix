@@ -193,13 +193,22 @@
                 let
                   sh = spawn "sh" "-c";
                   # focus-column-left/right land on the column's last-active window.
-                  # Re-focus by row afterwards to stay in the same row (niri clamps it).
+                  # Pick the same row ourselves (clamped to the bottom) so focus moves once.
                   focus-row =
-                    dir:
+                    dir: d:
                     sh ''
-                      row=$(niri msg -j focused-window | jq '.layout.pos_in_scrolling_layout[1] // empty')
-                      niri msg action focus-column-${dir}
-                      [ -n "$row" ] && niri msg action focus-window-in-column "$row"
+                      id=$(niri msg -j windows | jq --argjson d ${d} '
+                        (.[] | select(.is_focused)) as $f
+                        | ($f.layout.pos_in_scrolling_layout // empty) as [$col, $row]
+                        | map(select(.workspace_id == $f.workspace_id
+                            and .layout.pos_in_scrolling_layout[0] == $col + $d
+                            and .layout.pos_in_scrolling_layout[1] <= $row))
+                        | max_by(.layout.pos_in_scrolling_layout[1]).id // empty')
+                      if [ -n "$id" ]; then
+                        niri msg action focus-window --id "$id"
+                      else
+                        niri msg action focus-column-${dir}
+                      fi
                     '';
                 in
                 {
@@ -220,10 +229,10 @@
 
                   "Mod+Shift+V".action = toggle-window-floating;
 
-                  "Mod+H".action = focus-row "left";
+                  "Mod+H".action = focus-row "left" "-1";
                   "Mod+J".action = focus-window-down;
                   "Mod+K".action = focus-window-up;
-                  "Mod+L".action = focus-row "right";
+                  "Mod+L".action = focus-row "right" "1";
 
                   "Mod+Ctrl+H".action = move-column-left;
                   "Mod+Ctrl+J".action = move-window-down;
