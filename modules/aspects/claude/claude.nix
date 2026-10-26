@@ -259,6 +259,9 @@
             sanity = {
               url = "https://mcp.sanity.io";
             };
+            figma = {
+              url = "https://mcp.figma.com/mcp";
+            };
             unsplash = {
               command = "${unsplashPython}/bin/python";
               args = [ "${inputs.unsplash-mcp}/server.py" ];
