@@ -68,9 +68,12 @@
       # TODO: re-enable for vera once secrets/google-oauth-client-vera.age exists.
       includes =
         lib.optional (user != null && user.userName == "work") den.aspects.google-workspace
-      # Hevy workout-tracker MCP: personal, so vera only.
+      # Hevy workout-tracker and LinkedIn MCPs: personal, so vera only.
       # NOTE: hasAspect is cyclic inside `includes`, hence the name check.
-      ++ lib.optional (user != null && user.userName == "vera") den.aspects.hevy;
+      ++ lib.optionals (user != null && user.userName == "vera") [
+        den.aspects.hevy
+        den.aspects.linkedin
+      ];
 
       nixos = {
         environment.etc."claude-code/managed-settings.json".source =
