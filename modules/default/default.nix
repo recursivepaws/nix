@@ -25,7 +25,7 @@ in
     terminal
     browser
     claude
-    gimp
+    artcraft
     keyboard
     software-repos
     ollama
