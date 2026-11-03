@@ -11,6 +11,7 @@
 
     nixos =
       {
+        config,
         lib,
         user ? null,
         ...
@@ -58,6 +59,15 @@
                 ];
                 # .obsidian holds home-manager-managed store symlinks, which syncthing can't write.
                 ignorePatterns = [ ".obsidian" ];
+              };
+              # ampulex owns the rekordbox DB; other hosts only mirror it, so their local edits never propagate back.
+              rbxport = {
+                path = "~/.local/share/rbxport/rekordbox";
+                type = if config.networking.hostName == "ampulex" then "sendonly" else "receiveonly";
+                devices = [
+                  "hericium"
+                  "ampulex"
+                ];
               };
             };
           };
