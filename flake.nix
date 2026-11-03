@@ -45,10 +45,6 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    monarch-mcp-server = {
-      url = "github:robcerda/monarch-mcp-server";
-      flake = false;
-    };
     niri-flake = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";

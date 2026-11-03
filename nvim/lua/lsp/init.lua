@@ -19,7 +19,6 @@ require("lsp.zls")
 
 -- XXX: Terminal mental disorders
 -- require("lsp.eslint")
--- require("lsp.tsls")
 
 -- INFO: Treatable mental disorders
 require("lsp.html")

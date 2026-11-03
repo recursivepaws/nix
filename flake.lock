@@ -282,22 +282,6 @@
         "type": "github"
       }
     },
-    "monarch-mcp-server": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791784703,
-        "narHash": "sha256-pxjsF5Qs4KFRx41IbPTbY3sW9e3MXEfWoNFimOMITIw=",
-        "owner": "robcerda",
-        "repo": "monarch-mcp-server",
-        "rev": "994d1a124e68b3f3522a4f7945c5828ffb16d081",
-        "type": "github"
-      },
-      "original": {
-        "owner": "robcerda",
-        "repo": "monarch-mcp-server",
-        "type": "github"
-      }
-    },
     "niri-flake": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -728,7 +712,6 @@
         "humanizer": "humanizer",
         "import-tree": "import-tree",
         "mcp-servers-nix": "mcp-servers-nix",
-        "monarch-mcp-server": "monarch-mcp-server",
         "niri-flake": "niri-flake",
         "nix-flatpak": "nix-flatpak",
         "nixos-hardware": "nixos-hardware",

@@ -195,11 +195,14 @@
           tombi
           nil
           tinymist
+          typst
           zls
           # html/css/json/eslint servers
           vscode-langservers-extracted
-          # bin: tsgo; project-local wins via pnpm_or_path
+          # bin: tsc (Go port, run as tsgo LSP); project-local tsgo wins via pnpm_or_path
           typescript
+          vtsls
+          graphql-language-service-cli
           biome
           yaml-language-server
           gh-actions-language-server

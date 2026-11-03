@@ -68,11 +68,11 @@
       # TODO: re-enable for vera once secrets/google-oauth-client-vera.age exists.
       includes =
         lib.optional (user != null && user.userName == "work") den.aspects.google-workspace
-      # Hevy workout-tracker and LinkedIn MCPs: personal, so vera only.
+      # Hevy workout-tracker and job-search MCPs: personal, so vera only.
       # NOTE: hasAspect is cyclic inside `includes`, hence the name check.
       ++ lib.optionals (user != null && user.userName == "vera") [
         den.aspects.hevy
-        den.aspects.linkedin
+        den.aspects.jobs
       ];
 
       nixos = {
@@ -286,6 +286,10 @@
                 UNSPLASH_ACCESS_KEY = "\${UNSPLASH_ACCESS_KEY}";
               };
             };
+          }
+          # Monarch's official remote MCP: personal finance, so vera only. OAuth sign-in on first use.
+          // lib.optionalAttrs (user.userName == "vera") {
+            monarch.url = "https://api.monarch.com/mcp";
           };
 
           home.packages = [

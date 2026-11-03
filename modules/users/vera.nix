@@ -12,7 +12,6 @@
       windows-vst
       native-vst-plugins
       davinci
-      monarch
       varnam
       gaming
       crypto
