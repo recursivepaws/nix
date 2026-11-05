@@ -19,7 +19,6 @@
     in
     {
       home.packages = with pkgs; [
-        gnome-shell
         sassc
       ];
 

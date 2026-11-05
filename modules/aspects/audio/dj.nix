@@ -1,14 +1,5 @@
 {
   den.aspects.dj = {
-    nixos =
-      { pkgs, ... }:
-      {
-        # Mixxx's udev rule grants non-root hidraw access to the DDJ-FLX4
-        services.udev.packages = [ pkgs.mixxx ];
-        # JACK backend, so Mixxx doesn't fight pipewire for exclusive hw access
-        services.pipewire.jack.enable = true;
-      };
-
     homeManager =
       {
         pkgs,
@@ -17,25 +8,6 @@
         ...
       }:
       let
-        # Built off the unreleased 2.6 branch (nixpkgs stops at 2.5.6) because the stock FLX4 mapping leaves Pad FX unimplemented and ElHanko's, which does implement it, needs 2.6's Stems controls.
-        # ENGINEPRIME=OFF because 2.6 pins libdjinterop 0.27.1 exact and nixpkgs has 0.26.1; rekordbox USB export goes through baken/rbxport anyway.
-        mixxx = pkgs.mixxx.overrideAttrs (old: {
-          version = "2.6-unstable-2026-10-06";
-
-          src = pkgs.fetchFromGitHub {
-            owner = "mixxxdj";
-            repo = "mixxx";
-            rev = "20fdcbfc6f16d86d495dc8da5fc515ed19b25a66";
-            hash = "sha256-8Fxj+HxE+aMD0PQpqkbIATAz8G4ip4dsbYAyqfMpk2Y=";
-          };
-
-          # Upstream nixpkgs patches the 2.5 CMakeLists to accept a newer
-          # libdjinterop, marked "Should be removed when bumping to 2.6.x".
-          postPatch = "";
-
-          cmakeFlags = old.cmakeFlags ++ [ "-DENGINEPRIME=OFF" ];
-        });
-
         # Mixxx reads a rekordbox USB but has never written one (mixxxdj/mixxx#9463, open since 2018).
         # baken writes the legacy export.pdb + PIONEER/USBANLZ format straight from a rekordbox XML, with --generate-analysis filling in waveforms for tracks rekordbox never touched.
         baken = pkgs.rustPlatform.buildRustPackage (finalAttrs: {
@@ -128,18 +100,6 @@
         home.packages = [
           baken
           rbxport
-
-          # QT_QPA_PLATFORMTHEME=gtk3 makes Mixxx abort.
-          # TODO: maybe fix upstream?
-          # (pkgs.symlinkJoin {
-          #   name = "mixxx-${mixxx.version}";
-          #   paths = [ mixxx ];
-          #   nativeBuildInputs = [ pkgs.makeWrapper ];
-          #   postBuild = ''
-          #     wrapProgram $out/bin/mixxx --prefix XDG_DATA_DIRS : \
-          #       "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}:${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}"
-          #   '';
-          # })
         ];
 
         # Symlink rather than `masterDbDirectory` in rekordbox3.settings: rbxport rewrites that file itself on a library switch, so it is not ours to manage.

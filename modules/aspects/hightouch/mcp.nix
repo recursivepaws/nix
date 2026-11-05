@@ -22,7 +22,7 @@
             command = "${npxFromHome}";
             args = [
               "-y"
-              "@circleci/mcp-server-circleci@latest"
+              "@circleci/mcp-server-circleci@0.20.0"
             ];
             env = {
               CIRCLECI_TOKEN = "\${CIRCLECI_TOKEN}";
@@ -38,7 +38,7 @@
             command = "${npxFromHome}";
             args = [
               "-y"
-              "@winor30/mcp-server-datadog"
+              "@winor30/mcp-server-datadog@1.8.0"
             ];
             env = {
               DATADOG_API_KEY = "\${DATADOG_API_KEY}";
@@ -49,7 +49,7 @@
             command = "${npxFromHome}";
             args = [
               "-y"
-              "slack-mcp-server@latest"
+              "slack-mcp-server@1.3.0"
               "--transport"
               "stdio"
             ];
@@ -62,7 +62,7 @@
             command = "${npxFromHome}";
             args = [
               "-y"
-              "@hightouchio/internal-mcp@latest"
+              "@hightouchio/internal-mcp@1.2.2"
             ];
             env = {
               HIGHTOUCH_API_KEY = "\${HIGHTOUCH_API_KEY}";
