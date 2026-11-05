@@ -34,6 +34,7 @@
             devices = {
               hericium.id = "DF42VLZ-AEK3KVC-4LMFQ5F-Z4UECDF-XEKO2X2-NYSOBRA-NUJA5ME-E2ZURA4";
               ampulex.id = "JEN3UBL-IZKUXBJ-3NTN2ER-WYM75SC-ZLDP4DM-VATQNVR-UQVMNBP-TUC6QAC";
+              amanita.id = "ZJDVRK5-NEM2NJS-MKOBW5I-MOEA7GE-BTCJHGP-5B2XWIF-G5QCMOE-HLA37AM";
             };
 
             # Declare a folder only on hosts in its device list, so unrelated folders never get created in that user's home.
@@ -43,6 +44,7 @@
                 devices = [
                   "hericium"
                   "ampulex"
+                  "amanita"
                 ];
               };
               playlists = {
@@ -50,6 +52,7 @@
                 devices = [
                   "hericium"
                   "ampulex"
+                  "amanita"
                 ];
               };
               notes = {
