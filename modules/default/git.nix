@@ -27,6 +27,19 @@
             ".direnv/"
             "**/.claude/settings.local.json"
           ];
+          # Format staged .nix files on commit, only in clones of the system config repo
+          includes = [
+            {
+              condition = "hasconfig:remote.*.url:git@github.com:recursivepaws/nix*";
+              contents.core.hooksPath = "${pkgs.writeShellScriptBin "pre-commit" ''
+                set -eu
+                files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.nix')
+                [ -n "$files" ] || exit 0
+                echo "$files" | xargs ${pkgs.nixfmt-tree}/bin/treefmt --tree-root "$(git rev-parse --show-toplevel)"
+                echo "$files" | xargs git add
+              ''}/bin";
+            }
+          ];
           settings = {
             safe = {
               directory = [ "/etc/nixos" ];
