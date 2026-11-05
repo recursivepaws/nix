@@ -20,4 +20,5 @@ in
   "cachix-token.age".publicKeys = keys;
   "google-oauth-client-work.age".publicKeys = keys;
   "google-oauth-client-vera.age".publicKeys = keys;
+  "falcon-cid.age".publicKeys = keys;
 }

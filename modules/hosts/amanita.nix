@@ -2,7 +2,11 @@
 {
   den.aspects.amanita = {
     den.aspects.work.includes = [ den.provides.primary-user ];
-    includes = [ den.aspects.audio-fix ];
+    includes = with den.aspects; [
+      audio-fix
+      # Re-enable once the Falcon .deb is in the store (see modules/aspects/crowdstrike.nix).
+      # crowdstrike
+    ];
 
     nixos =
       { pkgs, ... }:
