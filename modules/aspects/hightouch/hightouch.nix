@@ -8,6 +8,7 @@
       {
         pkgs,
         config,
+        lib,
         user,
         ...
       }:
@@ -35,11 +36,27 @@
         # Required by tilt
         virtualisation.docker = {
           enable = true;
+          # Nothing starts dockerd at boot; the tilt wrapper below starts it on `tilt up`.
+          enableOnBoot = false;
           # Don't clog up the root partition with images
           daemon.settings = {
             data-root = "/home/docker";
           };
         };
+        # WARN: one `docker ps` would socket-activate dockerd and restore every `restart: always` container.
+        # docker.service requires docker.socket, so starting the service still brings the socket up.
+        systemd.sockets.docker.wantedBy = lib.mkForce [ ];
+
+        # Lets the tilt wrapper start docker without a password prompt.
+        security.polkit.extraConfig = ''
+          polkit.addRule(function (action, subject) {
+            if (action.id == "org.freedesktop.systemd1.manage-units" &&
+                (action.lookup("unit") == "docker.service" || action.lookup("unit") == "docker.socket") &&
+                subject.isInGroup("docker")) {
+              return polkit.Result.YES;
+            }
+          });
+        '';
 
         security.pki.certificateFiles = [
           (pkgs.fetchurl {
@@ -83,6 +100,15 @@
         nodePkgs = inputs.nixpkgs-node.legacyPackages.${pkgs.stdenv.hostPlatform.system};
         nodejs = nodePkgs.nodejs_24;
         pnpm = nodePkgs.pnpm.override { nodejs-slim = nodePkgs.nodejs-slim_24; };
+
+        # dockerd is not socket-activated here, so `tilt up` starts it.
+        tilt = pkgs.writeShellScriptBin "tilt" ''
+          if [ "''${1:-}" = up ]; then
+            ${pkgs.systemd}/bin/systemctl is-active --quiet docker.service \
+              || ${pkgs.systemd}/bin/systemctl start docker.service
+          fi
+          exec ${pkgs.tilt}/bin/tilt "$@"
+        '';
 
         # Lets the backend's JVM tooling trust custom CAs.
         setupJavaCacertsScript = pkgs.writeShellScript "setup-java-cacerts" ''
@@ -173,10 +199,13 @@
         '';
 
         # `docker events` rather than polling, so this is idle-free when nothing is happening.
+        # Gated on dockerd being up; --since 5m replays a caddy start that landed during the wait.
         caddyTrustWatcherScript = pkgs.writeShellScript "caddy-trust-watcher" ''
           set -euo pipefail
+          until ${pkgs.systemd}/bin/systemctl is-active --quiet docker.service; do sleep 10; done
           echo "caddy-trust-watcher: listening for hightouch-caddy-1 start events"
           ${pkgs.docker}/bin/docker events \
+            --since 5m \
             --filter "container=hightouch-caddy-1" \
             --filter "event=start" \
             --format "{{.TimeNano}}" \
@@ -212,6 +241,7 @@
           packages = [
             nodejs
             pnpm
+            tilt
             caddyTrustScript
           ]
           ++ (with pkgs; [
@@ -220,7 +250,6 @@
 
             # Dev workflow
             git-spice # Stacked PRs
-            tilt # Local dev orchestration (Docker Compose)
             _1password-cli # Secrets management
             autossh
             fzf
@@ -245,7 +274,8 @@
           Service = {
             Type = "simple";
             ExecStart = "${caddyTrustWatcherScript}";
-            Restart = "on-failure";
+            # `docker events` exits when dockerd stops; restart and wait for the next `tilt up`.
+            Restart = "always";
             RestartSec = 5;
           };
           Install = {

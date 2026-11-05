@@ -2,7 +2,12 @@
 {
   den.aspects.crowdstrike = {
     nixos =
-      { pkgs, lib, config, ... }:
+      {
+        pkgs,
+        lib,
+        config,
+        ...
+      }:
       let
         # Fill from the .deb IT provides, then on the host once:
         #   nix store add --mode flat --hash-algo sha256 falcon-sensor_<version>_amd64.deb
@@ -19,8 +24,18 @@
           pname = "falcon-sensor";
           inherit version;
           src = deb;
-          nativeBuildInputs = with pkgs; [ dpkg autoPatchelfHook ];
-          buildInputs = with pkgs; [ stdenv.cc.cc.lib openssl libnl zlib elfutils libbpf ];
+          nativeBuildInputs = with pkgs; [
+            dpkg
+            autoPatchelfHook
+          ];
+          buildInputs = with pkgs; [
+            stdenv.cc.cc.lib
+            openssl
+            libnl
+            zlib
+            elfutils
+            libbpf
+          ];
           unpackCmd = "dpkg-deb -x $curSrc .";
           sourceRoot = ".";
           installPhase = "cp -r opt $out";
@@ -55,13 +70,19 @@
           wantedBy = [ "multi-user.target" ];
           unitConfig = {
             DefaultDependencies = false;
-            RequiresMountsFor = [ "/opt" "/var" ];
+            RequiresMountsFor = [
+              "/opt"
+              "/var"
+            ];
           };
           after = [ "local-fs.target" ];
           conflicts = [ "shutdown.target" ];
           before = [ "shutdown.target" ];
           serviceConfig = {
-            ExecStartPre = [ install "/opt/CrowdStrike/falconctl -g --cid" ];
+            ExecStartPre = [
+              install
+              "/opt/CrowdStrike/falconctl -g --cid"
+            ];
             ExecStart = "/opt/CrowdStrike/falcond";
             Type = "forking";
             PIDFile = "/var/run/falcond.pid";

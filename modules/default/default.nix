@@ -71,6 +71,8 @@ in
       nix.gc = {
         automatic = true;
         dates = "weekly";
+        # A missed weekly run fires at boot (persistent timer); the delay keeps it out of the login window.
+        randomizedDelaySec = "45min";
         options = "--delete-older-than 30d";
       };
       nix.optimise.automatic = true;
@@ -221,6 +223,11 @@ in
         home-manager.enable = true;
         zsh = {
           dotDir = config.home.homeDirectory;
+          initContent = ''
+            nixfmt-all() {
+              ${pkgs.nixfmt-tree}/bin/treefmt --tree-root "''${1:-.}"
+            }
+          '';
         };
       };
 

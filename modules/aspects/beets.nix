@@ -30,7 +30,8 @@
           directory = "~/Music/playlists";
           library = "~/Music/playlists/musiclibrary.db";
           # source_path maps each new file back to its old path, for repointing rekordbox.
-          plugins = config.programs.beets.settings.plugins ++ [ "importsource" ];          paths = {
+          plugins = config.programs.beets.settings.plugins ++ [ "importsource" ];
+          paths = {
             default = "$playlist/$artist - $title";
             comp = "$playlist/$artist - $title";
             singleton = "$playlist/$artist - $title";

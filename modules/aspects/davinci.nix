@@ -15,7 +15,12 @@
     }:
     {
       homeManager =
-        { pkgs, lib, config, ... }:
+        {
+          pkgs,
+          lib,
+          config,
+          ...
+        }:
         {
           # Resolve bundles Qt5 with no wayland platform plugin, so it dies silently under the QT_QPA_PLATFORM=wayland set in niri.nix.
           # DOCS: https://github.com/NixOS/nixpkgs/issues/341634
