@@ -75,18 +75,43 @@
           den.aspects.jobs
         ];
 
-      nixos = {
-        environment.etc."claude-code/managed-settings.json".source =
-          builtins.toFile "managed-settings.json"
-            (
-              builtins.toJSON {
-                permissions.allow = [
-                  "Read(//home/*/Software/tickets/**)"
-                  "Edit(//home/*/Software/tickets/**)"
+      nixos =
+        { pkgs, ... }:
+        let
+          # Managed settings cannot be overridden by user settings or auto mode.
+          # Commits and pushes always prompt, so they only happen when the user asks.
+          gitGate = pkgs.writeShellScript "claude-hook-git-gate" ''
+            input=$(cat)
+            if [ "$(${pkgs.jq}/bin/jq -r .tool_name <<<"$input")" = Bash ]; then
+              ${pkgs.jq}/bin/jq -r .tool_input.command <<<"$input" \
+                | grep -qE '\bgit\b[^|;&]*\b(commit|push)\b' || exit 0
+            fi
+            echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Commits and pushes need explicit user approval"}}'
+          '';
+        in
+        {
+          environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
+            permissions.allow = [
+              "Read(//home/*/Software/tickets/**)"
+              "Edit(//home/*/Software/tickets/**)"
+            ];
+            attribution = {
+              commit = "";
+              pr = "";
+            };
+            hooks.PreToolUse = [
+              {
+                matcher = "Bash|mcp__plugin_hm_git__git_commit|mcp__plugin_hm_github__(push_files|create_or_update_file|delete_file)";
+                hooks = [
+                  {
+                    type = "command";
+                    command = "${gitGate}";
+                  }
                 ];
               }
-            );
-      };
+            ];
+          };
+        };
 
       homeManager =
         {
@@ -312,6 +337,7 @@
               Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
               Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
               When in /etc/nixos/, always load the nixos-managing skill.
+              Never commit, push, or add a Co-Authored-By trailer unless explicitly asked in the current request. Leave changes in the working tree.
             '';
           }
           # Attr name = skill name, as it appears under ~/.claude/skills.
