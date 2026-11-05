@@ -36,7 +36,8 @@
               ampulex.id = "JEN3UBL-IZKUXBJ-3NTN2ER-WYM75SC-ZLDP4DM-VATQNVR-UQVMNBP-TUC6QAC";
             };
 
-            folders = {
+            # Declare a folder only on hosts in its device list, so unrelated folders never get created in that user's home.
+            folders = lib.filterAttrs (_: f: builtins.elem config.networking.hostName f.devices) {
               beets = {
                 path = "~/Music/beets";
                 devices = [

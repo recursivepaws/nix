@@ -1,5 +1,8 @@
 { den, ... }:
 {
+  # Only work@amanita runs syncthing; vera does on the other hosts.
+  den.aspects."work@amanita".includes = [ den.aspects.syncthing ];
+
   den.aspects.amanita = {
     den.aspects.work.includes = [ den.provides.primary-user ];
     includes = with den.aspects; [

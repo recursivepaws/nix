@@ -27,10 +27,10 @@
             ".direnv/"
             "**/.claude/settings.local.json"
           ];
-          # Format staged .nix files on commit, only in clones of the system config repo
+          # Format staged .nix files on commit, only in my own repos
           includes = [
             {
-              condition = "hasconfig:remote.*.url:git@github.com:recursivepaws/nix*";
+              condition = "hasconfig:remote.*.url:git@github.com:recursivepaws/*";
               contents.core.hooksPath = "${pkgs.writeShellScriptBin "pre-commit" ''
                 set -eu
                 files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.nix')
