@@ -4,6 +4,7 @@
     includes = [
       den.provides.define-user
       (den.provides.user-shell "zsh")
+      den.aspects.syncthing
       (
         { host, ... }:
         {
@@ -19,7 +20,6 @@
               varnam
               gaming
               crypto
-              syncthing
               messaging
             ]
           );
