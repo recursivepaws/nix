@@ -24,6 +24,8 @@
             home.file.Music.source = config.lib.file.mkOutOfStoreSymlink "/home/vera/Music";
             home.file."Software/tickets".source =
               config.lib.file.mkOutOfStoreSymlink "/home/vera/Software/tickets";
+            # vera's home-manager already ships the vault's .obsidian; writing it through the symlink lands outside work's $HOME.
+            programs.obsidian.vaults.tickets.enable = false;
           };
 
         programs.obs-studio = {
