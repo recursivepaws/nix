@@ -16,12 +16,14 @@
           pnpm
         ];
 
-        # Share vera's music library with work. Host-specific: vera doesn't exist on amanita.
-        # Write access comes from a one-off `setfacl -R -m u:work:rwX -m d:u:work:rwX -m d:u:vera:rwX ~/Music` as vera.
+        # Share vera's music library and synced tickets with work. Host-specific: vera doesn't exist on amanita.
+        # Write access: one-off `setfacl -R -m u:work:rwX -m d:u:work:rwX -m d:u:vera:rwX <dir>` as vera on ~/Music and ~/Software/tickets.
         home-manager.users.work =
           { config, ... }:
           {
             home.file.Music.source = config.lib.file.mkOutOfStoreSymlink "/home/vera/Music";
+            home.file."Software/tickets".source =
+              config.lib.file.mkOutOfStoreSymlink "/home/vera/Software/tickets";
           };
 
         programs.obs-studio = {

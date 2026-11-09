@@ -82,6 +82,15 @@
                       # .obsidian holds home-manager-managed store symlinks, which syncthing can't write.
                       ignorePatterns = [ ".obsidian" ];
                     };
+                    # Work's tickets: `~` is work's home on amanita, vera's on hericium (work gets a symlink there, hericium.nix).
+                    tickets = {
+                      path = at "tickets" "~/Software/tickets";
+                      devices = [
+                        "amanita"
+                        "hericium"
+                        "barkstation"
+                      ];
+                    };
                     # ampulex owns the rekordbox DB; other hosts only mirror it, so their local edits never propagate back.
                     rbxport = {
                       path = at "rbxport" "~/.local/share/rbxport/rekordbox";
