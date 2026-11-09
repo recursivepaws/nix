@@ -90,27 +90,33 @@
           '';
         in
         {
-          environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
-            permissions.allow = [
-              "Read(//home/*/Software/tickets/**)"
-              "Edit(//home/*/Software/tickets/**)"
-            ];
-            attribution = {
-              commit = "";
-              pr = "";
-            };
-            hooks.PreToolUse = [
-              {
-                matcher = "Bash|mcp__plugin_hm_git__git_commit|mcp__plugin_hm_github__(push_files|create_or_update_file|delete_file)";
-                hooks = [
-                  {
-                    type = "command";
-                    command = "${gitGate}";
-                  }
-                ];
-              }
-            ];
-          };
+          # This module is emitted once per user.
+          # `text` would concatenate the copies into invalid JSON, so use `source`.
+          environment.etc."claude-code/managed-settings.json".source =
+            pkgs.writeText "managed-settings.json"
+              (
+                builtins.toJSON {
+                  permissions.allow = [
+                    "Read(//home/*/Software/tickets/**)"
+                    "Edit(//home/*/Software/tickets/**)"
+                  ];
+                  attribution = {
+                    commit = "";
+                    pr = "";
+                  };
+                  hooks.PreToolUse = [
+                    {
+                      matcher = "Bash|mcp__plugin_hm_git__git_commit|mcp__plugin_hm_github__(push_files|create_or_update_file|delete_file)";
+                      hooks = [
+                        {
+                          type = "command";
+                          command = "${gitGate}";
+                        }
+                      ];
+                    }
+                  ];
+                }
+              );
         };
 
       homeManager =
