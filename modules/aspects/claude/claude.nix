@@ -312,10 +312,11 @@
               };
             };
           }
-          # Monarch's and PayPal's official remote MCPs: personal finance, so vera only. OAuth sign-in on first use.
+          # Monarch's, PayPal's and Fastmail's official remote MCPs: personal finance and mail, so vera only. OAuth sign-in on first use.
           // lib.optionalAttrs (user.userName == "vera") {
             monarch.url = "https://api.monarch.com/mcp";
             paypal.url = "https://mcp.paypal.com/mcp";
+            fastmail.url = "https://api.fastmail.com/mcp";
           };
 
           home.packages = [
