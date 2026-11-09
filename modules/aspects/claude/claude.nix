@@ -312,9 +312,10 @@
               };
             };
           }
-          # Monarch's official remote MCP: personal finance, so vera only. OAuth sign-in on first use.
+          # Monarch's and PayPal's official remote MCPs: personal finance, so vera only. OAuth sign-in on first use.
           // lib.optionalAttrs (user.userName == "vera") {
             monarch.url = "https://api.monarch.com/mcp";
+            paypal.url = "https://mcp.paypal.com/mcp";
           };
 
           home.packages = [
