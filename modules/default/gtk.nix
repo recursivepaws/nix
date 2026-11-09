@@ -4,6 +4,7 @@
       pkgs,
       config,
       lib,
+      host,
       ...
     }:
     let
@@ -17,7 +18,7 @@
         "Software"
       ];
     in
-    {
+    lib.mkIf host.desktop {
       home.packages = with pkgs; [
         sassc
       ];

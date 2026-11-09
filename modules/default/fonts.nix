@@ -1,7 +1,12 @@
 {
   den.default.nixos =
-    { pkgs, ... }:
     {
+      pkgs,
+      lib,
+      host,
+      ...
+    }:
+    lib.mkIf host.desktop {
       environment.systemPackages = with pkgs; [ lohit-fonts.devanagari ];
 
       fonts = {

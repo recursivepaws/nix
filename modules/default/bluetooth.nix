@@ -1,7 +1,7 @@
 {
   den.default.nixos =
-    { ... }:
-    {
+    { lib, host, ... }:
+    lib.mkIf host.desktop {
       hardware.enableAllFirmware = true;
       hardware.bluetooth = {
         enable = true;

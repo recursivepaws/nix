@@ -14,21 +14,31 @@ in
   den.schema.user.includes = [ den._.mutual-provider ];
 
   # Default aspects
-  den.default.includes = with den.aspects; [
-    music
-    beets
-    spotify
-    niri
-    noctalia
-    obsidian
-    file-manager
-    terminal
-    browser
-    claude
-    artcraft
-    keyboard
-    software-repos
-    ollama
+  den.default.includes = [
+    (
+      { host, ... }:
+      {
+        includes = lib.optionals host.desktop (
+          with den.aspects;
+          [
+            music
+            beets
+            spotify
+            niri
+            noctalia
+            obsidian
+            file-manager
+            terminal
+            browser
+            claude
+            artcraft
+            keyboard
+            software-repos
+            ollama
+          ]
+        );
+      }
+    )
   ];
 
   # Allow unfree packages
@@ -142,7 +152,7 @@ in
             KbdInteractiveAuthentication = false;
           };
         };
-        pipewire.enable = true;
+        pipewire.enable = host.desktop;
       };
 
       # Prevent OOM freezes
@@ -150,7 +160,7 @@ in
         enable = true;
         freeMemThreshold = 5;
         freeSwapThreshold = 10;
-        enableNotifications = true;
+        enableNotifications = host.desktop;
       };
 
       # Compressed swap in RAM
@@ -160,16 +170,16 @@ in
       };
 
       programs = {
-        coolercontrol.enable = true;
+        coolercontrol.enable = host.desktop;
         fzf.fuzzyCompletion = true;
         _1password.enable = true;
         _1password-gui = {
-          enable = true;
+          enable = host.desktop;
           polkitPolicyOwners = builtins.attrNames host.users;
         };
         nix-ld.enable = true;
         lazygit.enable = true;
-        localsend.enable = true;
+        localsend.enable = host.desktop;
         gnupg.agent = {
           enable = true;
           enableSSHSupport = true;

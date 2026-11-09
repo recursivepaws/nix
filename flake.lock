@@ -138,6 +138,26 @@
         "type": "github"
       }
     },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792526520,
+        "narHash": "sha256-3hSJlv8mUVnZPMWK2+CM7a9O+nR6Z4mCh27NfLCmTPc=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "cedd626e11b635470fa6f9fdb8ad79b0075dd7f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
     "flake-file": {
       "locked": {
         "lastModified": 1791955343,
@@ -673,6 +693,7 @@
         "davinci-resolve-mcp": "davinci-resolve-mcp",
         "den": "den",
         "direnv-instant": "direnv-instant",
+        "disko": "disko",
         "flake-file": "flake-file",
         "flake-parts": "flake-parts_2",
         "google-workspace-mcp": "google-workspace-mcp",

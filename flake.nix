@@ -23,6 +23,10 @@
     };
     den.url = "github:vic/den";
     direnv-instant.url = "github:Mic92/direnv-instant";
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
