@@ -49,8 +49,16 @@
             folders =
               lib.mapAttrs
                 (
-                  # Synology's indexer drops @eaDir into every directory on the NAS copies.
-                  _: f: f // { ignorePatterns = (f.ignorePatterns or [ ]) ++ [ "@eaDir" ]; }
+                  # Synology's indexer drops @eaDir into every NAS directory.
+                  # .obsidian holds home-manager-managed store symlinks, which syncthing can't write.
+                  _: f:
+                  f
+                  // {
+                    ignorePatterns = [
+                      "@eaDir"
+                      ".obsidian"
+                    ];
+                  }
                 )
                 (
                   lib.filterAttrs (_: f: builtins.elem config.networking.hostName f.devices) {
@@ -79,8 +87,6 @@
                         "ampulex"
                         "barkstation"
                       ];
-                      # .obsidian holds home-manager-managed store symlinks, which syncthing can't write.
-                      ignorePatterns = [ ".obsidian" ];
                     };
                     # Work's tickets: `~` is work's home on amanita, vera's on hericium (work gets a symlink there, hericium.nix).
                     tickets = {
