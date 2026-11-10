@@ -44,15 +44,25 @@
           runtimeInputs = with pkgs; [
             config.programs.beets.package
             curl
+            ffmpeg
             jq
           ];
           text = ''
-            # usage: beet-pl-art [QUERY...]   (no query = every track)
+            # usage: beet-pl-art [--missing] [QUERY...]   (no query = every track)
+            # --missing skips tracks that already have embedded art.
             cfg=${playlistsConfig}
+            missing=0
+            if [ "''${1-}" = "--missing" ]; then
+              missing=1
+              shift
+            fi
             ua="beet-pl-art/1 ( https://beets.io/ )"
             # shellcheck disable=SC2016
             beet -c "$cfg" ls -f '$path|$data_source|$mb_trackid|$deezer_track_id|$spotify_track_id' "$@" |
               while IFS='|' read -r path src mb dz sp; do
+                if [ "$missing" = 1 ] && ffprobe -v error -select_streams v -show_entries stream=codec_type -of csv=p=0 "$path" | grep -q video; then
+                  continue
+                fi
                 url=""
                 case "$src" in
                   Spotify)
