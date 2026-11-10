@@ -93,45 +93,49 @@ in
       nixpkgs.config.allowUnfree = true;
 
       # Essential system packages
-      environment.systemPackages = with pkgs; [
-        eza
-        bat
-        zoxide
-        tree
-        wayland
-        networkmanager
-        unzip
-        fzf
-        ripgrep
-        fd
-        clang
-        htop
-        jq
+      environment.systemPackages =
+        with pkgs;
+        [
+          eza
+          bat
+          zoxide
+          tree
+          networkmanager
+          unzip
+          fzf
+          ripgrep
+          fd
+          clang
+          htop
+          jq
 
-        # Dev toolchain + media tools shared by all hosts
-        gcc # TODO: fix nvim building without these (gcc, gnumake)
-        gnumake
-        cargo
-        go
-        uv
-        python314
-        mold
-        sccache
-        clang-tools
-        delta
-        gawk
-        bc
-        wget
-        lm_sensors
-        scrcpy
-        xprop
-        v4l-utils
-        guvcview
-        ffmpeg-full
-        SDL2
-        yasm
-        nasm
-      ];
+          # Dev toolchain + media tools shared by all hosts
+          gcc # TODO: fix nvim building without these (gcc, gnumake)
+          gnumake
+          cargo
+          go
+          uv
+          python314
+          mold
+          sccache
+          clang-tools
+          delta
+          gawk
+          bc
+          wget
+          lm_sensors
+          yasm
+          nasm
+        ]
+        ++ lib.optionals host.desktop [
+          wayland
+          scrcpy
+          xprop
+          v4l-utils
+          guvcview
+          ffmpeg-full
+          SDL2
+        ];
 
       environment.sessionVariables = {
         NIXOS_OZONE_WL = "1";
@@ -183,7 +187,7 @@ in
         gnupg.agent = {
           enable = true;
           enableSSHSupport = true;
-          pinentryPackage = pkgs.pinentry-gnome3;
+          pinentryPackage = if host.desktop then pkgs.pinentry-gnome3 else pkgs.pinentry-curses;
         };
         zsh = {
           enable = true;
