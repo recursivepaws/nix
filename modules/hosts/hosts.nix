@@ -10,16 +10,25 @@
     };
 
   den.hosts.x86_64-linux = {
-    hericium.users = {
-      vera = { };
-      work = { };
+    hericium = {
+      desktop = true;
+      users = {
+        vera = { };
+        work = { };
+      };
     };
-    amanita.users = {
-      # vera = { };
-      work = { };
+    amanita = {
+      desktop = true;
+      users = {
+        # vera = { };
+        work = { };
+      };
     };
-    ampulex.users = {
-      vera = { };
+    ampulex = {
+      desktop = true;
+      users = {
+        vera = { };
+      };
     };
     barkstation = {
       desktop = false;

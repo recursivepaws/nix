@@ -210,7 +210,12 @@ in
     };
 
   den.default.homeManager =
-    { pkgs, config, ... }:
+    {
+      pkgs,
+      config,
+      host,
+      ...
+    }:
     {
       home.stateVersion = stateVersion;
       nixpkgs.config.allowUnfree = true;
@@ -242,18 +247,21 @@ in
       };
 
       # Packages I consider essential for all users on all systems
-      home.packages = with pkgs; [
-        eog
-        foliate
-        cameractrls
-        cameractrls-gtk4
-        wl-clipboard
-        (wrapSudo baobab)
-        resources
-        gnome-disk-utility
-        vlc
-        (wrapSudo popsicle)
-        (wrapSudo gparted)
-      ];
+      home.packages =
+        with pkgs;
+        lib.optionals host.desktop [
+          eog
+          foliate
+          cameractrls
+          cameractrls-gtk4
+          wl-clipboard
+          (wrapSudo baobab)
+          resources
+          gnome-disk-utility
+          vlc
+          (wrapSudo popsicle)
+          (wrapSudo gparted)
+          fastmail-desktop
+        ];
     };
 }
