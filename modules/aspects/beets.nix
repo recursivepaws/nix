@@ -37,6 +37,50 @@
             singleton = "$playlist/$artist - $title";
           };
         };
+        # fetchart/embedart only run for albums, and beet-pl imports singletons.
+        # Resolve a cover URL per track from its data_source id, then let embedart shrink and embed it.
+        beet-pl-art = pkgs.writeShellApplication {
+          name = "beet-pl-art";
+          runtimeInputs = with pkgs; [
+            config.programs.beets.package
+            curl
+            jq
+          ];
+          text = ''
+            # usage: beet-pl-art [QUERY...]   (no query = every track)
+            cfg=${playlistsConfig}
+            ua="beet-pl-art/1 ( https://beets.io/ )"
+            # shellcheck disable=SC2016
+            beet -c "$cfg" ls -f '$path|$data_source|$mb_trackid|$deezer_track_id|$spotify_track_id' "$@" |
+              while IFS='|' read -r path src mb dz sp; do
+                url=""
+                case "$src" in
+                  Spotify)
+                    # oEmbed hands out the 300px id prefix (00001e02); 0000b273 is the 640px one.
+                    url=$(curl -sf "https://open.spotify.com/oembed?url=https://open.spotify.com/track/$sp" | jq -r '.thumbnail_url // empty' | sed 's/ab67616d00001e02/ab67616d0000b273/') || true
+                    ;;
+                  Deezer)
+                    url=$(curl -sf "https://api.deezer.com/track/$dz" | jq -r '.album.cover_big // empty') || true
+                    ;;
+                  MusicBrainz)
+                    mapfile -t rels < <(curl -sf -A "$ua" "https://musicbrainz.org/ws/2/recording/$mb?inc=releases&fmt=json" | jq -r '.releases[].id' | head -5)
+                    for rel in "''${rels[@]}"; do
+                      u="https://coverartarchive.org/release/$rel/front-500"
+                      if curl -sfIL -o /dev/null "$u"; then url=$u; break; fi
+                    done
+                    # MusicBrainz rate limit
+                    sleep 1
+                    ;;
+                esac
+                if [ -z "$url" ]; then
+                  echo "no art: $path" >&2
+                  continue
+                fi
+                echo "$path <- $url"
+                beet -c "$cfg" embedart -y -u "$url" "path:$path" </dev/null || echo "embed failed: $path" >&2
+              done
+          '';
+        };
       in
       {
         # Default pkgs.beets enables every plugin below and wraps
@@ -171,6 +215,7 @@
 
         # Also on user PATH for manual ffmpeg/flac steps in MAINTENANCE.md.
         home.packages = with pkgs; [
+          beet-pl-art
           ffmpeg
           imagemagick
           flac
