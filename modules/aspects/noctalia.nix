@@ -59,6 +59,31 @@
       }:
       let
         hasHightouch = user.hasAspect den.aspects.hightouch;
+        # OAuth is one-time per account, via Settings > Calendar > Accounts > Save and Connect.
+        # Refresh tokens land in gnome-keyring, not in config.
+        calendarAccounts =
+          {
+            vera.personal = {
+              type = "google";
+              name = "Personal";
+            };
+            work.work = {
+              type = "google";
+              name = "Work";
+            };
+          }
+          .${user.userName} or { };
+        # Noctalia only logs when a Google account has no refresh token, so toast it at login.
+        calendarCheck = pkgs.writeShellScript "noctalia-calendar-check" ''
+          for i in $(seq 30); do [ -S "$XDG_RUNTIME_DIR/noctalia-$WAYLAND_DISPLAY.sock" ] && break; sleep 2; done
+          ${lib.concatStrings (
+            lib.mapAttrsToList (id: acct: ''
+              if [ -z "$(${pkgs.libsecret}/bin/secret-tool lookup application noctalia scope calendar owner ${id} name refresh-token version 1)" ]; then
+                noctalia msg notification-show "Calendar not connected" "${acct.name}: Settings > Calendar > Accounts > Connect"
+              fi
+            '') (lib.filterAttrs (_: a: a.type == "google") calendarAccounts)
+          )}
+        '';
         plugins = [
           "noctalia/timer"
           "noctalia/kaomoji"
@@ -99,6 +124,7 @@
                   "noctalia -d"
                 ];
               }
+              { command = [ "${calendarCheck}" ]; }
             ];
             layer-rules = [
               {
@@ -242,20 +268,7 @@
                 enabled = true;
                 default_lead_minutes = 10;
               };
-              # OAuth is one-time per account, via Settings > Calendar > Accounts > Save and Connect.
-              # Refresh tokens land in gnome-keyring, not in config.
-              account = {
-                personal = {
-                  type = "google";
-                  name = "Personal";
-                };
-              }
-              // lib.optionalAttrs hasHightouch {
-                work = {
-                  type = "google";
-                  name = "Work";
-                };
-              };
+              account = calendarAccounts;
             };
 
             bar.main = {
