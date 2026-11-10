@@ -28,6 +28,8 @@
               CIRCLECI_TOKEN = "\${CIRCLECI_TOKEN}";
             };
           };
+          # Hightouch docs search. /authed/mcp also serves private docs; OAuth sign-in on first use.
+          hightouch-docs.url = "https://docs.hightouch.com/authed/mcp";
           snowflake = {
             url = "\${SNOWFLAKE_MCP_URL}";
             headers = {
