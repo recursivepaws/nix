@@ -57,6 +57,7 @@
                     ignorePatterns = [
                       "@eaDir"
                       ".obsidian"
+                      ".git"
                     ];
                   }
                 )
