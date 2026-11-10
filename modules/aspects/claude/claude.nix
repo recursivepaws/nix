@@ -341,9 +341,14 @@
           # Our own come from the ~/Software/skills working copy instead, see home.activation.linkOwnSkills.
           home.file = {
             # Global user memory: loaded into every Claude Code session.
+            # Caveman and ponytail rules are inlined rather than "invoke the skill at start":
+            # CLAUDE.md is re-sent every turn, so the rules survive compaction and reach subagents.
             ".claude/CLAUDE.md".text = ''
-              Always respond in caveman mode: invoke the caveman skill (full intensity) at session start, every session.
-              Always write in ponytail mode: invoke the ponytail skill (full intensity) at session start, every session.
+              ${builtins.readFile "${inputs.caveman}/src/rules/caveman-activate.md"}
+              ${lib.last (
+                lib.splitString "---\n" (builtins.readFile "${inputs.ponytail}/skills/ponytail/SKILL.md")
+              )}
+              Subagents: follow the caveman voice, skip the ponytail closing lines.
               When in /etc/nixos/, always load the nixos-managing skill.
               Never commit, push, or add a Co-Authored-By trailer unless explicitly asked in the current request. Leave changes in the working tree.
             '';
@@ -351,6 +356,8 @@
           # Attr name = skill name, as it appears under ~/.claude/skills.
           // lib.mapAttrs' (name: source: lib.nameValuePair ".claude/skills/${name}" { inherit source; }) {
             caveman = "${inputs.caveman}/skills/caveman";
+            ultracave = "${inputs.caveman}/skills/ultracave";
+            megacave = "${inputs.caveman}/skills/megacave";
             ponytail = "${inputs.ponytail}/skills/ponytail";
             nixos-managing = "${inputs.nixos-management-skill}/nixos-managing";
             rust-best-practices = "${inputs.apollo-skills}/skills/rust-best-practices";
