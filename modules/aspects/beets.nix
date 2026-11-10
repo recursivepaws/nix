@@ -56,10 +56,14 @@
               missing=1
               shift
             fi
-            ua="beet-pl-art/1 ( https://beets.io/ )"
+            # archive.org is slow and MusicBrainz 503s under load; retry instead of giving up.
+            get() { curl -sfL --retry 3 --retry-all-errors --retry-delay 2 --connect-timeout 10 --max-time 60 -A "beet-pl-art/1 ( https://beets.io/ )" "$@"; }
+            img=$(mktemp -t beet-pl-art.XXXXXX)
+            trap 'rm -f "$img"' EXIT
+            tab=$(printf '\t')
             # shellcheck disable=SC2016
-            beet -c "$cfg" ls -f '$path|$data_source|$mb_trackid|$deezer_track_id|$spotify_track_id' "$@" |
-              while IFS='|' read -r path src mb dz sp; do
+            beet -c "$cfg" ls -f "\$path$tab\$data_source$tab\$mb_trackid$tab\$deezer_track_id$tab\$spotify_track_id$tab\$artist$tab\$title" "$@" |
+              while IFS="$tab" read -r path src mb dz sp artist title; do
                 if [ "$missing" = 1 ] && ffprobe -v error -select_streams v -show_entries stream=codec_type -of csv=p=0 "$path" | grep -q video; then
                   continue
                 fi
@@ -67,27 +71,38 @@
                 case "$src" in
                   Spotify)
                     # oEmbed hands out the 300px id prefix (00001e02); 0000b273 is the 640px one.
-                    url=$(curl -sf "https://open.spotify.com/oembed?url=https://open.spotify.com/track/$sp" | jq -r '.thumbnail_url // empty' | sed 's/ab67616d00001e02/ab67616d0000b273/') || true
+                    url=$(get "https://open.spotify.com/oembed?url=https://open.spotify.com/track/$sp" | jq -r '.thumbnail_url // empty' | sed 's/ab67616d00001e02/ab67616d0000b273/') || true
                     ;;
                   Deezer)
-                    url=$(curl -sf "https://api.deezer.com/track/$dz" | jq -r '.album.cover_big // empty') || true
+                    url=$(get "https://api.deezer.com/track/$dz" | jq -r '.album.cover_big // empty') || true
                     ;;
                   MusicBrainz)
-                    mapfile -t rels < <(curl -sf -A "$ua" "https://musicbrainz.org/ws/2/recording/$mb?inc=releases&fmt=json" | jq -r '.releases[].id' | head -5)
+                    mapfile -t rels < <(get "https://musicbrainz.org/ws/2/recording/$mb?inc=releases&fmt=json" | jq -r '.releases[].id' | head -5)
                     for rel in "''${rels[@]}"; do
                       u="https://coverartarchive.org/release/$rel/front-500"
-                      if curl -sfIL -o /dev/null "$u"; then url=$u; break; fi
+                      if get -I -o /dev/null "$u"; then url=$u; break; fi
                     done
                     # MusicBrainz rate limit
                     sleep 1
                     ;;
                 esac
+                # Fallback: iTunes text search, accepted only when the title matches.
+                if [ -z "$url" ]; then
+                  term=$(jq -rn --arg t "$artist $title" '$t|@uri')
+                  url=$(get "https://itunes.apple.com/search?media=music&entity=song&limit=5&term=$term" |
+                    jq -r --arg t "$title" 'first(.results[] | select(.trackName | ascii_downcase | contains($t | ascii_downcase)) | .artworkUrl100) // empty' |
+                    sed 's/100x100bb/600x600bb/') || true
+                fi
                 if [ -z "$url" ]; then
                   echo "no art: $path" >&2
                   continue
                 fi
                 echo "$path <- $url"
-                beet -c "$cfg" embedart -y -u "$url" "path:$path" </dev/null || echo "embed failed: $path" >&2
+                if get -o "$img" "$url"; then
+                  beet -c "$cfg" embedart -y -f "$img" "path:$path" </dev/null || echo "embed failed: $path" >&2
+                else
+                  echo "download failed: $path <- $url" >&2
+                fi
               done
           '';
         };
