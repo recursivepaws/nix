@@ -1,6 +1,11 @@
-{ ... }:
+{ den, lib, ... }:
 {
   den.aspects.syncthing = {
+    # The iPod syncs from this user's Syncthing copies; barkstation is headless.
+    includes = [
+      ({ host, ... }: { includes = lib.optionals host.desktop [ den.aspects.ipod ]; })
+    ];
+
     # Syncthing litters every synced folder with these.
     homeManager = _: {
       programs.git.ignores = [

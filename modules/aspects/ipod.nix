@@ -1,7 +1,13 @@
 {
   den.aspects.ipod = {
     nixos =
-      { pkgs, ... }:
+      {
+        pkgs,
+        config,
+        lib,
+        user ? null,
+        ...
+      }:
       let
         ipod = {
           vendor = "05ac";
@@ -12,8 +18,10 @@
           name = "ipod-sync";
           runtimeInputs = with pkgs; [
             util-linux # mountpoint, mount
-            coreutils # tee, id, readlink, cat, basename, seq, mkdir, sleep
-            cifs-utils # mount.cifs
+            coreutils # tee, id, readlink, cat, basename, seq, mkdir, sleep, date
+            findutils # find
+            curl # syncthing REST API
+            jq
             rsync
             systemd # udevadm
             gnugrep # grep
@@ -24,23 +32,24 @@
           text = builtins.readFile ../../scripts/ipod-sync.sh;
         };
       in
-      {
+      lib.mkIf (user != null) {
         services.udev.extraRules = ''ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="${ipod.vendor}", ATTR{idProduct}=="${ipod.id}", TAG+="systemd", ENV{SYSTEMD_WANTS}="ipod-sync.service"'';
         systemd.services.ipod-sync = {
-          description = "Sync files from SMB server to iPod";
+          description = "Sync beets library and playlists to iPod";
           restartIfChanged = false;
           environment = {
             DISPLAY = ":0";
-            # XAUTHORITY = "/home/vera/.Xauthority";
+            IPOD_USER = user.userName;
+            # Same paths as syncthing.nix's configDir and folder paths.
+            SYNCTHING_HOME = "/home/${user.userName}/.config/syncthing";
+            MUSIC_DIR = "/home/${user.userName}/Music";
+            # Always-on hub: if it agrees with us, nobody online has anything newer.
+            HUB_ID = config.services.syncthing.settings.devices.barkstation.id;
           };
-          after = [ "network-online.target" ];
-          wants = [ "network-online.target" ];
           serviceConfig = {
             Type = "oneshot";
             ExecStart = "${ipodSyncScript}/bin/ipod-sync ${ipod.vendor} ${ipod.id}";
             User = "root"; # Needs root for mounting
-            # Allow access to the agenix secret
-            SupplementaryGroups = [ "keys" ];
           };
         };
       };

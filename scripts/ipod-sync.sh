@@ -11,17 +11,15 @@ fi
 IPOD_VENDOR="$1"
 IPOD_PRODUCT="$2"
 
-# Configuration
+# Configuration (IPOD_USER, SYNCTHING_HOME, MUSIC_DIR, HUB_ID come from the unit's environment)
 IPOD_MOUNT="/mnt/IPOD"
-SMB_HOST="192.168.1.167"
-SMB_USER="vera"
-SMB_SHARE="data/media/"
-SMB_MOUNT="/mnt/MeowStationSMB"
-SECRET_FILE="/run/agenix/secrets"
 MAX_WAIT=30 # seconds to wait for device
+ST_WAIT=30  # seconds to wait for syncthing to settle before asking
+FOLDERS=(beets playlists)
+EXCLUDES=(--exclude=.stfolder --exclude=.stignore --exclude=.stversions --exclude=@eaDir --exclude=musiclibrary.db)
 
 show_zenity() {
-  sudo -u vera DISPLAY=:0 XAUTHORITY=/home/vera/.Xauthority zenity "$@"
+  sudo -u "$IPOD_USER" DISPLAY=:0 XAUTHORITY="/home/$IPOD_USER/.Xauthority" zenity "$@"
 }
 
 # Logging
@@ -37,12 +35,6 @@ cleanup() {
   if mountpoint -q "$IPOD_MOUNT" 2>/dev/null; then
     log "Unmounting iPod..."
     umount "$IPOD_MOUNT" 2>/dev/null || umount -l "$IPOD_MOUNT" 2>/dev/null
-  fi
-
-  # Unmount SMB share if mounted
-  if mountpoint -q "$SMB_MOUNT" 2>/dev/null; then
-    log "Unmounting SMB share..."
-    umount "$SMB_MOUNT" 2>/dev/null || umount -l "$SMB_MOUNT" 2>/dev/null
   fi
 
   log "Cleanup complete"
@@ -61,14 +53,105 @@ exec 3> >(show_zenity --progress \
 zpct() { echo "$1" >&3; }
 zmsg() { echo "# $1" >&3; }
 
+# rsync_progress <start%> <span%> <rsync args...>: rsync, mapping its total progress into the dialog.
+rsync_progress() {
+  local start="$1" span="$2" line pct
+  shift 2
+  rsync -av --size-only --info=progress2 "${EXCLUDES[@]}" "$@" |
+    while IFS= read -r -d $'\r' line; do
+      pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
+      if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
+        zpct "$((start + pct * span / 100))"
+      fi
+    done || true
+}
+
 # ---------------------------------------------------------------------------
-# Stage 1: Wait for iPod (0-20%)
+# Stage 0: Syncthing gate (0-15%)
+# ---------------------------------------------------------------------------
+# "Up to date" = matches everything the connected peers have announced.
+# The hub is always on, so requiring it rules out all but edits on powered-off machines.
+key=$(grep -oP '(?<=<apikey>)[^<]+' "$SYNCTHING_HOME/config.xml" || true)
+st() { curl -sf --max-time 5 -H "X-API-Key: $key" "http://127.0.0.1:8384/rest/$1" "${@:2}"; }
+
+# Prints one reason per line; no output means up to date.
+stale_reasons() {
+  local conn started age f s c
+  if ! conn=$(st system/connections); then
+    echo "Syncthing API unreachable"
+    return
+  fi
+  if [ "$(jq -r --arg d "$HUB_ID" '.connections[$d].connected // false' <<<"$conn")" != true ]; then
+    echo "barkstation not connected"
+  else
+    # Index exchange runs right after connecting; until it settles the global view can be stale.
+    started=$(jq -r --arg d "$HUB_ID" '.connections[$d].startedAt' <<<"$conn")
+    age=$(($(date +%s) - $(date -d "$started" +%s)))
+    [ "$age" -ge 30 ] || echo "barkstation connected only ${age}s ago"
+  fi
+  for f in "${FOLDERS[@]}"; do
+    if ! s=$(st "db/status?folder=$f"); then
+      echo "$f: status unavailable"
+      continue
+    fi
+    jq -r --arg f "$f" '
+      (select(.state != "idle") | "\($f): \(.state)"),
+      (select(.needTotalItems > 0) | "\($f): \(.needTotalItems) items still to download"),
+      (select(.pullErrors > 0) | "\($f): \(.pullErrors) pull errors")' <<<"$s"
+    if ! c=$(st "db/completion?folder=$f&device=$HUB_ID"); then
+      echo "$f: barkstation completion unavailable"
+      continue
+    fi
+    jq -r --arg f "$f" 'select(.completion < 100 or .remoteState != "valid")
+      | "\($f): barkstation is missing local changes (\(.completion | floor)%, \(.remoteState))"' <<<"$c"
+  done
+}
+
+log "Checking Syncthing state..."
+zmsg "Checking Syncthing..."
+zpct 0
+
+# Pick up local edits the watcher has not scanned yet.
+for f in "${FOLDERS[@]}"; do
+  st "db/scan?folder=$f" -X POST >/dev/null || true
+done
+
+reasons=""
+for i in $(seq 1 $ST_WAIT); do
+  reasons=$(stale_reasons)
+  [ -z "$reasons" ] && break
+  zmsg "Waiting for Syncthing... ($i/$ST_WAIT)"
+  zpct "$((i * 15 / ST_WAIT))"
+  sleep 1
+done
+
+if [ -n "$reasons" ]; then
+  log "Syncthing not up to date: ${reasons//$'\n'/; }"
+  # A dialog that cannot open also returns non-zero, so a headless run never syncs stale data.
+  if ! show_zenity --question --no-markup \
+    --title="iPod Sync: Syncthing Not Up To Date" \
+    --text="The local music folders may be stale:
+
+$reasons
+
+Sync anyway?"; then
+    log "Sync declined"
+    exec 3>&-
+    exit 0
+  fi
+  log "Syncing anyway at user request"
+else
+  log "Syncthing up to date"
+fi
+
+# ---------------------------------------------------------------------------
+# Stage 1: Wait for iPod (15-25%)
 # ---------------------------------------------------------------------------
 log "Looking for iPod device..."
 DEVICE=""
 
 zmsg "Waiting for iPod to connect..."
-zpct 0
+zpct 15
 
 for i in $(seq 1 $MAX_WAIT); do
   for syspath in /sys/bus/usb/devices/*; do
@@ -96,7 +179,7 @@ for i in $(seq 1 $MAX_WAIT); do
   done
 
   zmsg "Waiting for iPod... ($i/$MAX_WAIT)"
-  zpct "$((i * 20 / MAX_WAIT))"
+  zpct "$((15 + i * 10 / MAX_WAIT))"
   sleep 1
 done
 
@@ -109,118 +192,97 @@ fi
 log "Found iPod device: $DEVICE"
 
 # ---------------------------------------------------------------------------
-# Stage 2: Mount iPod + SMB share (20%)
+# Stage 2: Mount iPod (25%)
 # ---------------------------------------------------------------------------
 zmsg "Mounting iPod..."
-zpct 20
+zpct 25
 
 mkdir -p "$IPOD_MOUNT"
-mkdir -p "$SMB_MOUNT"
 
 if mountpoint -q "$IPOD_MOUNT"; then
   log "iPod already mounted at $IPOD_MOUNT"
 else
   log "Mounting iPod from $DEVICE to $IPOD_MOUNT..."
-  mount -t vfat -o "codepage=437,uid=$(id -u vera),gid=$(id -g vera),fmask=0022,dmask=0022,iocharset=utf8,shortname=mixed" "$DEVICE" "$IPOD_MOUNT"
+  mount -t vfat -o "codepage=437,uid=$(id -u "$IPOD_USER"),gid=$(id -g "$IPOD_USER"),fmask=0022,dmask=0022,iocharset=utf8,shortname=mixed" "$DEVICE" "$IPOD_MOUNT"
   log "iPod mounted successfully"
 fi
 
-if [ ! -f "$SECRET_FILE" ]; then
-  log "ERROR: Secret file not found at $SECRET_FILE"
-  exec 3>&-
-  exit 1
-fi
-
-# shellcheck disable=SC1090
-source "$SECRET_FILE"
-
-if [ -z "$SMB_PASSWORD" ]; then
-  log "Secret file did not contain SMB password"
-  exec 3>&-
-  exit 1
-fi
-
-if mountpoint -q "$SMB_MOUNT"; then
-  log "SMB share already mounted at $SMB_MOUNT"
-else
-  log "Mounting SMB share..."
-  mount -t cifs "//$SMB_HOST/$SMB_SHARE" "$SMB_MOUNT" \
-    -o "username=$SMB_USER,password=$SMB_PASSWORD,uid=$(id -u vera),gid=$(id -g vera)"
-  log "SMB share mounted successfully"
-fi
-
 # ---------------------------------------------------------------------------
-# Stage 3: Space check before music sync
+# Stage 3: Space check
 # ---------------------------------------------------------------------------
 zmsg "Checking available space..."
 log "Checking available space on iPod..."
 
-server_music_size=$(du -sb "$SMB_MOUNT/beets/" | cut -f1)
-ipod_music_size=$(du -sb "$IPOD_MOUNT/Music" 2>/dev/null | cut -f1 || echo 0)
+source_size=$(du -scb "$MUSIC_DIR/beets/" "$MUSIC_DIR/playlists/" | tail -1 | cut -f1)
+ipod_used=$(du -scb "$IPOD_MOUNT/Music" "$IPOD_MOUNT/Playlists" 2>/dev/null | tail -1 | cut -f1 || echo 0)
 ipod_free=$(df -B1 --output=avail "$IPOD_MOUNT" | tail -1 | tr -d ' ')
-available=$((ipod_free + ipod_music_size))
+available=$((ipod_free + ipod_used))
 
-log "Server music size:      $((server_music_size / 1048576)) MiB"
-log "iPod Music folder size: $((ipod_music_size / 1048576)) MiB"
-log "iPod free space:        $((ipod_free / 1048576)) MiB"
-log "Effective available:    $((available / 1048576)) MiB"
+log "Local music + playlists:   $((source_size / 1048576)) MiB"
+log "iPod Music + Playlists:    $((ipod_used / 1048576)) MiB"
+log "iPod free space:           $((ipod_free / 1048576)) MiB"
+log "Effective available:       $((available / 1048576)) MiB"
 
-if [ "$server_music_size" -gt "$available" ]; then
-  needed=$(((server_music_size - available) / 1048576))
+if [ "$source_size" -gt "$available" ]; then
+  needed=$(((source_size - available) / 1048576))
   log "ERROR: Not enough space on iPod (need ${needed} MiB more)"
   exec 3>&-
   show_zenity --error \
     --title="iPod Sync: Not Enough Space" \
-    --text="Not enough space on iPod to sync music.\n\nNeed $((server_music_size / 1048576)) MiB, but only $((available / 1048576)) MiB available (${needed} MiB short)."
+    --text="Not enough space on iPod to sync music.\n\nNeed $((source_size / 1048576)) MiB, but only $((available / 1048576)) MiB available (${needed} MiB short)."
   exit 1
 fi
 
 log "Space check passed"
 
 # ---------------------------------------------------------------------------
-# Stage 4: Sync music (20-60%)
+# Stage 4: Sync music (25-70%)
 # ---------------------------------------------------------------------------
 log "Starting music sync..."
 zmsg "Syncing music..."
-zpct 20
+zpct 25
 
-rsync -av \
-  --size-only \
-  --info=progress2 \
-  "$SMB_MOUNT/beets/" \
-  "$IPOD_MOUNT/Music" |
-  while IFS= read -r -d $'\r' line; do
-    pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
-    if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
-      zpct "$((20 + pct * 40 / 100))"
-    fi
-  done || true
+rsync_progress 25 45 "$MUSIC_DIR/beets/" "$IPOD_MOUNT/Music"
 
 log "Music sync completed"
 zmsg "Music sync complete"
-zpct 60
+zpct 70
 
 # ---------------------------------------------------------------------------
-# Stage 5: Sync podcasts (60-95%)
+# Stage 5: Sync playlists (70-95%)
 # ---------------------------------------------------------------------------
-log "Starting podcast sync..."
-zmsg "Syncing podcasts..."
+log "Starting playlist sync..."
+zmsg "Syncing playlists..."
 
-rsync -av \
-  --size-only \
-  --info=progress2 \
-  --delete \
-  "$SMB_MOUNT/podcasts/" \
-  "$IPOD_MOUNT/Podcasts" |
-  while IFS= read -r -d $'\r' line; do
-    pct=$(printf '%s' "$line" | grep -oP '\d+(?=%)' | head -1)
-    if [[ -n "$pct" && "$pct" =~ ^[0-9]+$ && "$pct" -le 100 ]]; then
-      zpct "$((60 + pct * 35 / 100))"
-    fi
-  done || true
+# Protect .m3u8 from --delete: generated ones are pruned below, hand-made Rockbox ones are kept.
+rsync_progress 70 25 --delete --filter='P *.m3u8' "$MUSIC_DIR/playlists/" "$IPOD_MOUNT/Playlists"
 
-log "Podcast sync completed"
-zmsg "Podcast sync complete"
+# One Rockbox playlist per folder; paths are relative to /Playlists.
+marker="# generated by ipod-sync"
+for d in "$MUSIC_DIR/playlists"/*/; do
+  [ -d "$d" ] || continue
+  name=$(basename "$d")
+  {
+    printf '#EXTM3U\n%s\n' "$marker"
+    # sort -V, as in mpd-playlists, so 100 sorts after 99.
+    find "$d" -maxdepth 1 -type f \
+      \( -iname '*.flac' -o -iname '*.mp3' -o -iname '*.m4a' \
+      -o -iname '*.opus' -o -iname '*.ogg' -o -iname '*.wav' \
+      -o -iname '*.aiff' \) \
+      -printf '%f\n' | sort -V |
+      while IFS= read -r track; do printf '%s/%s\n' "$name" "$track"; done
+  } >"$IPOD_MOUNT/Playlists/$name.m3u8"
+done
+
+# Drop generated playlists whose folder is gone; hand-made ones lack the marker.
+for f in "$IPOD_MOUNT/Playlists"/*.m3u8; do
+  [ -f "$f" ] || continue
+  grep -qxF "$marker" "$f" || continue
+  [ -d "$MUSIC_DIR/playlists/$(basename "$f" .m3u8)" ] || rm -f "$f"
+done
+
+log "Playlist sync completed"
+zmsg "Playlist sync complete"
 zpct 95
 
 # ---------------------------------------------------------------------------
@@ -230,7 +292,6 @@ zmsg "Unmounting iPod..."
 log "Unmounting iPod..."
 
 umount "$IPOD_MOUNT" 2>/dev/null || umount -l "$IPOD_MOUNT" 2>/dev/null || true
-umount "$SMB_MOUNT" 2>/dev/null || umount -l "$SMB_MOUNT" 2>/dev/null || true
 
 log "Sync complete"
 zmsg "Done!"

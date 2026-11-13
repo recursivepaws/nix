@@ -54,9 +54,6 @@
         };
       };
 
-    provides.to-users.includes = with den.aspects; [
-      amd
-      ipod
-    ];
+    provides.to-users.includes = with den.aspects; [ amd ];
   };
 }
