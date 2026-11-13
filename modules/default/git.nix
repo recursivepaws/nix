@@ -24,6 +24,7 @@
         git = {
           enable = true;
           ignores = [
+            ".stfolder/"
             ".direnv/"
             "**/.claude/settings.local.json"
           ];

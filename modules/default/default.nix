@@ -135,6 +135,7 @@ in
           guvcview
           ffmpeg-full
           SDL2
+          yt-dlp
         ];
 
       environment.sessionVariables = {

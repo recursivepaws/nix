@@ -48,6 +48,8 @@
             "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
             "org.freedesktop.impl.portal.ScreenCast" = [ "xdg-desktop-portal-gnome" ];
             "org.freedesktop.impl.portal.Screenshot" = [ "xdg-desktop-portal-gnome" ];
+            # 1Password asks the portal for Ctrl+Shift+Space at login; gnome backend can't bind under niri, so it nags every session.
+            "org.freedesktop.impl.portal.GlobalShortcuts" = [ "none" ];
           };
           extraPortals = [
             pkgs.gnome-keyring
