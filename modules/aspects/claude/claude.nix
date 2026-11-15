@@ -375,6 +375,19 @@
               name: _:
               lib.nameValuePair ".claude/skills/${name}" { source = "${inputs.resumeskills}/skills/${name}"; }
             ) (builtins.readDir "${inputs.resumeskills}/skills")
+          )
+          # Full python-skills collection (python/, common/, other langs): vera only.
+          # python/ and common/ keep their dir name; other langs get a prefix since go/scala both ship "projects".
+          // lib.optionalAttrs (user.userName == "vera") (
+            lib.concatMapAttrs (
+              lang: _:
+              lib.mapAttrs' (
+                dir: _:
+                lib.nameValuePair ".claude/skills/${
+                  if lang == "python" || lang == "common" then dir else "${lang}-${dir}"
+                }" { source = "${inputs.python-skills}/skills/${lang}/${dir}"; }
+              ) (builtins.readDir "${inputs.python-skills}/skills/${lang}")
+            ) (builtins.readDir "${inputs.python-skills}/skills")
           );
 
           # Linking from the working copy means editing a skill takes effect next session, at the cost of no per-machine pin - refresh elsewhere with `git -C ~/Software/skills pull`.
