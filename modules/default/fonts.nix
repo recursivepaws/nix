@@ -11,6 +11,8 @@
 
       fonts = {
         enableDefaultPackages = true;
+        # /run/current-system/sw/share/X11/fonts
+        fontDir.enable = true;
         packages =
           let
             nerdFonts = with pkgs.nerd-fonts; [
