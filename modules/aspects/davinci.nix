@@ -91,7 +91,7 @@
 
           # <install>/IOPlugins and the sandbox /usr are both read-only store paths, so overlay at launch instead of rebuilding the 14 GiB tree.
           # WARN: overlays must precede nixpkgs' license/Extras binds or they shadow them.
-          davinci-resolve-studio = pkgs.davinci-resolve-studio.override (old: {
+          davinci-resolve-studio = pkgs.davinci-resolve-studio.override {
             buildFHSEnv =
               args:
               let
@@ -112,7 +112,7 @@
                 );
               in
               pkg;
-          });
+          };
         in
         {
           home.packages = [
@@ -154,14 +154,14 @@
             command = "${pkgs.python3.withPackages (ps: [ ps.mcp ])}/bin/python";
             args = [ "${inputs.davinci-resolve-mcp}/src/server.py" ];
             env = {
-              RESOLVE_SCRIPT_API = "${pkgs.davinci-resolve-studio.davinci}/Developer/Scripting";
-              RESOLVE_SCRIPT_LIB = "${pkgs.davinci-resolve-studio.davinci}/libs/Fusion/fusionscript.so";
+              RESOLVE_SCRIPT_API = "${davinci-resolve-studio.davinci}/Developer/Scripting";
+              RESOLVE_SCRIPT_LIB = "${davinci-resolve-studio.davinci}/libs/Fusion/fusionscript.so";
               # server.py logs beside itself, which is the read-only store here.
               # It dies at import without this.
               RESOLVE_MCP_LOG_FILE = "${config.xdg.cacheHome}/davinci-resolve-mcp/server.log";
               # fusionscript.so needs libs that exist only in Resolve's FHS sandbox.
               # usr/lib there is an absolute symlink, so point at lib64 directly.
-              LD_LIBRARY_PATH = "${pkgs.davinci-resolve-studio.fhsenv}/usr/lib64";
+              LD_LIBRARY_PATH = "${davinci-resolve-studio.fhsenv}/usr/lib64";
             };
           };
         };
