@@ -44,22 +44,56 @@
             '';
           });
 
-          # Resolve only scans <install>/IOPlugins, which is the read-only store.
-          # Overlay the plugin in at launch instead of rebuilding the 14 GiB tree; the overlay must precede nixpkgs' license/Extras binds.
+          # Linux Resolve cannot encode AAC either, so MP4 exports carry FLAC/PCM without this.
+          # DOCS: https://github.com/Toxblh/davinci-linux-aac-codec
+          aac-encoder-plugin = pkgs.stdenv.mkDerivation (final: {
+            pname = "aac-encoder-plugin";
+            version = "1.0.1";
+            src = pkgs.fetchFromGitHub {
+              owner = "Toxblh";
+              repo = "davinci-linux-aac-codec";
+              tag = "v${final.version}";
+              hash = "sha256-NVNxmUFNwZ3hzlyi3QVENXhfPICAAP3M4s6QEgWsP/g=";
+            };
+            buildInputs = [ pkgs.ffmpeg-full ];
+            # Upstream Makefile hardcodes Fedora include paths, so compile directly.
+            buildPhase = ''
+              $CXX -shared -fPIC -O2 -std=c++11 -Iinclude -Iwrapper plugin.cpp audio_encoder.cpp wrapper/host_api.cpp -lavcodec -lavutil -o aac_encoder_plugin.dvcp
+            '';
+            installPhase = ''
+              install -D aac_encoder_plugin.dvcp $out/IOPlugins/aac_encoder_plugin.dvcp.bundle/Contents/Linux-x86-64/aac_encoder_plugin.dvcp
+            '';
+          });
+
+          # Text+ scans SystemFonts: (/usr/share/fonts), not fontconfig, and the sandbox /usr has no fonts.
+          # Expose the NixOS fontDir there so no per-user Path Map edit is needed.
+          fonts = pkgs.linkFarm "resolve-fonts" {
+            "share/fonts" = "/run/current-system/sw/share/X11/fonts";
+          };
+
+          # <install>/IOPlugins and the sandbox /usr are both read-only store paths, so overlay at launch instead of rebuilding the 14 GiB tree.
+          # WARN: overlays must precede nixpkgs' license/Extras binds or they shadow them.
           davinci-resolve-studio = pkgs.davinci-resolve-studio.override (old: {
             buildFHSEnv =
               args:
-              pkgs.buildFHSEnv (
-                args
-                // {
-                  extraBwrapArgs = [
-                    "--overlay-src ${ffmpeg-encoder-plugin}"
-                    "--overlay-src ${args.passthru.davinci}"
-                    "--ro-overlay ${args.passthru.davinci}"
-                  ]
-                  ++ args.extraBwrapArgs;
-                }
-              );
+              let
+                pkg = pkgs.buildFHSEnv (
+                  args
+                  // {
+                    extraBwrapArgs = [
+                      "--overlay-src ${ffmpeg-encoder-plugin}"
+                      "--overlay-src ${aac-encoder-plugin}"
+                      "--overlay-src ${args.passthru.davinci}"
+                      "--ro-overlay ${args.passthru.davinci}"
+                      "--overlay-src ${fonts}/share"
+                      "--overlay-src ${pkg.fhsenv}/usr/share"
+                      "--ro-overlay /usr/share"
+                    ]
+                    ++ args.extraBwrapArgs;
+                  }
+                );
+              in
+              pkg;
           });
         in
         {
