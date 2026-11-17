@@ -14,6 +14,12 @@
       ...
     }:
     {
+      # earlyoom kills the largest process at 5% free, which is Resolve mid-render.
+      nixos.services.earlyoom.extraArgs = [
+        "--avoid"
+        "^resolve$"
+      ];
+
       homeManager =
         {
           pkgs,
@@ -65,6 +71,18 @@
             '';
           });
 
+          # Resolve ignores QT_SCALE_FACTOR; its only UI scale is <DisplayScale> in config.user.xml.
+          # Follow the largest niri output scale so each host gets its own value.
+          # HACK: Resolve accepts 100/150/200 only, so a 1.25 output yields an invalid 125.
+          displayScale = builtins.floor (
+            100
+            * lib.foldl' lib.max 1.0 (
+              map (o: if (o.scale or null) == null then 1.0 else o.scale) (
+                lib.attrValues (lib.attrByPath [ "programs" "niri" "settings" "outputs" ] { } config)
+              )
+            )
+          );
+
           # Text+ scans SystemFonts: (/usr/share/fonts), not fontconfig, and the sandbox /usr has no fonts.
           # Expose the NixOS fontDir there so no per-user Path Map edit is needed.
           fonts = pkgs.linkFarm "resolve-fonts" {
@@ -104,9 +122,15 @@
               name = "davinci-resolve-studio-xcb";
               paths = [ davinci-resolve-studio ];
               nativeBuildInputs = [ pkgs.makeWrapper ];
+              # Resolve rewrites config.user.xml on exit, so pin DisplayScale right before each launch.
+              # Its Qt multiplies the X cursor by that scale and niri scales X11 surfaces again, so divide the cursor back out.
               postBuild = ''
                 for bin in $out/bin/*; do
-                  wrapProgram "$bin" --set QT_QPA_PLATFORM xcb
+                  wrapProgram "$bin" --set QT_QPA_PLATFORM xcb --run '
+                    f="$HOME/.local/share/DaVinciResolve/configs/config.user.xml"
+                    [ -f "$f" ] && ${pkgs.gnused}/bin/sed -i "s#<DisplayScale>[0-9]*</DisplayScale>#<DisplayScale>${toString displayScale}</DisplayScale>#" "$f"
+                    case "''${XCURSOR_SIZE:-24}" in *[!0-9]*) ;; *) export XCURSOR_SIZE=$(( ''${XCURSOR_SIZE:-24} * 100 / ${toString displayScale} )) ;; esac
+                  '
                 done
               '';
             })
