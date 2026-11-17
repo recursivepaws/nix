@@ -106,6 +106,8 @@
           if [ "''${1:-}" = up ]; then
             ${pkgs.systemd}/bin/systemctl is-active --quiet docker.service \
               || ${pkgs.systemd}/bin/systemctl start docker.service
+            # Build cache grows unbounded; prune here so a timer never has to wake dockerd.
+            ${pkgs.docker}/bin/docker builder prune -f --reserved-space 20GB >/dev/null 2>&1 &
           fi
           exec ${pkgs.tilt}/bin/tilt "$@"
         '';
