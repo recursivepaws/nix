@@ -88,6 +88,14 @@
             fi
             echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Commits and pushes need explicit user approval"}}'
           '';
+          # Logs fan-out cost per subagent (DOCS: ~/Software/skills/ORCHESTRATION.md).
+          # msg_head keeps the "[skill-name]" tag that orchestrator prompts put first.
+          subagentLog = pkgs.writeShellScript "claude-hook-subagent-log" ''
+            ${pkgs.jq}/bin/jq -c '{ts: (now | todate), agent_type, agent_id,
+              msg_len: ((.last_assistant_message // "") | length),
+              msg_head: ((.last_assistant_message // "")[:40])}' \
+              >> "$HOME/.claude/subagent-log.jsonl" 2>/dev/null || true
+          '';
         in
         {
           # This module is emitted once per user.
@@ -97,8 +105,30 @@
               (
                 builtins.toJSON {
                   permissions.allow = [
+                    # Edit rules also cover Write; a Write(...) rule never matches.
                     "Read(//home/*/Software/tickets/**)"
                     "Edit(//home/*/Software/tickets/**)"
+                    # Read-only MCP calls made by background subagent fan-outs.
+                    # A background agent cannot answer a permission prompt, so these would stall.
+                    "mcp__plugin_linear_linear__get_*"
+                    "mcp__plugin_linear_linear__list_*"
+                    "mcp__plugin_linear_linear__whoami"
+                    "mcp__plugin_hm_slack__channels_list"
+                    "mcp__plugin_hm_slack__conversations_history"
+                    "mcp__plugin_hm_slack__conversations_replies"
+                    "mcp__plugin_hm_slack__conversations_unreads"
+                    "mcp__plugin_hm_slack__usergroups_me"
+                    "mcp__plugin_hm_slack__saved_list"
+                    "mcp__plugin_hm_google-workspace__list_calendars"
+                    "mcp__plugin_hm_google-workspace__get_events"
+                    "mcp__plugin_hm_google-workspace__search_gmail_messages"
+                    "mcp__plugin_hm_google-workspace__get_gmail_*"
+                    "mcp__plugin_hm_datadog__get_logs"
+                    "mcp__plugin_hm_datadog__list_traces"
+                    "mcp__plugin_hm_datadog__query_metrics"
+                    "mcp__plugin_hm_snowflake__execute_sql"
+                    "mcp__plugin_hm_circleci__get_*"
+                    "mcp__plugin_hm_context7__*"
                   ];
                   attribution = {
                     commit = "";
@@ -111,6 +141,17 @@
                         {
                           type = "command";
                           command = "${gitGate}";
+                        }
+                      ];
+                    }
+                  ];
+                  hooks.SubagentStop = [
+                    {
+                      hooks = [
+                        {
+                          type = "command";
+                          command = "${subagentLog}";
+                          timeout = 10;
                         }
                       ];
                     }
