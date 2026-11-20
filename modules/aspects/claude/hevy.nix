@@ -1,18 +1,9 @@
 { den, ... }:
 {
-  # Pulled in by claude.nix for the vera user; mcp-servers options come from there.
+  # Pulled in by claude.nix for the vera user; mcp-servers options and npxFromHome come from there.
   den.aspects.hevy = {
     homeManager =
-      { pkgs, ... }:
-      let
-        # Run npx from $HOME so project configs can't interfere.
-        # npx's shebang is `env node`, so nodejs has to be on PATH too.
-        npxFromHome = pkgs.writeShellScript "npx-from-home" ''
-          cd "$HOME"
-          export PATH="${pkgs.nodejs}/bin:$PATH"
-          exec ${pkgs.nodejs}/bin/npx "$@"
-        '';
-      in
+      { npxFromHome, ... }:
       {
         # HACK: upstream is an nx/pnpm monorepo and its tarball leaves deps unbundled.
         # So npx rather than a store-pinned build; deps land in ~/.npm on first launch.

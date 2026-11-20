@@ -68,11 +68,12 @@
       # TODO: re-enable for vera once secrets/google-oauth-client-vera.age exists.
       includes =
         lib.optional (user != null && user.userName == "work") den.aspects.google-workspace
-        # Hevy workout-tracker and job-search MCPs: personal, so vera only.
+        # Hevy workout-tracker, job-search and Tailscale MCPs: personal, so vera only.
         # NOTE: hasAspect is cyclic inside `includes`, hence the name check.
         ++ lib.optionals (user != null && user.userName == "vera") [
           den.aspects.hevy
           den.aspects.jobs
+          den.aspects.tailscale-mcp
         ];
 
       nixos =
@@ -222,6 +223,13 @@
             export CAVEMAN_TELEMETRY="''${CAVEMAN_TELEMETRY:-0}"
             exec ${pkgs.nodejs}/bin/node ${cavemanCliSrc}/dist/index.js "$@"
           '';
+          # Run npx from $HOME so project configs can't interfere.
+          # npx's shebang is `env node`, so nodejs has to be on PATH too.
+          npxFromHome = pkgs.writeShellScript "npx-from-home" ''
+            cd "$HOME"
+            export PATH="${pkgs.nodejs}/bin:$PATH"
+            exec ${pkgs.nodejs}/bin/npx "$@"
+          '';
           pdfPackages = with pkgs; [
             poppler-utils # pdfinfo, pdftotext, pdftoppm, pdfimages
             qpdf # merge/split/decrypt
@@ -239,6 +247,9 @@
             claude-plugins-nix.homeManagerModules.default
             mcp-servers-nix.homeManagerModules.default
           ];
+
+          # Shared with the MCP aspects included above (hevy, tailscale-mcp) as a module arg.
+          _module.args = { inherit npxFromHome; };
 
           programs = {
             # TODO: make conditional on the presence of the playwright mcp
@@ -364,19 +375,6 @@
             monarch.url = "https://api.monarch.com/mcp";
             paypal.url = "https://mcp.paypal.com/mcp";
             fastmail.url = "https://api.fastmail.com/mcp";
-            # Community server (no official one); pinned since the key can delete and deauthorize devices.
-            tailscale = {
-              command = "${pkgs.nodejs}/bin/npx";
-              args = [
-                "-y"
-                "@hexsleeves/tailscale-mcp-server@1.3.4"
-              ];
-              env = {
-                TAILSCALE_API_KEY = "\${TAILSCALE_API_KEY}";
-                # "-" is the API's alias for the key's own tailnet.
-                TAILSCALE_TAILNET = "-";
-              };
-            };
           };
 
           home.packages = [
