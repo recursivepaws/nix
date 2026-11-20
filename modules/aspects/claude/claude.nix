@@ -364,6 +364,19 @@
             monarch.url = "https://api.monarch.com/mcp";
             paypal.url = "https://mcp.paypal.com/mcp";
             fastmail.url = "https://api.fastmail.com/mcp";
+            # Community server (no official one); pinned since the key can delete and deauthorize devices.
+            tailscale = {
+              command = "${pkgs.nodejs}/bin/npx";
+              args = [
+                "-y"
+                "@hexsleeves/tailscale-mcp-server@1.3.4"
+              ];
+              env = {
+                TAILSCALE_API_KEY = "\${TAILSCALE_API_KEY}";
+                # "-" is the API's alias for the key's own tailnet.
+                TAILSCALE_TAILNET = "-";
+              };
+            };
           };
 
           home.packages = [

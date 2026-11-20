@@ -26,6 +26,8 @@
           device = "nodev";
         };
         programs.chromium.enable = true;
+        # Reach barkstation by name from anywhere; join the personal tailnet once with `sudo tailscale up`.
+        services.tailscale.enable = true;
 
         services.upower.enable = true;
         services.fwupd.enable = true;

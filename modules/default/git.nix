@@ -18,6 +18,11 @@
                 IdentityFile = "~/.ssh/id_github.pub";
                 IdentitiesOnly = "yes";
               };
+              # Tailscale MagicDNS name, so it resolves away from home and doesn't depend on LAN mDNS.
+              barkstation = {
+                IdentityFile = "~/.ssh/id_barkstation";
+                IdentitiesOnly = "yes";
+              };
             };
           };
 

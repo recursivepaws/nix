@@ -27,8 +27,16 @@ in
   };
 
   den.aspects.barkstation.nixos =
-    { lib, modulesPath, ... }:
     {
+      lib,
+      pkgs,
+      modulesPath,
+      ...
+    }:
+    {
+      # ssh from kitty sets TERM=xterm-kitty; without its terminfo the shell can't draw.
+      environment.systemPackages = [ pkgs.kitty.terminfo ];
+
       imports = [
         (modulesPath + "/installer/scan/not-detected.nix")
         inputs.disko.nixosModules.disko
@@ -121,6 +129,12 @@ in
       services.avahi.publish = {
         enable = true;
         addresses = true;
+      };
+
+      # Remote ssh from anywhere without port forwarding; join once with `sudo tailscale up`.
+      services.tailscale = {
+        enable = true;
+        openFirewall = true;
       };
 
       # Docker-published ports bypass this firewall; only jellyfin uses host networking.
