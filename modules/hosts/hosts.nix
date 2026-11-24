@@ -28,6 +28,7 @@
       desktop = true;
       users = {
         vera = { };
+        work = { };
       };
     };
     barkstation = {
