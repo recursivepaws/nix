@@ -362,13 +362,15 @@
             launchdarkly = {
               url = "https://mcp.launchdarkly.com/mcp/launchdarkly";
             };
-            unsplash = {
-              command = "${unsplashPython}/bin/python";
-              args = [ "${inputs.unsplash-mcp}/server.py" ];
-              env = {
-                UNSPLASH_ACCESS_KEY = "\${UNSPLASH_ACCESS_KEY}";
-              };
-            };
+            # Disabled: nixpkgs marks fastmcp 3 broken under mcp >= 2. Re-enable once fixed,
+            # or build from the server's own lockfile like google-workspace.nix.
+            # unsplash = {
+            #   command = "${unsplashPython}/bin/python";
+            #   args = [ "${inputs.unsplash-mcp}/server.py" ];
+            #   env = {
+            #     UNSPLASH_ACCESS_KEY = "\${UNSPLASH_ACCESS_KEY}";
+            #   };
+            # };
           }
           # Monarch's, PayPal's and Fastmail's official remote MCPs: personal finance and mail, so vera only. OAuth sign-in on first use.
           // lib.optionalAttrs (user.userName == "vera") {

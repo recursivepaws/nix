@@ -224,6 +224,8 @@ in
     {
       home.stateVersion = stateVersion;
       nixpkgs.config.allowUnfree = true;
+      # gtk2 is deprecation-broken (removal before 27.05); ir-lv2 still needs it.
+      nixpkgs.config.problems.handlers."gtk+".broken = "warn";
 
       xdg.configFile."nixpkgs/config.nix".text = "{ allowUnfree = true; }";
 

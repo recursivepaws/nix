@@ -72,7 +72,7 @@
         gtk3 = {
           bookmarks = (map (dir: "file://${config.home.homeDirectory}/${dir}") localDirs) ++ [
             "smb://vera@MeowStation.local/ MeowStation"
-            "sftp://vera@BarkStation.local/ BarkStation"
+            "sftp://vera@barkstation.tail30e54f.ts.net/ BarkStation"
           ];
           extraConfig = {
             gtk-application-prefer-dark-theme = 1;
