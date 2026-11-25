@@ -261,6 +261,8 @@
             # Overlay layer so persistent toasts (calendar reminders) never end up behind the bar after a bar surface recreate on niri
             notification.layer = "overlay";
 
+            lockscreen.transition = [ "crt" ];
+
             calendar = {
               enabled = true;
               refresh_minutes = 5;
