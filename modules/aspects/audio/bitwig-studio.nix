@@ -1,5 +1,8 @@
+{ den, ... }:
 {
   den.aspects.bitwig-studio = {
+    includes = [ den.aspects.bitwig-mcp ];
+
     homeManager =
       { pkgs, ... }:
       let
