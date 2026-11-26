@@ -29,6 +29,11 @@
         # Reach barkstation by name from anywhere; join the personal tailnet once with `sudo tailscale up`.
         services.tailscale.enable = true;
 
+        # Touchpad wakes the laptop from suspend (known Framework defect), so drop it as a wake source.
+        services.udev.extraRules = ''
+          ACTION=="add", SUBSYSTEM=="i2c", KERNEL=="i2c-PIXA3854:00", ATTR{power/wakeup}="disabled"
+        '';
+
         services.upower.enable = true;
         services.fwupd.enable = true;
         # enabled in niri flake aspect
